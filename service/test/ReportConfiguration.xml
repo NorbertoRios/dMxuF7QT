@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ReportConfiguration>
+<!-- 24=1.7.13.36.3.4.23.65.10.17.11.79.46.44.43.82.152.41.48.130.134 -->
+  <Fields>
+    <Field id="1" name="UnitName" size="-1"/>
+    <Field id="7" name="LocId" size="4"/>
+    <Field id="13" name="Speed" size="2"/>
+    <Field id="36" name="TimeStamp" size="4" description="Unix Epoch UTS time (no GMT offset added)"/>
+    <Field id="3" name="Latitude" size="4"/>
+    <Field id="4" name="Longitude" size="4"/>
+    <Field id="23" name="Odometer" size="4" description="in km"/>
+    <Field id="65" name="Switches" size="1" description="switch summary where SW1 = LSB and SW5=bit5"/> 
+    <Field id="10" name="Reason" size="1"/>
+    <Field id="17" name="Heading" size="2" description="degrees"/>
+    <Field id="11" name="Ignition" size="1"/>
+    <Field id="79" name="Relay" size="1" description="Uint8 bitmap. $ least significant bits represent the current state of the output relay drives on the GNX5/10"/>
+    <Field id="46" name="Satellites" size="1" />
+    <Field id="44" name="RSSI" size="1" description="in dBm" />   
+    <Field id="43" name="CSID" size="4" />
+    <Field id="82" name="IBID" size="4" description="Added in firmware .76 (March 2012) 4 bytes showing the 4 least significant bytes of the ibutton, as read on the ibutton, not including the 01 ibutton type."/>
+    <Field id="152" name="FMI" size="1" description="FMI status 70||198 is On else Off"/>
+    <Field id="41" name="Supply" size="2" description="in millivolts"/>   
+    <Field id="48" name="GPSStat" size="1" description="bitmap (See Troubleshooting guide)"/>
+    <Field id="130" name="TemperatureSensors" size="8" description="4 * int16. This column is a summary of the four external 1 wire tempsensors (as shown in DIAG 1WIRE response)"/>
+    <Field id="134" name="FuelLevel" size="2"/>
+    <Field id="56" name="BusStatus" size="1" description="uint8_t (char) N/D/O/9/7/J; Not configured,Down,OBD,J1939,J1708,J1939+J1708"/> 
+    <Field id="70" name="BusOdometer" size="4" description="uint32(km/miles*100)"/> 
+    <Field id="77" name="Rpm" size="2" description="RPM" /> 
+    <Field id="93" name="DerivedOdometer" size="4" description="km/miles*100"/>
+  </Fields>
+</ReportConfiguration>

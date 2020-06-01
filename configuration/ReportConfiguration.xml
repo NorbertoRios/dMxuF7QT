@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ReportConfiguration>
+
+
+<!-- 24=1.7.13.36.3.4.23.65.10.17.11.79.46.44.43.82.152.41.48.130.134 -->
+  <Fields>
+    <Field id="1" name="UnitName" type="string" sensor=""/>
+    <Field id="7" name="LocId" type="uint32" sensor="queue_sensor"/>
+    <Field id="13" name="Speed" type="uint16" description="speed kph" sensor="gps_sensor"/>
+    <Field id="36" name="TimeStamp" type="uint32" description="Unix Epoch UTS time (no GMT offset added)" sensor="time_sensor" />
+    <Field id="3" name="Latitude" type="int32" sensor="gps_sensor"/>
+    <Field id="4" name="Longitude" type="int32" sensor="gps_sensor"/>
+    <Field id="23" name="OdometerMi" type="uint32" description="in km" sensor="trip_sensor"/>
+    <Field id="65" name="Switches" type="uint8" description="switch summary where SW1 = LSB and SW5=bit5" sensor="inputs"> 
+    <Field id="10" name="Reason" type="uint8" sensor=""/>
+    <Field id="17" name="Heading" type="uint16" description="degrees" sensor="gps_sensor"/>
+    <Field id="11" name="Ignition" type="uint8" sensor="inputs"/>
+    <Field id="79" name="Relay" type="uint8" description="Uint8 bitmap. $ least significant bits represent the current state of the output relay drives on the GNX5/10" sensor="outputs"/>
+    <Field id="46" name="Satellites" type="uint8" sensor="gps_sensor"/>   
+    <Field id="44" name="RSSI" type="int8" description="in dBm" sensor="network_sensor" />   
+    <Field id="43" name="CSID" type="uint32" sensor="network_sensor"/>
+    <Field id="82" name="IBID" type="int32" description="Added in firmware .76 (March 2012) 4 bytes showing the 4 least significant bytes of the ibutton, as read on the ibutton, not including the 01 ibutton type." sensor="1wire_sensor"/>
+    <Field id="152" name="FMI" type="uint8" description="FMI status 70||198 is On else Off" sensor="gps_sensor"/>
+    <Field id="41" name="Supply" type="uint16" description="in millivolts" sensor="power_sensor"/>   
+    <Field id="48" name="GPSStat" type="uint8" description="bitmap (See Troubleshooting guide)" sensor="gps_sensor"/>
+    <Field id="130" name="TemperatureSensors" type="bytes" size="8" description="4 * int16. This column is a summary of the four external 1 wire tempsensors (as shown in DIAG 1WIRE response)" sensor="1wire_sensor"/>
+    <Field id="134" name="FuelLevel" type="uint16" sensor="fuel_sensor"/>
+  </Fields>
+<!-- 
+  <Fields>
+    <Field id="1" name="UnitName" type="string" sensor=""/>
+    <Field id="2" name="EventTime" type="uint32" description="Unix Epoch UTS time (no GMT offset added)" sensor="time_sensor"/>
+    <Field id="3" name="Latitude" type="int32" sensor="gps_sensor"/>
+    <Field id="4" name="Longitude" type="int32" sensor="gps_sensor"/>
+    <Field id="5" name="Latitude(MAS)" type="int32" sensor="gps_sensor"/>
+    <Field id="6" name="Longitude(MAS)" type="int32" sensor="gps_sensor"/>
+    <Field id="7" name="LocId" type="uint32" sensor="queue_sensor"/>
+    <Field id="8" name="LocAge" type="uint8" sensor="gps_sensor"/>
+    <Field id="9" name="Reason" type="uint8" description="presented as code, not text (see special cases below) for messaging and iButton ROM ID)" sensor=""/>
+    <Field id="10" name="Reason" type="uint8" sensor=""/>
+    <Field id="11" name="Ignition" type="uint8" sensor="input_sensor"/>
+    <Field id="12" name="StopDur(mins)" type="uint16" description="in minutes" sensor="time_sensor"/>
+    <Field id="13" name="Speed" type="uint16" description="speed kph" sensor="gps_sensor"/>
+    <Field id="14" name="Speed" type="uint16" description="speed mph" sensor="gps_sensor"/>
+    <Field id="15" name="Speed" type="uint16" description="m/s" sensor="gps_sensor"/>
+    <Field id="16" name="VehHdg" type="uint16" description="degrees" sensor="gps_sensor"/>
+    <Field id="17" name="Heading" type="uint16" description="degrees" sensor="gps_sensor"/>
+    <Field id="18" name="Landmark" type="string" sensor="gps_sensor"/>
+    <Field id="19" name="LandmarkDist" type="uint16" description="in km*10" sensor="gps_sensor"/>
+    <Field id="20" name="LandmarkDist" type="uint16" description="in miles*10" sensor="gps_sensor"/>
+    <Field id="21" name="LandmarkBearing" type="uint16" description="in degrees" sensor="gps_sensor"/>
+    <Field id="22" name="LandmarkBearing" type="uint16" description="in degrees" sensor="gps_sensor"/>
+    <Field id="23" name="Odometer" type="uint32" description="in km" sensor="trip_sensor"/>
+    <Field id="24" name="Odometer" type="uint32" description="in meters" sensor="trip_sensor"/>
+    <Field id="25" name="Region" type="string" sensor="gps_sensor"/>
+    <Field id="26" name="Altitude" type="uint16" description="in meters" sensor="gps_sensor"/>
+    <Field id="27" name="Altitude" type="uint16" description="in feets" sensor="gps_sensor"/>
+    <Field id="28" name="SerialNumber" type="uint32" description="as the 10 least significant digits of the 12 digit serial number" sensor=""/>
+    <Field id="29" name="Localtime" type="uint32" description="as the 10 least significant digits of the 12 digit serial number" sensor="time_sensor"/>
+    <Field id="30" name="IdleTime" type="uint16" description="Duration of idling (speed &lt; STOP_SPEED and ignition on) in minutes." sensor="time_sensor"/>
+    <Field id="31" name="State" type="char" description="Char MOVING, IDLING, or STOPPED, (‘M’, ‘I’, ‘P’ based on parameters STOP_SPEED, MOVE_SPEED, STOP_TIMER, MOVE_TIMER." sensor="gps_sensor"/>
+    <Field id="32" name="AvgSpeed" type="uint8" description="Speed average used for state determination." sensor="gps_sensor"/>
+    <Field id="33" name="CRC16_CCITT" type="uint16" description="CCITT-CRC16 checksum of all prior characters in a row of data, including commas." />
+    <Field id="36" name="TimeStamp" type="uint32" description="Unix Epoch UTS time (no GMT offset added)" sensor="time_sensor" />
+    <Field id="37" name="Switch_1" type="uint8" description="switch summary where SW1 = LSB and SW5=bit5" />
+    <Field id="38" name="Switch_2" type="uint8" description="switch summary where SW1 = LSB and SW5=bit5" />
+    <Field id="39" name="Switch_3" type="uint8" description="switch summary where SW1 = LSB and SW5=bit5" />
+    <Field id="40" name="Switch_4" type="uint8" description="switch summary where SW1 = LSB and SW5=bit5" />
+    <Field id="41" name="Supply" type="uint16" description="in millivolts" sensor="power_sensor"/>    
+    <Field id="42" name="ADC" type="uint16" description="in millivolts" />    
+    <Field id="43" name="CSID" type="uint32" sensor="network_sensor"/>    
+    <Field id="44" name="RSSI" type="int8" description="in dBm" sensor="network_sensor" />    
+    <Field id="45" name="CallsSupported" type="uint16" description="bitmap (See Troubleshooting guide)" />    
+    <Field id="46" name="Satellites" type="uint8" sensor="gps_sensor"/>   
+    <Field id="47" name="SatTrk" type="uint8"/>   
+    <Field id="48" name="GPSStat" type="uint8" description="bitmap (See Troubleshooting guide)" sensor="gps_sensor"/>   
+    <Field id="49" name="GPSSNR" type="uint8"/> 
+    <Field id="50" name="Temp" type="uint16" description="in degrees Celsius * 10"/> 
+    <Field id="51" name="HMD5" type="bytes" size="16" description="16 bytes of uint8"/> 
+    <Field id="52" name="WakeCode" type="uint16" description="bitmap: GenX diagnostic purposes only"/> 
+    <Field id="56" name="BusStatus" type="char" description="uint8_t (char) N/D/O/9/7/J; Not configured,Down,OBD,J1939,J1708,J1939+J1708"/> 
+    <Field id="57" name="ExternalTemp1" type="int16" description="temperature*100 in degrees C or degrees F depending on probe used (Sensatronics=F, 1Wire=configurable F/C)"/> 
+    <Field id="58" name="ExternalTemp2" type="int16" description="temperature*100 in degrees C or degrees F depending on probe used (Sensatronics=F, 1Wire=configurable F/C)"/> 
+    <Field id="59" name="BusOdometerD" type="uint16" description="Delta odo in meters (based on column 70 or 93)"/> 
+    <Field id="62" name="PhoneNumber" type="string"/> 
+    <Field id="63" name="ICCID" type="string"/> 
+    <Field id="64" name="SecCnt" type="uint32"/> 
+    <Field id="65" name="GPIO" type="uint8" description="switch summary where SW1 = LSB and SW5=bit5" sensor="input_sensor"> 
+    <Field id="70" name="BusOdometer" type="uint32" description="uint32(km/miles*100)"/> 
+    <Field id="71" name="JFuelEcon" type="uint16" description="l/km or mpg"/> 
+    <Field id="72" name="JAmbientTemp" type="int16" description="C or F"/> 
+    <Field id="73" name="JCargoTemp" type="int16" description="C or F"/> 
+    <Field id="74" name="CoolantTemp" type="int16" description="C or F"/> 
+    <Field id="75" name="VehicleSpeed" type="uint16" description="kmh/mph" /> 
+    <Field id="76" name="EngineLoad" type="uint8" description="l/km or mpg" /> 
+    <Field id="77" name="Rpm" type="uint16" description="RPM" /> 
+    <Field id="78" name="EngineThrottle" type="uint8" description="%"/> 
+    <Field id="79" name="Relay" type="uint8" description="Uint8 bitmap. $ least significant bits represent the current state of the output relay drives on the GNX5/10" sensor="output_sensor"/>
+    <Field id="81" name="FuelEconNG" type="uint16" description="km/kg or m/lb"/> 
+    <Field id="82" name="IBID" type="int32" description="Added in firmware .76 (March 2012) 4 bytes showing the 4 least significant bytes of the ibutton, as read on the ibutton, not including the 01 ibutton type." sensor="1wire_sensor"/>
+    <Field id="89" name="FuelConsumed" type="uint32" description="liters/gallons*100"/>
+    <Field id="90" name="DeltaFuelConsumed" type="uint16" description="liters/gallons*1000"/>
+    <Field id="91" name="FuelConsumedNG" type="uint32" description="kg/lb*100"/>
+    <Field id="92" name="DeltaFuelConsumedNG" type="uint16" description="kg/lb*1000"/>
+    <Field id="93" name="DerivedOdometer" type="uint32" description="km/miles*100"/>
+    <Field id="94" name="JPTOStatus" type="" description="See Guidelines for JBox Operation"/>
+    <Field id="95" name="JPTOEngageStatus" type="" description="See Guidelines for JBox Operation"/>
+    <Field id="96" name="J1708AUXIO" type="" description="See Guidelines for JBox Operation"/>
+    <Field id="97" name="JTripDistance" type="uint32" description="uint32_t (km/miles*100)"/>
+    <Field id="98" name="DeltaOdo" type="uint16" description="in meters"/>
+    <Field id="99" name="FuelLevel1" type="uint8" description="%"/>
+    <Field id="100" name="FuelLevel2" type="uint8" description="%"/>
+    <Field id="101" name="J1939PTOStatus" type="" description="See Guidelines for JBox Operation"/>
+    <Field id="102" name="J1939AUXIO" type="" description="See Guidelines for JBox Operation"/>
+    <Field id="103" name="TripFuel" type="uint32" description="liters/gallons/kg/lb*100"/>
+    <Field id="104" name="OilTemp" type="int16" description="C/F"/>
+    <Field id="105" name="OilPressure" type="uint16" description="kPa"/>
+    <Field id="106" name="J1939AUXADC" type="bytes" size="4" description=""/>
+    <Field id="107" name="JBattery" type="uint16" description="millivolts"/>
+    <Field id="108" name="FuelConsumed" type="uint32" description="liters/gallons*100"/>
+    <Field id="109" name="TotalNGFuel" type="uint32" description="kg/lb*100"/>
+    <Field id="110" name="TotalIdleFuel" type="uint32" description="liters/gallons*100"/>
+    <Field id="111" name="TotalIdleNGFuel" type="uint32" description="kg/lb*100"/>
+    <Field id="112" name="EngTotalHours" type="uint32" description="hours*100"/>
+    <Field id="113" name="EngIdleHours" type="uint32" description="hours*100"/>
+    <Field id="114" name="SeatBeltStatus" type="uint8" description="B/b/E/U (buckled, not, error, unknown)/uint8 0=unbuckled,1=buckled,2=error, > 2=unknown"/>
+    <Field id="175" name="CCS" type="uint8" description="3 ASCII characters CcU,SsU,RrU;Cruise, set, reset state"/>
+    <Field id="176" name="WaterFuel" type="uint8" description="W/w/E/U (yes, no, error, unknown); uint8_t 0=yes,1=no,2=error, > 2 unknown"/>
+    <Field id="177" name="ThrottlePos" type="uint8" description="%"/>
+    <Field id="178" name="EngCoolLevel" type="uint8" description="%"/>
+    <Field id="179" name="EngCoolPres" type="uint16" description="kPa"/>
+    <Field id="180" name="FuelDelPres" type="uint16" description="kPa"/>
+    <Field id="181" name="TransOilTemp" type="int16" description="C/F"/>
+    <Field id="182" name="ParkBrakeSW" type="uint8" description="B/b/E/U (applied, not, error, unknown); uint8_t 0=applied,1=not applied,2=error, > 2 unknown"/>
+    <Field id="183" name="BrakeAppPres" type="uint16" description="kPa"/>
+    <Field id="184" name="BrakePedalPos" type="uint8" description="%"/>
+    <Field id="130" name="TemperatureSensors" type="bytes" size="8" description="4 * int16. This column is a summary of the four external 1 wire tempsensors (as shown in DIAG 1WIRE response)"/>
+    <Field id="131" name="RH" type="bytes" size="4" description="4*uint8: relative humidity of external DS1923 1wire ibuttons (up to 4 supported)" sensor="1wire_sensor"/>
+    <Field id="132" name="AccelCalibration" type="char" description="Char N/A/C/G N = not, A=no accel data, C=calibrated, G=noGPS"/>
+    <Field id="133" name="ExtendedSwitchSummary" type="uint16" description="uint16 with up to 12 switch input bits"/>
+    <Field id="134" name="FuelLevel" type="uint16" sensor="fuel_sensor"/>
+    <Field id="135" name="GPSPDOP" type="uint8" description="Uint8 (0-255) representing a PDOP of 0-25.5 x 10"/>
+    <Field id="152" name="FMI" type="uint8" description="FMI status 70||198 is On else Off" sensor="gps_sensor"/>
+    <Field id="185" name="ELDData" type="array" size="5" description="TypeCode:8,EldMalfunction:8,EldSequenceID:16/signed, GpsBad:8"/>
+  </Fields> -->
+</ReportConfiguration>
