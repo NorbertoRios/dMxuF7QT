@@ -1,33 +1,28 @@
 package configuration
 
 import (
-	"encoding/xml"
 	"fmt"
-	"genx-go/genxutils"
-	"io/ioutil"
 	"log"
 )
 
-//ReportConfiguration root of report configuration
+type IProvider interface {
+	Provide() ([]Field, error)
+}
+
 type ReportConfiguration struct {
-	Fields []Field `xml:"Fields>Field"`
+	Fields []Field
 }
 
 //ConstructReportConfiguration create report config instance
-func ConstructReportConfiguration(fileName string) (*ReportConfiguration, error) {
-	file := genxutils.FileUtils{Filename: fileName}
-	filePath := file.Path()
-	log.Println("Loading report configuration from:", filePath)
-	configXML, err := ioutil.ReadFile(filePath)
+func ConstructReportConfiguration(provider IProvider) (*ReportConfiguration, error) {
+	fields, err := provider.Provide()
 	if err != nil {
 		return nil, err
 	}
-	configInstance := &ReportConfiguration{}
-	err = xml.Unmarshal(configXML, configInstance)
-	if err != nil {
-		return nil, err
+	configuration := &ReportConfiguration{
+		Fields : fields,
 	}
-	return configInstance, nil
+	return configuration, nil
 }
 
 //GetField returns description for field by id

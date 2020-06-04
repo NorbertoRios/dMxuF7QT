@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"genx-go/configuration"
+	"genx-go/genxutils"
 	"genx-go/core/sensors"
 	"genx-go/genxparser"
 	"testing"
@@ -46,7 +47,9 @@ import (
 
 func TestMessageParsing(t *testing.T) {
 	param24 := "1.7.13.36.3.4.23.65.10.17.11.79.46.44.43.82.152.41.48.56.70.77.93.130;"
-	config, err := configuration.ConstructReportConfiguration("ReportConfiguration.xml")
+	file := genxutils.File{Filename: "reportConfiguration.xml"}
+	xmlProvider := configuration.ConstructXmlProvider(file)
+	config, err := configuration.ConstructReportConfiguration(xmlProvider)
 	if err != nil {
 		t.Error("Error while instantation report configuration")
 	}
