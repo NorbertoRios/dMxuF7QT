@@ -15,26 +15,15 @@ type GenxBinaryReportParser struct {
 }
 
 //BuildGenxBinaryReportParser returns new report parser
-func BuildGenxBinaryReportParser(param24 string, reportConfigInstance configuration.IReportConfiguration) *GenxBinaryReportParser {
+func BuildGenxBinaryReportParser(param24 string, reportConfiguration *configuration.ReportConfiguration) *GenxBinaryReportParser {
 	param24 = strings.ReplaceAll(param24, ";", "")
-	fields := mapReportColumn(param24, reportConfigInstance)
+	param24_columns := strings.Split(param24, ".")
+	fields := reportConfiguration.GetFieldsByIds(param24_columns)
 	return &GenxBinaryReportParser{
 		reportFields: fields,
 	}
 }
 
-func mapReportColumn(params string, reportConfigInstance configuration.IReportConfiguration) []*configuration.Field {
-	result := make([]*configuration.Field, 0)
-	columns := strings.Split(params, ".")
-	for _, v := range columns {
-		if f, err := reportConfigInstance.GetField(v); err == nil {
-			result = append(result, f)
-		} else {
-			log.Println("[mapReportColumn] ", err)
-		}
-	}
-	return result
-}
 
 //Parse parser for location message
 func (parser *GenxBinaryReportParser) Parse(rawMessage *genxmessage.RawMessage) ([]*genxmessage.GenxMessage, string) {

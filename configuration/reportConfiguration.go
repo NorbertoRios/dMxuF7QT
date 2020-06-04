@@ -8,28 +8,13 @@ import (
 	"log"
 )
 
-//IReportConfiguration ReportConfiguration interface
-type IReportConfiguration interface {
-	GetField(id string) (*Field, error)
-}
-
 //ReportConfiguration root of report configuration
 type ReportConfiguration struct {
 	Fields []Field `xml:"Fields>Field"`
 }
 
-//GetField returns description for field by id
-func (c *ReportConfiguration) GetField(id string) (*Field, error) {
-	for _, f := range c.Fields {
-		if f.ID == id {
-			return &f, nil
-		}
-	}
-	return nil, fmt.Errorf("Not found field with id:%v", id)
-}
-
 //ConstructReportConfiguration create report config instance
-func ConstructReportConfiguration(fileName string) (IReportConfiguration, error) {
+func ConstructReportConfiguration(fileName string) (*ReportConfiguration, error) {
 	file := genxutils.FileUtils{Filename: fileName}
 	filePath := file.Path()
 	log.Println("Loading report configuration from:", filePath)
@@ -43,4 +28,26 @@ func ConstructReportConfiguration(fileName string) (IReportConfiguration, error)
 		return nil, err
 	}
 	return configInstance, nil
+}
+
+//GetField returns description for field by id
+func (reportConfiguration *ReportConfiguration) GetFieldById(id string) (*Field, error) {
+	for _, reportField := range reportConfiguration.Fields {
+		if reportField.ID == id {
+			return &reportField, nil
+		}
+	}
+	return nil, fmt.Errorf("Not found field with id:%v", id)
+}
+
+func (reportConfiguration *ReportConfiguration) GetFieldsByIds(ids []string) []*Field {
+	result := make([]*Field, 0)
+	for _, id := range ids{
+		if reportField, err := reportConfiguration.GetFieldById(id); err == nil {
+			result = append(result, reportField)
+		} else {
+			log.Println("[GetReportColumnsByIds] ", err)
+		}
+	}
+	return result
 }
