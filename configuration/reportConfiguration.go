@@ -1,46 +1,48 @@
 package configuration
 
 import (
-	"encoding/xml"
 	"fmt"
-	"genx-go/utils"
-	"io/ioutil"
 	"log"
 )
 
-//IReportConfiguration ReportConfiguration interface
-type IReportConfiguration interface {
-	GetField(id string) (*Field, error)
+type IProvider interface {
+	Provide() ([]Field, error)
 }
 
-//ReportConfiguration root of report configuration
 type ReportConfiguration struct {
-	Fields []Field `xml:"Fields>Field"`
+	Fields []Field
+}
+
+//ConstructReportConfiguration create report config instance
+func ConstructReportConfiguration(provider IProvider) (*ReportConfiguration, error) {
+	fields, err := provider.Provide()
+	if err != nil {
+		return nil, err
+	}
+	configuration := &ReportConfiguration{
+		Fields: fields,
+	}
+	return configuration, nil
 }
 
 //GetField returns description for field by id
-func (c *ReportConfiguration) GetField(id string) (*Field, error) {
-	for _, f := range c.Fields {
-		if f.ID == id {
-			return &f, nil
+func (reportConfiguration *ReportConfiguration) GetFieldById(id string) (*Field, error) {
+	for _, reportField := range reportConfiguration.Fields {
+		if reportField.ID == id {
+			return &reportField, nil
 		}
 	}
 	return nil, fmt.Errorf("Not found field with id:%v", id)
 }
 
-//ConstructReportConfiguration create report config instance
-func ConstructReportConfiguration(fileName string) (IReportConfiguration, error) {
-	file := utils.FileUtils{Filename: fileName}
-	filePath := file.Path()
-	log.Println("Loading report configuration from:", filePath)
-	configXML, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		return nil, err
+func (reportConfiguration *ReportConfiguration) GetFieldsByIds(ids []string) []*Field {
+	result := make([]*Field, 0)
+	for _, id := range ids {
+		if reportField, err := reportConfiguration.GetFieldById(id); err == nil {
+			result = append(result, reportField)
+		} else {
+			log.Println("[GetReportColumnsByIds] ", err)
+		}
 	}
-	configInstance := &ReportConfiguration{}
-	err = xml.Unmarshal(configXML, configInstance)
-	if err != nil {
-		return nil, err
-	}
-	return configInstance, nil
+	return result
 }

@@ -2,13 +2,17 @@ package utils
 
 import "path/filepath"
 
+type IFile interface{
+	Path() string
+}
+
 //FileUtils utils for files (configs)
-type FileUtils struct {
+type File struct {
 	Filename string
 }
 
 //Path returns absolute file path
-func (utils *FileUtils) Path() string {
-	absPath, _ := filepath.Abs(utils.Filename)
+func (file File) Path() string {
+	absPath, _ := filepath.Abs(file.Filename)
 	return absPath
 }
