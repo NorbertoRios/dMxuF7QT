@@ -2,7 +2,6 @@ package sensors
 
 import (
 	"genx-go/core"
-	"genx-go/core/columns"
 	"genx-go/utils"
 )
 
@@ -15,19 +14,28 @@ func BuildInputs(data map[string]interface{}) []ISensor {
 	swOnCode := byte(23)
 	swOffCode := byte(27)
 	resultSwitches := make([]ISensor, 0)
-	bValue := columns.Byte{RawValue: v}
-	utilsSwitchMask := &utils.ByteUtility{Data: bValue.Value()}
 	for i := 0; i < 4; i++ {
-		boolState := &utils.BoolUtils{Data: utilsSwitchMask.BitIsSet(i)}
-		sw := &Switch{ID: i, State: boolState.ToByte()}
-		posibleReasons := map[byte]bool{
-			swOnCode:  true,
-			swOffCode: true,
+		posibleReasons := map[byte]byte{
+			swOnCode:  1, //switch on
+			swOffCode: 2, //switch off
 		}
+		sw := BuildSwitch(i, v)
 		sw.Trigered = Trigered(data, posibleReasons)
 		resultSwitches = append(resultSwitches, sw)
-		swOnCode--
 		swOffCode--
+		swOnCode--
+	}
+	return resultSwitches
+}
+
+//BuildInputsFromString returns switches from string
+func BuildInputsFromString(bitMask string) []ISensor {
+	strUtils := &utils.StringUtils{Data: bitMask}
+	byteValue := strUtils.BitmaskStringToByte()
+	resultSwitches := make([]ISensor, 0)
+	for i := 0; i < 4; i++ {
+		sw := BuildSwitchFromByte(i, byteValue)
+		resultSwitches = append(resultSwitches, sw)
 	}
 	return resultSwitches
 }

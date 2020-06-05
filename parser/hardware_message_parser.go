@@ -11,13 +11,17 @@ func BuildGenxHardwareMessageParser() *GenxHardwareMessageParser {
 	fwExpr, _ := regexp.Compile(`FW:([^\s]+)`)
 	ignExpr, _ := regexp.Compile(`Ign-([^,]+)`)
 	voltExpr, _ := regexp.Compile(`Volt-([^,]+)`)
-	//switchExpr, _ := regexp.Compile(`Switch-([^,]+)`)
-	//relayExpr, _ := regexp.Compile(`Relay-([^,]+)`)
+	switchExpr, _ := regexp.Compile(`Switch-([^,]+)`)
+	relayExpr, _ := regexp.Compile(`Relay-([^,]+)`)
 	return &GenxHardwareMessageParser{
 		SingleSensorsBuilders: map[*regexp.Regexp]func(string) sensors.ISensor{
 			fwExpr:   sensors.BuildFirmwareSensor,
 			ignExpr:  sensors.BuildIgnitionSensorFromString,
 			voltExpr: sensors.BuildPowerSensorFromString,
+		},
+		ArraySensorsBuilders: map[*regexp.Regexp]func(string) []sensors.ISensor{
+			switchExpr: sensors.BuildInputsFromString,
+			relayExpr:  sensors.BuildOutputsFromString,
 		},
 	}
 }
@@ -37,6 +41,15 @@ func (parser *GenxHardwareMessageParser) Parse(rawMessage *message.RawMessage) *
 			sens := builder(value)
 			if sens != nil {
 				messageSensors = append(messageSensors, sens)
+			}
+		}
+	}
+	for expr, builder := range parser.ArraySensorsBuilders {
+		if expr.Match(rawMessage.RawData) {
+			value := expr.FindAllStringSubmatch(string(rawMessage.RawData), -1)[0][1]
+			sens := builder(value)
+			if sens != nil {
+				messageSensors = append(messageSensors, sens...)
 			}
 		}
 	}

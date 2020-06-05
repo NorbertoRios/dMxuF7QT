@@ -13,9 +13,9 @@ type IgnitionSensor struct {
 
 //BuildIgnitionSensor returns new gps sensor
 func BuildIgnitionSensor(data map[string]interface{}) ISensor {
-	posibleReasons := map[byte]bool{
-		byte(3): true,
-		byte(4): true,
+	posibleReasons := map[byte]byte{
+		3: 1, // 1- means IgnitionOn
+		2: 2, // 2 - mean IgnitionOff
 	}
 	if v, f := data[core.Ignition]; f {
 		ignitionState := &columns.Byte{RawValue: v}

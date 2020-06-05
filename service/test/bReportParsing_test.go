@@ -48,7 +48,7 @@ import (
 func TestMessageParsing(t *testing.T) {
 	param24 := "1.7.13.36.3.4.23.65.10.17.11.79.46.44.43.82.152.41.48.56.70.77.93.130;"
 	file := &utils.File{Filename: "reportConfiguration.xml"}
-	xmlProvider := configuration.ConstructXmlProvider(file)
+	xmlProvider := configuration.ConstructXMLProvider(file)
 	config, err := configuration.ConstructReportConfiguration(xmlProvider)
 	if err != nil {
 		t.Error("Error while instantation report configuration")
@@ -150,7 +150,7 @@ func checkBReportSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 				case 2:
 					{
 						assert("Relay2ID", sensor.ID, int(2), t)
-						assert("Relay2State", sensor.State, byte(0), t)
+						assert("Relay2State", sensor.State, byte(1), t)
 						break
 					}
 				case 3:
@@ -180,6 +180,7 @@ func checkBReportSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 		case *sensors.QueueSensor:
 			{
 				assert("LockId", sens.(*sensors.QueueSensor).LockID, uint32(22470), t)
+				assert("Trigered", sens.(*sensors.QueueSensor).Trigered, 1, t)
 				break
 			}
 		case *sensors.TimeSensor:

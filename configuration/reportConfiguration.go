@@ -5,10 +5,12 @@ import (
 	"log"
 )
 
+//IProvider represents provider
 type IProvider interface {
 	Provide() ([]Field, error)
 }
 
+//ReportConfiguration represents report config
 type ReportConfiguration struct {
 	Fields []Field
 }
@@ -25,8 +27,8 @@ func ConstructReportConfiguration(provider IProvider) (*ReportConfiguration, err
 	return configuration, nil
 }
 
-//GetField returns description for field by id
-func (reportConfiguration *ReportConfiguration) GetFieldById(id string) (*Field, error) {
+//GetFieldByID returns description for field by id
+func (reportConfiguration *ReportConfiguration) GetFieldByID(id string) (*Field, error) {
 	for _, reportField := range reportConfiguration.Fields {
 		if reportField.ID == id {
 			return &reportField, nil
@@ -35,10 +37,11 @@ func (reportConfiguration *ReportConfiguration) GetFieldById(id string) (*Field,
 	return nil, fmt.Errorf("Not found field with id:%v", id)
 }
 
+//GetFieldsByIds returns fields array by ids
 func (reportConfiguration *ReportConfiguration) GetFieldsByIds(ids []string) []*Field {
 	result := make([]*Field, 0)
 	for _, id := range ids {
-		if reportField, err := reportConfiguration.GetFieldById(id); err == nil {
+		if reportField, err := reportConfiguration.GetFieldByID(id); err == nil {
 			result = append(result, reportField)
 		} else {
 			log.Println("[GetReportColumnsByIds] ", err)

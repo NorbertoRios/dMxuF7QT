@@ -17,6 +17,12 @@ func BuildQueueSensor(data map[string]interface{}) ISensor {
 		return nil
 	} else {
 		lockID := &columns.LockID{RawValue: v}
-		return &QueueSensor{LockID: lockID.Value()}
+		sensor := &QueueSensor{LockID: lockID.Value()}
+		posibleReasons := map[byte]byte{
+			6: 1, // 1- Periodical
+			8: 1,
+		}
+		sensor.Trigered = Trigered(data, posibleReasons)
+		return sensor
 	}
 }

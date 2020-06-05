@@ -31,13 +31,18 @@ func BuildGpsSensor(rData map[string]interface{}) ISensor {
 	if !validateGpsFields(rData) {
 		return nil
 	}
+	posibleReasons := map[byte]byte{
+		60: 1, //1 - Periodical
+		10: 2, //2-GPS_LOST
+		11: 3, //2-GPS_Found
+	}
 	speedColumn := &columns.Speed{RawValue: rData[core.Speed]}
 	latitudeColumn := &columns.Coordinate{RawValue: rData[core.Latitude]}
 	longitudeColumn := &columns.Coordinate{RawValue: rData[core.Longitude]}
 	headingColumn := &columns.Tenth{RawValue: rData[core.Heading]}
 	satelitesColumn := &columns.Byte{RawValue: rData[core.Satellites]}
 	gStatusColumn := &columns.Byte{RawValue: rData[core.GPSStat]}
-	return &GPSSensor{
+	sensor := &GPSSensor{
 		Speed:      speedColumn.Value(),
 		Latitude:   latitudeColumn.Value(),
 		Longitude:  longitudeColumn.Value(),
@@ -45,6 +50,8 @@ func BuildGpsSensor(rData map[string]interface{}) ISensor {
 		Satellites: satelitesColumn.Value(),
 		Status:     gStatusColumn.Value(),
 	}
+	sensor.Trigered = Trigered(rData, posibleReasons)
+	return sensor
 }
 
 func validateGpsFields(data map[string]interface{}) bool {

@@ -43,16 +43,72 @@ func checkHWSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 			{
 				assert("Ignition", sens.(*sensors.IgnitionSensor).IgnitionState, byte(1), t)
 			}
-		//case *sensors.Inputs:
-		//	{
-		//		assert("GPIO", sens.(*sensors.Inputs).BitMask(), byte(9), t)
-		//		break
-		//	}
-		//case *sensors.Outputs:
-		//	{
-		//		assert("Relay", sens.(*sensors.Outputs).BitMask(), byte(6), t)
-		//		break
-		//	}
+		case *sensors.Switch:
+			{
+				sensor := sens.(*sensors.Switch)
+				switch sensor.ID {
+				case 0:
+					{
+						assert("Switch0", sensor.ID, int(0), t)
+						assert("Switch0", sensor.State, byte(1), t)
+					}
+				case 1:
+					{
+						assert("Switch1", sensor.ID, int(1), t)
+						assert("Switch1", sensor.State, byte(0), t)
+					}
+				case 2:
+					{
+						assert("Switch2", sensor.ID, int(2), t)
+						assert("Switch2", sensor.State, byte(0), t)
+						break
+					}
+				case 3:
+					{
+						assert("Switch3", sensor.ID, int(3), t)
+						assert("Switch3", sensor.State, byte(1), t)
+						break
+					}
+				default:
+					{
+						t.Error("Unexpected sensor id")
+						break
+					}
+				}
+			}
+		case *sensors.Relay:
+			{
+				sensor := sens.(*sensors.Relay)
+				switch sensor.ID {
+				case 0:
+					{
+						assert("Relay0ID", sensor.ID, int(0), t)
+						assert("Relay0State", sensor.State, byte(0), t)
+					}
+				case 1:
+					{
+						assert("Relay1ID", sensor.ID, int(1), t)
+						assert("Relay1State", sensor.State, byte(1), t)
+					}
+				case 2:
+					{
+						assert("Relay2ID", sensor.ID, int(2), t)
+						assert("Relay2State", sensor.State, byte(1), t)
+						break
+					}
+				case 3:
+					{
+						assert("Relay3ID", sensor.ID, int(3), t)
+						assert("Relay3State", sensor.State, byte(0), t)
+						break
+					}
+				default:
+					{
+						t.Error("Unexpected sensor id")
+						break
+					}
+				}
+			}
 		case *sensors.PowerSensor:
 			{
 				assert("Supply", sens.(*sensors.PowerSensor).Supply, int32(12131), t)

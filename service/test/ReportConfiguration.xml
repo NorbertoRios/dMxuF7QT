@@ -28,7 +28,7 @@
     <Field id="77" name="Rpm" size="2" description="RPM" /> 
     <Field id="93" name="DerivedOdometer" size="4" description="km/miles*100"/>
   </Fields>
-  <Reasons>
+  <!-- <Reasons>
     <Reason id="0" name="POWERUP" description="The GNX powers up."/>
     <Reason id="1" name="SHORT_PWROUT" description="A brief power glitch or GNX reset."/>
     <Reason id="2" name="IGNITION_OFF" description="The ignition goes off."/>
@@ -106,7 +106,7 @@
     <Reason id="102" name="IB_BAD" description="The ID ibutton checksum did not match any of the entries in Parameter 506." />
     <Reason id="99" name="PTO" description="GNX20/5p with port expander only: indicates a change of state on one of the PTO inputs 5-15 (port expander) or 5-12 (GNX20). If multiple inputs change in the same one-second interval, only a single PTO event is generated." />
     <Reason id="103" name="TILT" description="GNX20/5p with port expander only: indicates a change of state on one of the PTO inputs 5-15 (port expander) or 5-12 (GNX20). If multiple inputs change in the same one-second interval, only a single PTO event is generated." />
-  </Reasons>
+  </Reasons> -->
 </ReportConfiguration>
 
 <!-- 

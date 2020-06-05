@@ -10,14 +10,18 @@ type ISensor interface {
 }
 
 //Trigered triger for sensor
-func Trigered(rData map[string]interface{}, posibleReasons map[byte]bool) bool {
+func Trigered(rData map[string]interface{}, posibleReasons map[byte]byte) byte {
 	r, f := rData[core.Reason]
 	if !f {
-		return false
+		return byte(0)
 	}
 	reason := columns.BuildReasonColumn(r)
 	if reason == nil {
-		return false
+		return byte(0)
 	}
-	return posibleReasons[reason.Code]
+	if v, f := posibleReasons[reason.Code]; !f {
+		return byte(0)
+	} else {
+		return v
+	}
 }

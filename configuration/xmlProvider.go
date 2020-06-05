@@ -17,18 +17,20 @@ type xmlReportConfiguration struct {
 	Fields []xmlField `xml:"Fields>Field"`
 }
 
-type XmlProvider struct {
+//XMLProvider represent provider for XMl
+type XMLProvider struct {
 	file utils.IFile
 }
 
-func ConstructXmlProvider(file utils.IFile) *XmlProvider {
-	return &XmlProvider{
+//ConstructXMLProvider returns xml provider
+func ConstructXMLProvider(file utils.IFile) *XMLProvider {
+	return &XMLProvider{
 		file: file,
 	}
 }
 
-func (provider *XmlProvider) Provide() ([]Field, error) {
-	//file := genxutils.FileUtils{Filename: provider.fileName}
+//Provide provide
+func (provider *XMLProvider) Provide() ([]Field, error) {
 	filePath := provider.file.Path()
 	log.Println("Loading report configuration from:", filePath)
 	xmlFile, err := ioutil.ReadFile(filePath)
