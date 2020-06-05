@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"genx-go/configuration"
 	"genx-go/core/sensors"
-	"genx-go/genxparser"
+	"genx-go/parser"
 	"testing"
 	"time"
 )
@@ -28,7 +28,7 @@ import (
 //         "Odometer": 324956,
 //         "Reason": 6,
 //         "LocId": 22470,
-//         "Relay": 4,
+//         "Relay": 2,
 //         "Supply": 11207,
 //         "CSID": 25503,
 //         "RSSI": -103,
@@ -50,11 +50,11 @@ func TestMessageParsing(t *testing.T) {
 	if err != nil {
 		t.Error("Error while instantation report configuration")
 	}
-	parser := genxparser.BuildGenxBinaryReportParser(param24, config)
+	parser := parser.BuildGenxBinaryReportParser(param24, config)
 	if parser == nil {
 		t.Error("Parser is nil")
 	}
-	packet := []byte{0x33, 0x36, 0x30, 0x30, 0x32, 0x39, 0x39, 0x36, 0x00, 0x00, 0x00, 0x57, 0xc6, 0x00, 0x18, 0x5e, 0xc6, 0x4a, 0x48, 0x0a, 0x7b, 0x57, 0x16, 0x08, 0x11, 0xc3, 0xac, 0x00, 0x04, 0xf5, 0x5c, 0x00, 0x06, 0x01, 0x39, 0x01, 0x02, 0x00, 0x99, 0x00, 0x00, 0x63, 0x9f, 0x2a, 0x73, 0xf5, 0x01, 0x80, 0x2b, 0xc7, 0x38, 0x4e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x2A, 0x0D, 0x2A, 0x0F, 0x23, 0x0F, 0xE3}
+	packet := []byte{0x33, 0x36, 0x30, 0x30, 0x32, 0x39, 0x39, 0x36, 0x00, 0x00, 0x00, 0x57, 0xc6, 0x00, 0x18, 0x5e, 0xc6, 0x4a, 0x48, 0x0a, 0x7b, 0x57, 0x16, 0x08, 0x11, 0xc3, 0xac, 0x00, 0x04, 0xf5, 0x5c, 0x06, 0x06, 0x01, 0x39, 0x01, 0x02, 0x00, 0x99, 0x00, 0x00, 0x63, 0x9f, 0x2a, 0x73, 0xf5, 0x01, 0x80, 0x2b, 0xc7, 0x38, 0x4e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C, 0x2A, 0x0D, 0x2A, 0x0F, 0x23, 0x0F, 0xE3}
 	rm := factory.BuildRawMessage(packet)
 	if err != nil {
 		t.Error("[TestAckPreParsing] Error in construct new raw message")
@@ -77,9 +77,9 @@ func TestMessageParsing(t *testing.T) {
 func checkBReportSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 	for _, sens := range sensorsArr {
 		switch sens.(type) {
-		case *sensors.IButtonSensor:
+		case *sensors.IButton:
 			{
-				assert("IBID", sens.(*sensors.IButtonSensor).BtnID, int32(0x2a73f501), t) //Driver Id
+				assert("IBID", sens.(*sensors.IButton).BtnID, int32(0x2a73f501), t) //Driver Id
 				break
 			}
 		case *sensors.GPSSensor:
@@ -97,15 +97,71 @@ func checkBReportSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 				assert("Ignition", sens.(*sensors.IgnitionSensor).IgnitionState, byte(1), t)
 				break
 			}
-		case *sensors.GPIOSensor:
+		case *sensors.Switch:
 			{
-				assert("GPIO", sens.(*sensors.GPIOSensor).Switches, byte(0), t)
-				break
+				sensor := sens.(*sensors.Switch)
+				switch sensor.ID {
+				case 0:
+					{
+						assert("Switch0", sensor.ID, int(0), t)
+						assert("Switch0", sensor.State, byte(0), t)
+					}
+				case 1:
+					{
+						assert("Switch1", sensor.ID, int(1), t)
+						assert("Switch1", sensor.State, byte(1), t)
+					}
+				case 2:
+					{
+						assert("Switch2", sensor.ID, int(2), t)
+						assert("Switch2", sensor.State, byte(1), t)
+						break
+					}
+				case 3:
+					{
+						assert("Switch3", sensor.ID, int(3), t)
+						assert("Switch3", sensor.State, byte(0), t)
+						break
+					}
+				default:
+					{
+						t.Error("Unexpected sensor id")
+						break
+					}
+				}
 			}
-		case *sensors.RelaySensor:
+		case *sensors.Relay:
 			{
-				assert("Relay", sens.(*sensors.RelaySensor).Relay, byte(4), t)
-				break
+				sensor := sens.(*sensors.Relay)
+				switch sensor.ID {
+				case 0:
+					{
+						assert("Relay0ID", sensor.ID, int(0), t)
+						assert("Relay0State", sensor.State, byte(0), t)
+					}
+				case 1:
+					{
+						assert("Relay1ID", sensor.ID, int(1), t)
+						assert("Relay1State", sensor.State, byte(1), t)
+					}
+				case 2:
+					{
+						assert("Relay2ID", sensor.ID, int(2), t)
+						assert("Relay2State", sensor.State, byte(0), t)
+						break
+					}
+				case 3:
+					{
+						assert("Relay3ID", sensor.ID, int(3), t)
+						assert("Relay3State", sensor.State, byte(0), t)
+						break
+					}
+				default:
+					{
+						t.Error("Unexpected sensor id")
+						break
+					}
+				}
 			}
 		case *sensors.NetworkSensor:
 			{

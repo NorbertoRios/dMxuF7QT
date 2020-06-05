@@ -2,11 +2,11 @@ package test
 
 import (
 	"fmt"
-	"genx-go/genxmessage"
+	"genx-go/message"
 	"testing"
 )
 
-var factory = genxmessage.CounstructRawMessageFactory()
+var factory = message.CounstructRawMessageFactory()
 
 func TestBinaryReporPreParsing(t *testing.T) {
 	packet := []byte{0x33, 0x34, 0x36, 0x31, 0x34, 0x37, 0x30, 0x39, 0x00, 0x00, 0x02, 0x78, 0x1C, 0x00, 0x29, 0x5E, 0xC2, 0x83, 0xC3, 0x99, 0xC2, 0x8F, 0x03, 0x28, 0xC2, 0x94, 0xC2, 0x9B, 0x19, 0xC3, 0xB7, 0xC2, 0x82, 0xC3, 0xA5, 0x01, 0x19, 0x61, 0xC2, 0xBB, 0x00, 0x3C, 0x00, 0xC3, 0xB2, 0x01, 0x00, 0x0C, 0xC2, 0xA7, 0x00, 0x00, 0xC3, 0x89, 0x2F, 0x37, 0x77, 0x00}
@@ -68,7 +68,7 @@ func TestDiagCan(t *testing.T) {
 	checkRawMessage("TestDiagCan", res, "3912835", "diag", t)
 }
 
-func checkRawMessage(methodName string, res *genxmessage.RawMessage, shouldSerial string, shouldType string, t *testing.T) {
+func checkRawMessage(methodName string, res *message.RawMessage, shouldSerial string, shouldType string, t *testing.T) {
 	if res.MessageType != shouldType {
 		t.Error(fmt.Sprintf("[%v] Error in message type, should: %v, current: %v", methodName, shouldType, res.MessageType))
 	}

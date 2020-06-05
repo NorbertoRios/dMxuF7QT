@@ -3,7 +3,7 @@ package configuration
 import (
 	"encoding/xml"
 	"fmt"
-	"genx-go/genxutils"
+	"genx-go/utils"
 	"io/ioutil"
 	"log"
 )
@@ -30,7 +30,7 @@ func (c *ReportConfiguration) GetField(id string) (*Field, error) {
 
 //ConstructReportConfiguration create report config instance
 func ConstructReportConfiguration(fileName string) (IReportConfiguration, error) {
-	file := genxutils.FileUtils{Filename: fileName}
+	file := utils.FileUtils{Filename: fileName}
 	filePath := file.Path()
 	log.Println("Loading report configuration from:", filePath)
 	configXML, err := ioutil.ReadFile(filePath)

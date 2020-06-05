@@ -3,7 +3,7 @@ package test
 import (
 	"fmt"
 	"genx-go/core/sensors"
-	"genx-go/genxparser"
+	"genx-go/parser"
 	"testing"
 )
 
@@ -34,7 +34,7 @@ import (
 func TestPresent1WireMessage3TempSensors(t *testing.T) {
 	packet := []byte("1WIRE:10/Present\n1:10B8993E01080099 TS-65.300003\n2:102E5A080000006A TS-56.299999\n3:109F6108000000AE TS-60.799999\n4:0000000000000000\n5:01AB16430F00004E ID\n000003912835 3912835")
 	rm := factory.BuildRawMessage(packet)
-	parser := genxparser.BuildOneWireMessageParser()
+	parser := parser.BuildOneWireMessageParser()
 	message := parser.Parse(rm)
 	if len(message.Sensors) != 4 {
 		t.Error("Error in count of sensors")
@@ -48,7 +48,7 @@ func TestPresent1WireMessage3TempSensors(t *testing.T) {
 func TestNoDevice1WireMessageParsing(t *testing.T) {
 	packet := []byte("1WIRE:10/NoDevice\n1:0000000000000000\n2:0000000000000000\n3:0000000000000000\n4:0000000000000000\n5:0000000000000000\n000003912835 3912835")
 	rm := factory.BuildRawMessage(packet)
-	parser := genxparser.BuildOneWireMessageParser()
+	parser := parser.BuildOneWireMessageParser()
 	message := parser.Parse(rm)
 	if message.Sensors != nil {
 		t.Error("Error. No device")
@@ -58,7 +58,7 @@ func TestNoDevice1WireMessageParsing(t *testing.T) {
 func TestPresent1WireMessageParsing(t *testing.T) {
 	packet := []byte("1WIRE:10/Present\n1:10B8993E01080099 TS-65.300003\n2:102E5A080000006A TS-56.299999\n3:109F6108000000AE TS-60.799999\n4:288D19BD01000096 TS-66.199997\n5:01AB16430F00004E ID\n000003912835 3912835")
 	rm := factory.BuildRawMessage(packet)
-	parser := genxparser.BuildOneWireMessageParser()
+	parser := parser.BuildOneWireMessageParser()
 	message := parser.Parse(rm)
 	if len(message.Sensors) != 5 {
 		t.Error("Error in count of sensors")
@@ -71,7 +71,7 @@ func TestPresent1WireMessageParsing(t *testing.T) {
 }
 
 func checkIButtonSensor(s sensors.ISensor, driverID int32, t *testing.T) {
-	sensor, f := s.(*sensors.IButtonSensor)
+	sensor, f := s.(*sensors.IButton)
 	if !f {
 		t.Error("Cant cast sensor to IButtonSensor")
 	}
