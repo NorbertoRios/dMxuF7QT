@@ -1,6 +1,8 @@
 package sensors
 
-import "fmt"
+import (
+	"genx-go/utils"
+)
 
 //SerialSensor 1
 type SerialSensor struct {
@@ -14,9 +16,6 @@ func (column *SerialSensor) Value() string {
 
 //ToIdentity returns identity value
 func (column *SerialSensor) ToIdentity() string {
-	serial := column.RawValue.(string)
-	for l := len(column.RawValue.(string)); l < 12; l++ {
-		serial = fmt.Sprintf("0%v", serial)
-	}
-	return fmt.Sprintf("genx_%v", serial)
+	uIdentity := &utils.StringUtils{Data: column.RawValue.(string)}
+	return uIdentity.Identity()
 }

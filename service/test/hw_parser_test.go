@@ -28,20 +28,19 @@ func TestHWMessageParsing(t *testing.T) {
 	rm := factory.BuildRawMessage(packet)
 	parser := parser.BuildGenxHardwareMessageParser()
 	message := parser.Parse(rm)
+	if message.Firmware != "G699.06.78kX" {
+		t.Error("Wrong firmware version")
+	}
 	checkHWSensors(message.Sensors, t)
 }
 
 func checkHWSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 	for _, sens := range sensorsArr {
 		switch sens.(type) {
-		case *sensors.Firmware:
-			{
-				assert("FW", sens.(*sensors.Firmware).Version, "G699.06.78kX", t)
-				break
-			}
 		case *sensors.IgnitionSensor:
 			{
 				assert("Ignition", sens.(*sensors.IgnitionSensor).IgnitionState, byte(1), t)
+				break
 			}
 		case *sensors.Switch:
 			{
@@ -75,6 +74,7 @@ func checkHWSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 						break
 					}
 				}
+				break
 			}
 		case *sensors.Relay:
 			{
@@ -108,6 +108,7 @@ func checkHWSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 						break
 					}
 				}
+				break
 			}
 		case *sensors.PowerSensor:
 			{
@@ -117,6 +118,7 @@ func checkHWSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 		default:
 			{
 				t.Error("Unexpected sensor")
+				break
 			}
 		}
 	}

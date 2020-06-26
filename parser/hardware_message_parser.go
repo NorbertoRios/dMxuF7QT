@@ -1,8 +1,11 @@
 package parser
 
 import (
+	"fmt"
 	"genx-go/core/sensors"
 	"genx-go/message"
+	"genx-go/utils"
+	"log"
 	"regexp"
 )
 
@@ -14,12 +17,10 @@ func BuildGenxHardwareMessageParser() *GenxHardwareMessageParser {
 	switchExpr, _ := regexp.Compile(`Switch-([^,]+)`)
 	relayExpr, _ := regexp.Compile(`Relay-([^,]+)`)
 	return &GenxHardwareMessageParser{
-		SingleSensorsBuilders: map[*regexp.Regexp]func(string) sensors.ISensor{
-			fwExpr:   sensors.BuildFirmwareSensor,
-			ignExpr:  sensors.BuildIgnitionSensorFromString,
-			voltExpr: sensors.BuildPowerSensorFromString,
-		},
-		ArraySensorsBuilders: map[*regexp.Regexp]func(string) []sensors.ISensor{
+		FirmwareExpression: fwExpr,
+		SensorBuilders: map[*regexp.Regexp]interface{}{
+			ignExpr:    sensors.BuildIgnitionSensorFromString,
+			voltExpr:   sensors.BuildPowerSensorFromString,
 			switchExpr: sensors.BuildInputsFromString,
 			relayExpr:  sensors.BuildOutputsFromString,
 		},
@@ -28,36 +29,40 @@ func BuildGenxHardwareMessageParser() *GenxHardwareMessageParser {
 
 //GenxHardwareMessageParser represents sensors for hardware message
 type GenxHardwareMessageParser struct {
-	SingleSensorsBuilders map[*regexp.Regexp]func(string) sensors.ISensor
-	ArraySensorsBuilders  map[*regexp.Regexp]func(string) []sensors.ISensor
+	FirmwareExpression *regexp.Regexp
+	SensorBuilders     map[*regexp.Regexp]interface{}
 }
 
 //Parse parse genx hardware message
-func (parser *GenxHardwareMessageParser) Parse(rawMessage *message.RawMessage) *message.Message {
+func (parser *GenxHardwareMessageParser) Parse(rawMessage *message.RawMessage) *message.HardwareMessage {
 	messageSensors := make([]sensors.ISensor, 0)
-	for expr, builder := range parser.SingleSensorsBuilders {
+	for expr, builder := range parser.SensorBuilders {
 		if expr.Match(rawMessage.RawData) {
 			value := expr.FindAllStringSubmatch(string(rawMessage.RawData), -1)[0][1]
-			sens := builder(value)
-			if sens != nil {
-				messageSensors = append(messageSensors, sens)
+			switch builder.(type) {
+			case func(string) sensors.ISensor:
+				{
+					messageSensors = append(messageSensors, builder.(func(string) sensors.ISensor)(value))
+				}
+			case func(string) []sensors.ISensor:
+				{
+					messageSensors = append(messageSensors, builder.(func(string) []sensors.ISensor)(value)...)
+				}
 			}
 		}
 	}
-	for expr, builder := range parser.ArraySensorsBuilders {
-		if expr.Match(rawMessage.RawData) {
-			value := expr.FindAllStringSubmatch(string(rawMessage.RawData), -1)[0][1]
-			sens := builder(value)
-			if sens != nil {
-				messageSensors = append(messageSensors, sens...)
-			}
-		}
+	var fwVersion string
+	if !parser.FirmwareExpression.Match(rawMessage.RawData) {
+		log.Println(fmt.Sprintf("[GenxHardwareMessageParser] Can't extract firmwar version from message: %v", string(rawMessage.RawData)))
+		fwVersion = ""
 	}
-	serial := &sensors.SerialSensor{RawValue: rawMessage.SerialNumber}
-	message := &message.Message{
+	fwVersion = parser.FirmwareExpression.FindAllStringSubmatch(string(rawMessage.RawData), -1)[0][1]
+	sUtils := &utils.StringUtils{Data: rawMessage.SerialNumber}
+	message := &message.HardwareMessage{
+		Firmware:    fwVersion,
 		Sensors:     messageSensors,
 		MessageType: rawMessage.MessageType,
-		Identity:    serial.ToIdentity(),
+		Identity:    sUtils.Identity(),
 	}
 	return message
 }

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -8,6 +9,15 @@ import (
 //StringUtils utils for string
 type StringUtils struct {
 	Data string
+}
+
+//Identity returns identity from serial
+func (utils *StringUtils) Identity() string {
+	serial := utils.Data
+	for l := len(utils.Data); l < 12; l++ {
+		serial = fmt.Sprintf("0%v", serial)
+	}
+	return fmt.Sprintf("genx_%v", serial)
 }
 
 //BitmaskStringToByte string value to byte

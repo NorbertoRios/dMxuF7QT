@@ -1,27 +1,16 @@
 package device
 
 import (
+	"genx-go/connection"
 	"genx-go/core/sensors"
-	"genx-go/message"
-	"time"
 )
+
+//BuildDevice build new device
+func BuildDevice(channel *connection.UDPChannel, activity []sensors.ISensor, currentConfig map[string]string) {
+
+}
 
 //Device struct
 type Device struct {
-	Identity         string
-	Sensors          []sensors.ISensor
-	LastActivityTS   time.Time
-	onMessageArrived func(msg *message.Message)
-}
-
-//BuildDevice device intialize
-func BuildDevice(identity string) *Device {
-	device := &Device{}
-	device.Identity = identity
-	return device
-}
-
-//CurrentState returns device current state
-func (device *Device) CurrentState() []sensors.ISensor {
-	return nil
+	BaseDevice
 }

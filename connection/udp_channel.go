@@ -16,25 +16,51 @@ type IChannel interface {
 }
 
 //ConstructUDPChannel returns new channel
-func ConstructUDPChannel(addr *net.UDPAddr) IChannel {
+func ConstructUDPChannel(addr *net.UDPAddr, server *UDPServer) IChannel {
 	return &UDPChannel{
-		ConnectedAt: time.Now().UTC(),
-		clientAddr:  addr,
+		ServerInstance: server,
+		ConnectedAt:    time.Now().UTC(),
+		clientAddr:     addr,
 	}
 }
 
 //UDPChannel cahnnel for device
 type UDPChannel struct {
-	ConnectedAt    time.Time
-	LastActivityTs time.Time
-	received       int64
-	transmitted    int64
-	clientAddr     *net.UDPAddr
+	ServerInstance   *UDPServer
+	ConnectedAt      time.Time
+	LastActivityTs   time.Time
+	received         int64
+	transmitted      int64
+	onProcessMessage func()
+	clientAddr       *net.UDPAddr
 }
 
 //Received received bytes
 func (c *UDPChannel) Received() int64 {
 	return c.received
+}
+
+//Send message to device by UDP
+func (c *UDPChannel) Send(message interface{}) error {
+	var err error
+	var trs int64
+	switch message.(type) {
+	case string:
+		{
+			trs, err = c.ServerInstance.SendBytes(c.RemoteAddr(), []byte(message.(string)))
+			break
+		}
+	default:
+		{
+			trs, err = c.ServerInstance.SendBytes(c.RemoteAddr(), message.([]byte))
+			break
+		}
+	}
+	if err != nil {
+		return err
+	}
+	c.AddTransmitted(trs)
+	return err
 }
 
 //Transmitted transmitted bytes

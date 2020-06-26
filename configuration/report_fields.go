@@ -7,8 +7,8 @@ type Field struct {
 	Size int
 }
 
-//Reasons codes
-type Reasons struct {
-	ID   string `xml:"id,attr"`
-	Name string `xml:"name,attr"`
-}
+// //Reasons codes
+// type Reasons struct {
+// 	ID   string `xml:"id,attr"`
+// 	Name string `xml:"name,attr"`
+// }

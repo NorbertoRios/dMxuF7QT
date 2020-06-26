@@ -8,8 +8,8 @@ import (
 )
 
 //ConstructUDPServer returns new UDP server
-func ConstructUDPServer(port int) *UDPServer {
-	addr := fmt.Sprintf(":%v", port)
+func ConstructUDPServer(host string, port int) *UDPServer {
+	addr := fmt.Sprintf("%v:%v", host, port)
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		log.Fatalf("[UDPServer] Wrong UDP Address:%v", addr)
@@ -21,6 +21,7 @@ func ConstructUDPServer(port int) *UDPServer {
 		log.Fatalf("Create udp server error:%v", err.Error())
 		return nil
 	}
+
 	server := &UDPServer{
 		port:       port,
 		connection: udpConn,
@@ -32,7 +33,7 @@ func ConstructUDPServer(port int) *UDPServer {
 type UDPServer struct {
 	port        int
 	connection  *net.UDPConn
-	onNewPacket func(channel *net.UDPAddr, packet []byte)
+	onNewPacket func(channel IChannel, packet []byte)
 }
 
 //Listen incoming packet
@@ -45,36 +46,17 @@ func (server *UDPServer) Listen() {
 			return
 		}
 		log.Println("Received UDP packet:", hex.EncodeToString(buf[0:n]))
-		server.onNewPacket(addr, buf[0:n])
+		channel := ConstructUDPChannel(addr, server)
+		server.onNewPacket(channel, buf[0:n])
 	}
 }
 
-func (server *UDPServer) sendBytes(channel IChannel, packet []byte) {
-	n, err := server.connection.WriteToUDP(packet, channel.RemoteAddr())
+//SendBytes send bytes
+func (server *UDPServer) SendBytes(addr *net.UDPAddr, packet []byte) (int64, error) {
+	n, err := server.connection.WriteToUDP(packet, addr)
 	if err != nil {
 		log.Println("[UDPServer] Error while sending bytes. ", err)
-		return
+		return 0, err
 	}
-	channel.AddTransmitted(int64(n))
-}
-
-//Send send message to device
-func (server *UDPServer) Send(channel IChannel, message interface{}) {
-	switch message.(type) {
-	case string:
-		{
-			server.sendBytes(channel, []byte(message.(string)))
-			break
-		}
-	case []byte:
-		{
-			server.sendBytes(channel, message.([]byte))
-			break
-		}
-	default:
-		{
-			server.sendBytes(channel, message.([]byte))
-			break
-		}
-	}
+	return int64(n), nil
 }

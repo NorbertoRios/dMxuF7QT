@@ -5,18 +5,13 @@ import (
 	"log"
 )
 
-//IProvider represents provider
-type IProvider interface {
-	Provide() ([]Field, error)
-}
-
 //ReportConfiguration represents report config
 type ReportConfiguration struct {
 	Fields []Field
 }
 
 //ConstructReportConfiguration create report config instance
-func ConstructReportConfiguration(provider IProvider) (*ReportConfiguration, error) {
+func ConstructReportConfiguration(provider IReportConfigProvider) (*ReportConfiguration, error) {
 	fields, err := provider.Provide()
 	if err != nil {
 		return nil, err

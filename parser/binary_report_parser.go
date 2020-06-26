@@ -17,13 +17,19 @@ type GenxBinaryReportParser struct {
 //BuildGenxBinaryReportParser returns new report parser
 func BuildGenxBinaryReportParser(param24 string, reportConfiguration *configuration.ReportConfiguration) *GenxBinaryReportParser {
 	param24 = strings.ReplaceAll(param24, ";", "")
-	param24_columns := strings.Split(param24, ".")
-	fields := reportConfiguration.GetFieldsByIds(param24_columns)
+	param24Columns := strings.Split(param24, ".")
+	fields := reportConfiguration.GetFieldsByIds(param24Columns)
 	return &GenxBinaryReportParser{
 		reportFields: fields,
 	}
 }
 
+//ConstructGenxBinaryReportParser returns new report parser
+func ConstructGenxBinaryReportParser(fields []*configuration.Field) *GenxBinaryReportParser {
+	return &GenxBinaryReportParser{
+		reportFields: fields,
+	}
+}
 
 //Parse parser for location message
 func (parser *GenxBinaryReportParser) Parse(rawMessage *message.RawMessage) ([]*message.Message, string) {

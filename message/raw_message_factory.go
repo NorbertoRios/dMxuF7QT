@@ -2,6 +2,7 @@ package message
 
 import (
 	"fmt"
+	"genx-go/message/messagetype"
 	"genx-go/utils"
 	"log"
 	"regexp"
@@ -25,55 +26,55 @@ func CounstructRawMessageFactory() *RawMessageFactory {
 	return &RawMessageFactory{
 		Maps: []ReportMap{
 			{
-				Type: "breport",
+				Type: messagetype.BinaryLocation,
 				Reg:  breportExpr,
 			},
 			{
-				Type: "ack",
+				Type: messagetype.Ack,
 				Reg:  ackExpr,
 			},
 			{
-				Type: "nack",
+				Type: messagetype.Nack,
 				Reg:  nackExpr,
 			},
 			{
-				Type: "param",
+				Type: messagetype.Parameter,
 				Reg:  allParamsExpr,
 			},
 			{
-				Type: "poll",
+				Type: messagetype.Poll,
 				Reg:  pollExpr,
 			},
 			{
-				Type: "poll",
+				Type: messagetype.Poll,
 				Reg:  poll1Expr,
 			},
 			{
-				Type: "diag_hardware_brief",
+				Type: messagetype.DiagHardware,
 				Reg:  hardwareBriefExpr,
 			},
 			{
-				Type: "diag_1wire",
+				Type: messagetype.Diag1Wire,
 				Reg:  diag1WireExpr,
 			},
 			{
-				Type: "param",
+				Type: messagetype.Parameter,
 				Reg:  paramExpr,
 			},
 			{
-				Type: "diag",
+				Type: messagetype.DiagCAN,
 				Reg:  diagCan,
 			},
 			{
-				Type: "diag",
+				Type: messagetype.Diag,
 				Reg:  diagJExpr,
 			},
 			{
-				Type: "diag",
+				Type: messagetype.Diag,
 				Reg:  diagExpr,
 			},
 			{
-				Type: "message",
+				Type: messagetype.GraminMessage,
 				Reg:  garminMessage,
 			},
 		},

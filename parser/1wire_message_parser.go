@@ -50,18 +50,18 @@ type OneWireMessageParser struct {
 //Parse parse 1WireMessage
 func (parser *OneWireMessageParser) Parse(rawMessage *message.RawMessage) *message.Message {
 	if !parser.OneWireExpression.Match(rawMessage.RawData) {
-		serial := sensors.SerialSensor{RawValue: rawMessage.SerialNumber}
+		sUtils := &utils.StringUtils{Data: rawMessage.SerialNumber}
 		return &message.Message{
-			Identity:    serial.ToIdentity(),
+			Identity:    sUtils.Identity(),
 			MessageType: rawMessage.MessageType,
 			Sensors:     nil,
 		}
 	}
 	wireState := parser.OneWireExpression.FindAllStringSubmatch(string(rawMessage.RawData), -1)[0][1]
 	if wireState != "Present" {
-		serial := sensors.SerialSensor{RawValue: rawMessage.SerialNumber}
+		sUtils := &utils.StringUtils{Data: rawMessage.SerialNumber}
 		return &message.Message{
-			Identity:    serial.ToIdentity(),
+			Identity:    sUtils.Identity(),
 			MessageType: rawMessage.MessageType,
 			Sensors:     nil,
 		}
@@ -75,9 +75,9 @@ func (parser *OneWireMessageParser) Parse(rawMessage *message.RawMessage) *messa
 		iButtonSensors := parser.parseIButtonSensors(rawMessage.RawData)
 		finalSensors = append(finalSensors, iButtonSensors)
 	}
-	serial := &sensors.SerialSensor{RawValue: rawMessage.SerialNumber}
+	sUtils := &utils.StringUtils{Data: rawMessage.SerialNumber}
 	return &message.Message{
-		Identity:    serial.ToIdentity(),
+		Identity:    sUtils.Identity(),
 		Sensors:     finalSensors,
 		MessageType: rawMessage.MessageType,
 	}

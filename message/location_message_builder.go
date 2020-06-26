@@ -2,16 +2,16 @@ package message
 
 import (
 	"genx-go/core"
-	"genx-go/core/sensors"
+	"genx-go/utils"
 )
 
 //BuildMessage build new message
 func BuildMessage(rData map[string]interface{}, messageType string) *Message {
 	sensorsBuilder := BuildBinaryMessageSensors()
-	serial := &sensors.SerialSensor{RawValue: rData[core.UnitName]}
+	sUtils := &utils.StringUtils{Data: rData[core.UnitName].(string)}
 	message := &Message{
 		Sensors:     sensorsBuilder.Build(rData),
-		Identity:    serial.ToIdentity(),
+		Identity:    sUtils.Identity(),
 		MessageType: messageType,
 	}
 	return message
