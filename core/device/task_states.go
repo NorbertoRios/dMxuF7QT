@@ -6,6 +6,7 @@ const (
 	Acked                        = 2
 	DiagHardwareSended           = 3
 	DiagRequiredParametersSended = 4
-	ParametersReceived   = 5
+	ParametersReceived           = 5
 	Completed                    = 6
+	SubtaskIsActive              = 7
 )

@@ -66,24 +66,3 @@ func (storage *Storage) removeDevice(identity string) {
 	delete(storage.Devices, identity)
 	log.Println("[Storage] Device ", identity, " removed. Total device count:", len(storage.Devices))
 }
-
-// func (storage *Storage) start() {
-// 	ticker := time.NewTicker(300 * time.Second)
-// 	go func() {
-// 		defer func() {
-// 			if r := recover(); r != nil {
-// 				log.Println("[Storage] Recovered in watchdog function:", r)
-// 			}
-// 		}()
-// 		for {
-// 			select {
-// 			case <-ticker.C:
-// 				for identity, device := range storage.Devices {
-// 					if time.Now().UTC().Sub(device.LastActivityTS).Seconds() >= 3600 {
-// 						storage.removeDevice(identity)
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}()
-// }

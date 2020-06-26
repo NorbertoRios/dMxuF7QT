@@ -12,15 +12,24 @@ import (
 )
 
 //BuildConfigurationTask create configuration task
-func BuildConfigurationTask(device IDevice, config *models.ConfigurationModel) *ConfigurationTask {
+func BuildConfigurationTask(storage *TaskStorage, config *models.ConfigurationModel, onTaskCompleted func(string)) {
 	if config.ID == 0 || len(config.Command) == 0 {
-		return nil
+		log.Println("[BuildConfigurationTask] Error in configuration.")
+		return
 	}
-	return &ConfigurationTask{
-		Device:             device,
+	task := &ConfigurationTask{
+		Storage:            storage,
 		mutex:              &sync.Mutex{},
 		ConfigurationItems: devideConfiguration(config.Command),
+		OnTaskCompleted:    onTaskCompleted,
 	}
+	storage.NewTask(task.TaskType, task)
+	go task.Execute()
+}
+
+//CallbackID for tasks which need send responce to facade
+func (task *ConfigurationTask) CallbackID() string {
+	return ""
 }
 
 func devideConfiguration(config string) *list.List {
@@ -59,11 +68,13 @@ func devideConfiguration(config string) *list.List {
 
 //ConfigurationTask represents task for send config to device
 type ConfigurationTask struct {
+	TaskType           string
 	mutex              *sync.Mutex
-	Device             IDevice
+	Storage            *TaskStorage
 	CurrentItem        *list.Element
 	ConfigurationItems *list.List
 	SendAt             time.Time
+	OnTaskCompleted    func(string)
 }
 
 //Execute execute task
@@ -89,7 +100,7 @@ func (task *ConfigurationTask) Execute() {
 	}
 
 	stringParameter := task.CurrentItem.Value.(*ConfigItem).Parameter()
-	if err := task.Device.Send(stringParameter); err != nil {
+	if err := task.Storage.Device.Send(stringParameter); err != nil {
 		log.Println("[ConfigurationTask] Cant send configuration. Error: ", err)
 		return
 	}
@@ -100,8 +111,21 @@ func (task *ConfigurationTask) Execute() {
 	task.CurrentItem.Value.(*ConfigItem).SendtAt = time.Now().UTC()
 }
 
-//AckArrived to task
-func (task *ConfigurationTask) AckArrived(message *message.AckMessage) {
+//DeviceResponce to task
+func (task *ConfigurationTask) DeviceResponce(responce interface{} /**message.AckMessage*/) {
+	switch responce.(type) {
+	case *message.AckMessage:
+		{
+			task.processAckMessageFromDevice(responce.(*message.AckMessage))
+		}
+	default:
+		{
+			return
+		}
+	}
+}
+
+func (task *ConfigurationTask) processAckMessageFromDevice(message *message.AckMessage) {
 	task.mutex.Lock()
 	defer task.mutex.Unlock()
 	if task.CurrentItem == nil {
@@ -117,7 +141,7 @@ func (task *ConfigurationTask) AckArrived(message *message.AckMessage) {
 //Complete call when task is completed
 func (task *ConfigurationTask) Complete() {
 	defer func() {
-		task.Device = nil
+		task.Storage = nil
 	}()
-	task.Device.OnConfigTaskCompleted()
+	task.OnTaskCompleted(task.TaskType)
 }

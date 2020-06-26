@@ -9,7 +9,7 @@ import (
 func TestParametersMessageParsing(t *testing.T) {
 	packet := []byte("PARAMETERS\n56=;\n24=1.2.3.4.5.6.7.89.86.4.2.3;\n500=GFM1212312;\n000003912835 3912835\n")
 	rm := factory.BuildRawMessage(packet)
-	parser := parser.BuildParametersMessageParser()
+	parser := parser.ConstructParametersMessageParser()
 	message := parser.Parse(rm)
 	if message == nil {
 		t.Error("Message cant be null")
@@ -25,7 +25,7 @@ func TestParametersMessageParsing(t *testing.T) {
 func TestAllParametersMessageParsing(t *testing.T) {
 	packet := []byte("ALL-PARAMETERS\n9=3870006;\n500=GFM121232;\n501=259200;\n503=100;\n505=0;\n")
 	rm := factory.BuildRawMessage(packet)
-	parser := parser.BuildParametersMessageParser()
+	parser := parser.ConstructParametersMessageParser()
 	message := parser.Parse(rm)
 	if message == nil {
 		t.Error("Message cant be null")

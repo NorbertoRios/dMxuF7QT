@@ -4,5 +4,6 @@ package device
 type ITask interface {
 	Complete()
 	Execute()
-	OnReceiveNeededMessage()
+	DeviceResponce(interface{})
+	CallbackID() string
 }

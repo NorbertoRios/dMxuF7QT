@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-//BuildParametersMessageParser returns parameters message parser
-func BuildParametersMessageParser() *ParametersMessageParser {
+//ConstructParametersMessageParser returns parameters message parser
+func ConstructParametersMessageParser() *ParametersMessageParser {
 	allParamExpr, _ := regexp.Compile(`(?s)ALL-PARAMETERS*.(.*=.*;)`)
 	paramExpr, _ := regexp.Compile(`(?s)PARAMETERS*.(.*=.*;)`)
 	return &ParametersMessageParser{
@@ -26,7 +26,7 @@ type ParametersMessageParser struct {
 }
 
 //Parse parse message
-func (parser *ParametersMessageParser) Parse(rawMessage *message.RawMessage) *message.ParametersMessage {
+func (parser *ParametersMessageParser) Parse(rawMessage *message.RawMessage) interface{} {
 	var expr *regexp.Regexp
 	if parser.ParametersExpr.Match(rawMessage.RawData) {
 		expr = parser.ParametersExpr

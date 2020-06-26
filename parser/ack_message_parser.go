@@ -22,7 +22,7 @@ type AckNackMessageParser struct {
 }
 
 //Parse parse ack message
-func (parser *AckNackMessageParser) Parse(rMessage *message.RawMessage) *message.AckMessage {
+func (parser *AckNackMessageParser) Parse(rMessage *message.RawMessage) interface{} {
 	if parser.AckExpression.Match(rMessage.RawData) {
 		if value := parser.parseStringValue(rMessage.RawData); value != "" {
 			sUtils := &utils.StringUtils{Data: rMessage.SerialNumber}

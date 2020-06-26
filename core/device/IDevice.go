@@ -1,9 +1,12 @@
 package device
 
+import "genx-go/repository/models"
+
 //IDevice device inteface
 type IDevice interface {
-	OnSynchronizationTaskCompleted(bool)
 	Send(string) error
-	Config() string
-	OnConfigTaskCompleted()
+	OnLoadCurrentConfig() *models.ConfigurationModel
+	OnLoadNonSendedConfig() *models.ConfigurationModel
+	SendFacadeCallback(string)
+	OnSynchronizationTaskCompleted()
 }
