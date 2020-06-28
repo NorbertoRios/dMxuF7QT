@@ -3,9 +3,8 @@ package parser
 import (
 	"fmt"
 	"genx-go/core/sensors"
+	"genx-go/logger"
 	"genx-go/message"
-	"genx-go/utils"
-	"log"
 	"regexp"
 )
 
@@ -53,16 +52,15 @@ func (parser *GenxHardwareMessageParser) Parse(rawMessage *message.RawMessage) *
 	}
 	var fwVersion string
 	if !parser.FirmwareExpression.Match(rawMessage.RawData) {
-		log.Println(fmt.Sprintf("[GenxHardwareMessageParser] Can't extract firmwar version from message: %v", string(rawMessage.RawData)))
+		logger.Error(fmt.Sprintf("[GenxHardwareMessageParser] Can't extract firmwar version from message: %v", string(rawMessage.RawData)))
 		fwVersion = ""
 	}
 	fwVersion = parser.FirmwareExpression.FindAllStringSubmatch(string(rawMessage.RawData), -1)[0][1]
-	sUtils := &utils.StringUtils{Data: rawMessage.SerialNumber}
 	message := &message.HardwareMessage{
 		Firmware:    fwVersion,
 		Sensors:     messageSensors,
 		MessageType: rawMessage.MessageType,
-		Identity:    sUtils.Identity(),
+		Identity:    rawMessage.Identity,
 	}
 	return message
 }

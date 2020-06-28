@@ -13,14 +13,14 @@ func ConstructRabbitRepository(credentials *configuration.ServiceCredentials) *R
 	connectionStr := fmt.Sprintf("amqp://%v:%v@%v:%v/", credentials.Rabbit.Username, credentials.Rabbit.Password, credentials.Rabbit.Host, credentials.Rabbit.Port)
 	conn, err := amqp.Dial(connectionStr)
 	if err != nil {
-		log.Fatalf("Failed to connect to RabbitMQ; Connection string: %s", err)
+		logger.Fatal("Failed to connect to RabbitMQ; Connection string: %s", err)
 	}
 	if err != nil {
 		return nil
 	}
 	ch, err := conn.Channel()
 	if err != nil {
-		log.Fatalf("Failed to create rabbit channel.: %s", err)
+		logger.Fatal("Failed to create rabbit channel.: %s", err)
 	}
 	return &RabbitRepository{
 		connection: conn,

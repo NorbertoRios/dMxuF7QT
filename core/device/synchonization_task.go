@@ -2,9 +2,8 @@ package device
 
 import (
 	"fmt"
+	"genx-go/logger"
 	"genx-go/message"
-	"log"
-	"strings"
 	"time"
 )
 
@@ -40,14 +39,14 @@ func (task *SynchronizarionTask) CallbackID() string {
 func (task *SynchronizarionTask) Execute() {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("[SynchronizarionTask] panic:Recovered in Execute:", r)
+			logger.Error("[SynchronizarionTask] panic:Recovered in Execute:", r)
 		}
 	}()
 	switch task.state {
 	case Opened:
 		{
-			if err := task.device.Send("DIAG PARAMS=500,24,18;"); err != nil {
-				log.Println("[SynchronizarionTask] Error while command send. ", err)
+			if err := task.device.Send("DIAG PARAMS=500,24;"); err != nil {
+				logger.Error("[SynchronizarionTask] Error while command send. ", err)
 				return
 			}
 			task.state = DiagRequiredParametersSended
@@ -66,10 +65,10 @@ func (task *SynchronizarionTask) Execute() {
 		{
 			task.onParametersReceivedState()
 		}
-	case Completed:
-		{
-			task.Complete()
-		}
+	// case Completed:
+	// 	{
+	// 		task.Complete()
+	// 	}
 	default:
 		{
 
@@ -84,25 +83,24 @@ func (task *SynchronizarionTask) onSubtaskCompleted(taskName string) {
 }
 
 func (task *SynchronizarionTask) onParametersReceivedState() {
-	requiredParameters := []string{"500", "24", "18"}
-	for _, rp := range requiredParameters {
+	if task.state != DiagRequiredParametersSended {
+		task.Execute()
+		return
+	}
+	for _, rp := range []string{"500", "24"} {
 		if _, ok := task.currentParameterMessage.Parameters[rp]; !ok {
-			task.state = DiagRequiredParametersSended
 			task.Execute()
 			return
 		}
 	}
-	deviceConfig := task.device.OnLoadCurrentConfig().Command
-	for _, key := range requiredParameters {
-		if !strings.Contains(deviceConfig, task.currentParameterMessage.Parameters[key]) {
-			BuildConfigurationTask(task.TaskStorage, task.TaskStorage.Device.OnLoadCurrentConfig(), task.onSubtaskCompleted)
-			log.Println(fmt.Sprint("[SynchronizarionTask] New subtask for push current config to device is  created"))
-			task.state = SubtaskIsActive
-			task.Execute()
-			return
-		}
+	if task.device.Parameter24() == task.currentParameterMessage.Parameters["24"] &&
+		task.device.Parameter500() == task.currentParameterMessage.Parameters["500"] {
+		task.Complete(task.currentParameterMessage.Parameters["24"], task.currentParameterMessage.Parameters["500"])
+		return
 	}
-	task.state = Completed
+	BuildConfigurationTask(task.TaskStorage, task.TaskStorage.Device.OnLoadCurrentConfig(), task.onSubtaskCompleted)
+	logger.Info(fmt.Sprint("[SynchronizarionTask] New subtask for push current config to device is  created"))
+	task.state = SubtaskIsActive
 	task.Execute()
 }
 
@@ -114,15 +112,17 @@ func (task *SynchronizarionTask) DeviceResponce(responce interface{}) {
 	switch responce.(type) {
 	case *message.ParametersMessage:
 		{
-			task.currentParameterMessage = responce.(*message.ParametersMessage)
-			task.state = ParametersReceived
-			task.Execute()
+			if v, f := responce.(*message.ParametersMessage); f {
+				task.currentParameterMessage = v
+				task.state = ParametersReceived
+				task.Execute()
+			}
 		}
 	}
 }
 
 //Complete calls on task complete
-func (task *SynchronizarionTask) Complete() {
+func (task *SynchronizarionTask) Complete(param24, param500 string) {
 	defer func() {
 		task.TaskStorage = nil
 	}()

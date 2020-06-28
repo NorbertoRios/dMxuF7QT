@@ -2,9 +2,9 @@ package configuration
 
 import (
 	"encoding/json"
+	"genx-go/logger"
 	"genx-go/utils"
 	"io/ioutil"
-	"log"
 )
 
 //CredentialsJSONProvider provider
@@ -22,7 +22,7 @@ func ConstructCredentialsJSONProvider(file utils.IFile) *CredentialsJSONProvider
 //ProvideCredentials provide
 func (provider *XMLProvider) ProvideCredentials() (*ServiceCredentials, error) {
 	filePath := provider.file.Path()
-	log.Println("Loading credentials configuration from:", filePath)
+	logger.Info("Loading credentials configuration from:", filePath)
 	xmlFile, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err

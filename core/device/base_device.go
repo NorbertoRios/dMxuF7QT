@@ -11,13 +11,15 @@ import (
 )
 
 //BuildBaseDevice returns base device
-func BuildBaseDevice(identity string, channel *connection.UDPChannel, state []sensors.ISensor,
-	loadCurrentConfig func(string, string) *models.ConfigurationModel, deviceSynchronized func(IDevice)) IDevice {
+func BuildBaseDevice(identity string, channel *connection.UDPChannel, state *LastKnownDeviceState,
+	loadConfig func(string, string) *models.ConfigurationModel, deviceSynchronized func(IDevice), publishMessage func(interface{})) IDevice {
 	device := &BaseDevice{
-		Identity:   identity,
-		Channel:    channel,
-		Sensors:    state,
-		LoadConfig: loadCurrentConfig,
+		identity:             identity,
+		Channel:              channel,
+		Sensors:              state.Sensors,
+		LoadConfig:           loadConfig,
+		PublishMessage:       publishMessage,
+		OnDeviceSynchronized: deviceSynchronized,
 	}
 	device.TaskStorage = CounstructTaskStorage(device)
 	return device
@@ -25,27 +27,47 @@ func BuildBaseDevice(identity string, channel *connection.UDPChannel, state []se
 
 //BaseDevice unknown device
 type BaseDevice struct {
+	parameter500         string
+	parameter24          string
 	TaskStorage          *TaskStorage
+	PublishMessage       func(interface{})
 	Sensors              []sensors.ISensor
 	OnDeviceSynchronized func(IDevice)
 	LoadConfig           func(string, string) *models.ConfigurationModel
-	Identity             string
+	identity             string
 	Channel              *connection.UDPChannel
 	LatsConfigLoadingTS  time.Time
-	currentConfig        *models.ConfigurationModel
+	lastActivityTS       time.Time
 }
 
-//OnLoadCurrentConfig when need to load current device config
+//LastActivityTS returns device last activity
+func (device *BaseDevice) LastActivityTS() time.Time {
+	return device.lastActivityTS
+}
+
+//Parameter500 returns 500 parameter
+func (device *BaseDevice) Parameter500() string {
+	return device.parameter500
+}
+
+//Parameter24 returns 24
+func (device *BaseDevice) Parameter24() string {
+	return device.parameter24
+}
+
+//Identity returns device identity
+func (device *BaseDevice) Identity() string {
+	return device.identity
+}
+
+//OnLoadCurrentConfig returns current config
 func (device *BaseDevice) OnLoadCurrentConfig() *models.ConfigurationModel {
-	if device.currentConfig == nil || time.Now().UTC().Sub(device.LatsConfigLoadingTS).Minutes() > 180 {
-		device.currentConfig = device.LoadConfig(device.Identity, CurrentConfig)
-	}
-	return device.currentConfig
+	return device.LoadConfig(device.identity, CurrentConfig)
 }
 
 //OnLoadNonSendedConfig when need load non sended config
 func (device *BaseDevice) OnLoadNonSendedConfig() *models.ConfigurationModel {
-	return device.LoadConfig(device.Identity, Unsended)
+	return device.LoadConfig(device.identity, Unsended)
 }
 
 //SendFacadeCallback send callback to facade
@@ -54,40 +76,38 @@ func (device *BaseDevice) SendFacadeCallback(callbackID string) {
 }
 
 //OnSynchronizationTaskCompleted when synchonization complete
-func (device *BaseDevice) OnSynchronizationTaskCompleted() {
+func (device *BaseDevice) OnSynchronizationTaskCompleted(param24, param500 string) {
+	device.parameter24 = param24
+	device.parameter500 = param500
 	device.OnDeviceSynchronized(device)
 	return
 }
 
-//Send send command
+//Send command
 func (device *BaseDevice) Send(message string) error {
 	return device.Channel.Send(message)
 }
 
-//MessageArrived to device
+//MessageArrived on message arrived
 func (device *BaseDevice) MessageArrived(rawMessage *message.RawMessage) {
-	var msgParser parser.IParser
 	switch rawMessage.MessageType {
+
 	case messagetype.Parameter:
 		{
-			msgParser = parser.ConstructParametersMessageParser()
-			break
+			device.processSystemMessage(parser.ConstructParametersMessageParser(), rawMessage)
+			return
 		}
 	case messagetype.Ack:
 		{
-			msgParser = parser.ConstructAckMesageParser()
-			break
-		}
-	default:
-		{
+			device.processSystemMessage(parser.ConstructAckMesageParser(), rawMessage)
 			return
 		}
 	}
-	if message := msgParser.Parse(rawMessage); message != nil {
-		device.processSystemMessage(message)
-	}
 }
 
-func (device *BaseDevice) processSystemMessage(message interface{}) {
-	device.TaskStorage.NewDeviceResponce(message)
+func (device *BaseDevice) processSystemMessage(parser parser.IParser, rawMessage *message.RawMessage) {
+	if message := parser.Parse(rawMessage); message != nil {
+		device.PublishMessage(message)
+		device.TaskStorage.NewDeviceResponce(message)
+	}
 }

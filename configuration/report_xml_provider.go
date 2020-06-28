@@ -2,9 +2,9 @@ package configuration
 
 import (
 	"encoding/xml"
+	"genx-go/logger"
 	"genx-go/utils"
 	"io/ioutil"
-	"log"
 )
 
 type xmlField struct {
@@ -32,7 +32,7 @@ func ConstructXMLProvider(file utils.IFile) *XMLProvider {
 //Provide provide
 func (provider *XMLProvider) Provide() ([]Field, error) {
 	filePath := provider.file.Path()
-	log.Println("Loading report configuration from:", filePath)
+	logger.Info("Loading report configuration from:", filePath)
 	xmlFile, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err

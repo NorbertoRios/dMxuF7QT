@@ -1,9 +1,8 @@
 package parser
 
 import (
+	"genx-go/logger"
 	"genx-go/message"
-	"genx-go/utils"
-	"log"
 	"regexp"
 	"strings"
 )
@@ -25,15 +24,14 @@ type AckNackMessageParser struct {
 func (parser *AckNackMessageParser) Parse(rMessage *message.RawMessage) interface{} {
 	if parser.AckExpression.Match(rMessage.RawData) {
 		if value := parser.parseStringValue(rMessage.RawData); value != "" {
-			sUtils := &utils.StringUtils{Data: rMessage.SerialNumber}
 			return &message.AckMessage{
-				Identity:    sUtils.Identity(),
+				Identity:    rMessage.Identity,
 				Value:       value,
 				MessageType: rMessage.MessageType,
 			}
 		}
 	}
-	log.Println("[AckNackMessageParser] Cant parse ", rMessage.MessageType, " message. Message : ", string(rMessage.RawData), "Serial : ", rMessage.SerialNumber)
+	logger.Error("[AckNackMessageParser] Cant parse ", rMessage.MessageType, " message. Message : ", string(rMessage.RawData), "Serial : ", rMessage.SerialNumber)
 	return nil
 }
 

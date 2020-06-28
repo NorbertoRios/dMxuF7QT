@@ -3,11 +3,12 @@ package message
 import (
 	"genx-go/configuration"
 	"genx-go/core"
-	"log"
+	"genx-go/logger"
 )
 
 //RawMessage raw genx message
 type RawMessage struct {
+	Identity     string
 	SerialNumber string
 	MessageType  string
 	RawData      []byte
@@ -23,15 +24,10 @@ func (message *RawMessage) String(startIndex int) (interface{}, int) {
 	return message.RawData[startIndex:], len(message.RawData[startIndex:])
 }
 
-//Ack returns message Ack
-// func (message *RawMessage) Ack() string {
-// 	return fmt.Sprintf("UDPACK %v", len(message.RawData))
-// }
-
 //Value returns value as intreface{}
 func (message *RawMessage) Value(startIndex int, field *configuration.Field) (interface{}, int) {
 	if len(message.RawData) < startIndex+field.Size {
-		log.Println("Data array out of bound")
+		logger.Error("Data array out of bound")
 		return nil, 0
 	}
 	switch field.Size {

@@ -3,7 +3,6 @@ package parser
 import (
 	"genx-go/core/sensors"
 	"genx-go/message"
-	"genx-go/utils"
 	"regexp"
 	"strings"
 )
@@ -34,7 +33,6 @@ type CANMessageParser struct {
 func (parser *CANMessageParser) Parse(rawMessage *message.RawMessage) *message.Message {
 	if parser.CANBaseExpression.Match(rawMessage.RawData) {
 		sensorsArr := make([]sensors.ISensor, 0)
-		sUtils := &utils.StringUtils{Data: rawMessage.SerialNumber}
 		if fl := parser.parseFuelLevel(rawMessage.RawData); fl != nil {
 			sensorsArr = append(sensorsArr, fl)
 		}
@@ -46,7 +44,7 @@ func (parser *CANMessageParser) Parse(rawMessage *message.RawMessage) *message.M
 		}
 		return &message.Message{
 			MessageType: rawMessage.MessageType,
-			Identity:    sUtils.Identity(),
+			Identity:    rawMessage.Identity,
 			Sensors:     sensorsArr,
 		}
 	}

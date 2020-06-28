@@ -2,10 +2,10 @@ package device
 
 import (
 	"container/list"
+	"genx-go/logger"
 	"genx-go/message"
 	"genx-go/repository/models"
-	"log"
-	"regexp"
+	"genx-go/utils"
 	"strings"
 	"sync"
 	"time"
@@ -14,7 +14,7 @@ import (
 //BuildConfigurationTask create configuration task
 func BuildConfigurationTask(storage *TaskStorage, config *models.ConfigurationModel, onTaskCompleted func(string)) {
 	if config.ID == 0 || len(config.Command) == 0 {
-		log.Println("[BuildConfigurationTask] Error in configuration.")
+		logger.Error("[BuildConfigurationTask] Error in configuration.")
 		return
 	}
 	task := &ConfigurationTask{
@@ -27,43 +27,23 @@ func BuildConfigurationTask(storage *TaskStorage, config *models.ConfigurationMo
 	go task.Execute()
 }
 
+func devideConfiguration(config string) *list.List {
+	items := list.New()
+	cfgUtils := &utils.ConfigurationUtils{Config: config}
+	for key, value := range cfgUtils.ConfigParameters() {
+		item := &ConfigItem{
+			Name:  key,
+			Value: value,
+			State: byte(0),
+		}
+		items.PushBack(item)
+	}
+	return items
+}
+
 //CallbackID for tasks which need send responce to facade
 func (task *ConfigurationTask) CallbackID() string {
 	return ""
-}
-
-func devideConfiguration(config string) *list.List {
-	items := list.New()
-	re := regexp.MustCompile(`(\n)|(\r\n)`)
-	configurations := re.Split(config, -1)
-	for _, cfg := range configurations {
-		if len(cfg) == 0 ||
-			strings.Contains(strings.ToUpper(cfg), "SETPARAM") ||
-			strings.Contains(strings.ToUpper(cfg), "ENDPARAM") ||
-			strings.Contains(strings.ToUpper(cfg), "BACKUPNVRAM") {
-			continue
-		}
-		if strings.Contains(strings.ToUpper(cfg), "SETBOUNDARY") {
-			cfgItem := &ConfigItem{
-				Name:  "SETBOUNDARY",
-				Value: cfg,
-				State: byte(0),
-			}
-			items.PushBack(cfgItem)
-			continue
-		}
-		cfgName := strings.Split(cfg, "=")[0]
-		if len(cfgName) == 0 {
-			continue
-		}
-		cfgItem := &ConfigItem{
-			Name:  cfgName,
-			Value: cfg,
-			State: byte(0),
-		}
-		items.PushBack(cfgItem)
-	}
-	return items
 }
 
 //ConfigurationTask represents task for send config to device
@@ -101,10 +81,10 @@ func (task *ConfigurationTask) Execute() {
 
 	stringParameter := task.CurrentItem.Value.(*ConfigItem).Parameter()
 	if err := task.Storage.Device.Send(stringParameter); err != nil {
-		log.Println("[ConfigurationTask] Cant send configuration. Error: ", err)
+		logger.Error("[ConfigurationTask] Cant send configuration. Error: ", err)
 		return
 	}
-	log.Println("[ConfigurationTask] Config :", stringParameter, " sent.")
+	logger.Info("[ConfigurationTask] Config :", stringParameter, " sent.")
 	if task.CurrentItem.Value.(*ConfigItem).State == 0 {
 		task.CurrentItem.Value.(*ConfigItem).State = 2
 	}

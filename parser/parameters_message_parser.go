@@ -2,9 +2,8 @@ package parser
 
 import (
 	"fmt"
+	"genx-go/logger"
 	"genx-go/message"
-	"genx-go/utils"
-	"log"
 	"regexp"
 	"strings"
 )
@@ -35,7 +34,7 @@ func (parser *ParametersMessageParser) Parse(rawMessage *message.RawMessage) int
 		expr = parser.AllParametersExpr
 	}
 	if expr == nil {
-		log.Println(fmt.Sprintf("[ParametersMessageParser] Can't match parameters message. %v ", string(rawMessage.RawData)))
+		logger.Error(fmt.Sprintf("[ParametersMessageParser] Can't match parameters message. %v ", string(rawMessage.RawData)))
 		return nil
 	}
 
@@ -50,9 +49,8 @@ func (parser *ParametersMessageParser) Parse(rawMessage *message.RawMessage) int
 		}
 		values[cfgName] = cfg
 	}
-	sUtils := &utils.StringUtils{Data: rawMessage.SerialNumber}
 	return &message.ParametersMessage{
-		Identity:    sUtils.Identity(),
+		Identity:    rawMessage.Identity,
 		MessageType: rawMessage.MessageType,
 		Parameters:  values,
 	}

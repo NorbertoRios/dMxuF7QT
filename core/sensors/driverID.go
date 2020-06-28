@@ -3,7 +3,7 @@ package sensors
 import (
 	"genx-go/core"
 	"genx-go/core/columns"
-	"log"
+	"genx-go/logger"
 	"strconv"
 )
 
@@ -26,7 +26,7 @@ func BuildIButtonSensor(data map[string]interface{}) ISensor {
 func BuildIButtonSensorFromString(value string) ISensor {
 	intValue, err := strconv.ParseInt(value, 10, 32)
 	if err != nil {
-		log.Println("[BuildDriverIDSensorFromString] Cant parse DriverID sensor from : ", value)
+		logger.Error("[BuildDriverIDSensorFromString] Cant parse DriverID sensor from : ", value)
 		return nil
 	}
 	return &IButton{BtnID: int32(intValue)}

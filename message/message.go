@@ -9,4 +9,5 @@ type Message struct {
 	MessageType string
 	Identity    string
 	Sensors     []sensors.ISensor
+	SID         uint64
 }

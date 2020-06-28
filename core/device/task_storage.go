@@ -1,7 +1,7 @@
 package device
 
 import (
-	"log"
+	"genx-go/logger"
 	"sync"
 	"time"
 )
@@ -19,23 +19,29 @@ func CounstructTaskStorage(device IDevice) *TaskStorage {
 
 //TaskStorage task storage
 type TaskStorage struct {
-	mutex  *sync.Mutex
-	Tasks  map[string]ITask
-	Device IDevice
+	mutex                 *sync.Mutex
+	Tasks                 map[string]ITask
+	Device                IDevice
+	LastSinchronizationTS time.Time
 }
 
 func (storage *TaskStorage) synchronize() {
-	ticker := time.NewTicker(60 * time.Minute)
+	ticker := time.NewTicker(30 * time.Second)
 	go func() {
 		defer func() {
 			if r := recover(); r != nil {
-				log.Println("[BuildBaseDevice] Recovered in recync cron:", r)
+				logger.Error("[TaskStorage] Recovered in recync cron:", r)
 			}
 		}()
 		for {
 			select {
 			case <-ticker.C:
-				BuildSynchronizarionTask(storage.Device, storage, storage.removeTask)
+				{
+					if time.Now().UTC().Sub(storage.LastSinchronizationTS).Minutes() > 120 {
+						logger.Info("[TaskStorage | synchronize] Start sinchronization task for ", storage.Device.Identity())
+						BuildSynchronizarionTask(storage.Device, storage, storage.removeTask)
+					}
+				}
 			}
 		}
 	}()
@@ -49,13 +55,14 @@ func (storage *TaskStorage) NewTask(taskType string, newTask ITask) {
 		storage.addTaskToStorage(taskType, newTask)
 		return
 	}
-	log.Println("[TaskStorage] Cant add new task ", taskType, " to storage. The same task already exists")
+	logger.Error("[TaskStorage] Cant add new task \"", taskType, "\" to storage. The same task already exists. Device : ", storage.Device.Identity())
 }
 
 func (storage *TaskStorage) addTaskToStorage(taskType string, task ITask) {
 	storage.mutex.Lock()
 	defer storage.mutex.Unlock()
 	storage.Tasks[taskType] = task
+	logger.Info("[TaskStorage | addTaskToStorage] Task \"", taskType, "\" has been added to storage. Device : ", storage.Device.Identity())
 	go storage.Tasks[taskType].Execute()
 }
 

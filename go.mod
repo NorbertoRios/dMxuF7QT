@@ -7,4 +7,5 @@ require (
 	github.com/jinzhu/gorm v1.9.12
 	github.com/streadway/amqp v1.0.0
 	golang.org/x/text v0.3.2 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.0.0
 )

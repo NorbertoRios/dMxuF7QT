@@ -23,12 +23,12 @@ type MySQLRepository struct {
 }
 
 //LoadDeviceConfig returns not sended device config
-func (db *MySQLRepository) LoadDeviceConfig(identity string)  {
+func (db *MySQLRepository) LoadDeviceConfig(identity string, configType string) {
 
 }
 
-//LoadDeviceLastMessage returns device last message
-func (db *MySQLRepository) LoadDeviceLastMessage(identity string) *message.Message {
+//LoadDeviceState returns device last message
+func (db *MySQLRepository) LoadDeviceState(identity string) *message.Message {
 	return nil
 }
 

@@ -2,7 +2,7 @@ package configuration
 
 import (
 	"fmt"
-	"log"
+	"genx-go/logger"
 )
 
 //ReportConfiguration represents report config
@@ -39,7 +39,7 @@ func (reportConfiguration *ReportConfiguration) GetFieldsByIds(ids []string) []*
 		if reportField, err := reportConfiguration.GetFieldByID(id); err == nil {
 			result = append(result, reportField)
 		} else {
-			log.Println("[GetReportColumnsByIds] ", err)
+			logger.Error("[GetReportColumnsByIds] ", err)
 		}
 	}
 	return result

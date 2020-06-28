@@ -2,9 +2,9 @@ package message
 
 import (
 	"fmt"
+	"genx-go/logger"
 	"genx-go/message/messagetype"
 	"genx-go/utils"
-	"log"
 	"regexp"
 )
 
@@ -94,7 +94,7 @@ func (factory *RawMessageFactory) extractParam(index int, param string, packet [
 		return mapp.Reg.FindAllStringSubmatch(string(packet), -1)[0][id], nil
 	}
 	bUtil := &utils.ByteArrayUtility{Data: packet}
-	log.Println("[RawMessageFactory] Cant extract parameter : ", param, " from packet : ", bUtil.String())
+	logger.Error("[RawMessageFactory] Cant extract parameter : ", param, " from packet : ", bUtil.String())
 	return "", fmt.Errorf(fmt.Sprintf("Cant find %v in message", param))
 }
 
@@ -106,7 +106,9 @@ func (factory *RawMessageFactory) BuildRawMessage(packet []byte) *RawMessage {
 			if sErr != nil {
 				return nil
 			}
+			sUtils := utils.StringUtils{Data: serial}
 			return &RawMessage{
+				Identity:     sUtils.Identity(),
 				SerialNumber: serial,
 				MessageType:  mapp.Type,
 				RawData:      packet,
@@ -114,6 +116,6 @@ func (factory *RawMessageFactory) BuildRawMessage(packet []byte) *RawMessage {
 		}
 	}
 	bUtil := &utils.ByteArrayUtility{Data: packet}
-	log.Println("[RawMessageFactory] Cant create raw message for packet : ", bUtil.String())
+	logger.Error("[RawMessageFactory] Cant create raw message for packet : ", bUtil.String())
 	return nil
 }

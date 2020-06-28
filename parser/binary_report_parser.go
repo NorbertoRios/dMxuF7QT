@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"genx-go/configuration"
 	"genx-go/core"
+	"genx-go/logger"
 	"genx-go/message"
-	"log"
-	"strings"
 )
 
 //GenxBinaryReportParser parse message from genx
@@ -15,13 +14,21 @@ type GenxBinaryReportParser struct {
 }
 
 //BuildGenxBinaryReportParser returns new report parser
-func BuildGenxBinaryReportParser(param24 string, reportConfiguration *configuration.ReportConfiguration) *GenxBinaryReportParser {
-	param24 = strings.ReplaceAll(param24, ";", "")
-	param24Columns := strings.Split(param24, ".")
-	fields := reportConfiguration.GetFieldsByIds(param24Columns)
-	return &GenxBinaryReportParser{
-		reportFields: fields,
-	}
+func BuildGenxBinaryReportParser(param24 string, cfg *configuration.ReportConfiguration) *GenxBinaryReportParser {
+	// 	param24 = strings.ReplaceAll(strings.Split(param24, "=")[1], ";", "")
+	// 	param24Columns := strings.Split(param24, ".")
+	// 	file := &utils.File{FilePath: "/configuration/initialize/ReportConfiguration.xml"}
+	// 	xmlProvider := configuration.ConstructXMLProvider(file)
+	// 	config, err := configuration.ConstructReportConfiguration(xmlProvider)
+	// 	if err == nil {
+	// 		loggerPrintln("[BuildGenxBinaryReportParser] Cant create binary message parser")
+	// 		return nil
+	// 	}
+	// 	fields := config.GetFieldsByIds(param24Columns)
+	// 	return &GenxBinaryReportParser{
+	// 		reportFields: fields,
+	// 	}
+	return nil
 }
 
 //ConstructGenxBinaryReportParser returns new report parser
@@ -35,17 +42,16 @@ func ConstructGenxBinaryReportParser(fields []*configuration.Field) *GenxBinaryR
 func (parser *GenxBinaryReportParser) Parse(rawMessage *message.RawMessage) ([]*message.Message, string) {
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("panic:Recovered in ParseLocationMessage:", r)
+			logger.Error("panic:Recovered in ParseLocationMessage:", r)
 		}
 	}()
 	messages := make([]*message.Message, 0)
 	if len(rawMessage.RawData) == 0 {
-		log.Println("[ParseLocationMessage] Cant parse empty  packet")
+		logger.Error("[ParseLocationMessage] Cant parse empty  packet")
 		return nil, ""
 	}
 	position := 0
 	firstLen := 0
-	log.Println(len(rawMessage.RawData))
 	for position < len(rawMessage.RawData) && position+firstLen < len(rawMessage.RawData) {
 		data := make(map[string]interface{})
 		for _, f := range parser.reportFields {
@@ -57,7 +63,7 @@ func (parser *GenxBinaryReportParser) Parse(rawMessage *message.RawMessage) ([]*
 		if firstLen == 0 {
 			firstLen = position - 1
 		}
-		msg := message.BuildMessage(data, rawMessage.MessageType)
+		msg := message.BuildMessage(data, rawMessage.MessageType, rawMessage.Identity)
 		messages = append(messages, msg)
 	}
 	return messages, parser.buildAck(rawMessage.RawData)

@@ -3,7 +3,7 @@ package device
 //BuildCurrentDeviceConfig returns *CurrentConfig from config model
 // func BuildCurrentDeviceConfig(configModel *models.ConfigurationModel) *CurrentConfig {
 // 	if configModel == nil {
-// 		log.Println("[BuildCurrentDeviceConfig] Cant parse current device config from database.")
+// 		loggerPrintln("[BuildCurrentDeviceConfig] Cant parse current device config from database.")
 // 		return nil
 // 	}
 // 	re := regexp.MustCompile(`(\n)|(\r\n)`)
