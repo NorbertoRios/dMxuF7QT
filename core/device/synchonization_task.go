@@ -11,7 +11,7 @@ import (
 func BuildSynchronizarionTask(device IDevice, storage *TaskStorage, onTaskCompleted func(string)) {
 	task := &SynchronizarionTask{
 		TaskType:      SynchronizationTask,
-		TaskStorage:   storage,
+		TaskStorage:   storage, //вот тут избавлюсь от таск стор
 		taskCompleted: onTaskCompleted,
 		device:        device,
 		state:         Opened,
@@ -90,7 +90,7 @@ func (task *SynchronizarionTask) onParametersReceivedState() {
 		task.Complete()
 		return
 	}
-	BuildConfigurationTask(task.TaskStorage, task.TaskStorage.Device.OnLoadCurrentConfig(), task.onSubtaskCompleted)
+	BuildConfigurationTask(task.device, task.TaskStorage, task.TaskStorage.Device.OnLoadCurrentConfig(), task.onSubtaskCompleted)
 	logger.Info(fmt.Sprint("[SynchronizarionTask] New subtask for push current config to device is  created"))
 	task.state = SubtaskIsActive
 	task.Execute()

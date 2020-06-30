@@ -12,13 +12,13 @@ import (
 )
 
 //BuildConfigurationTask create configuration task
-func BuildConfigurationTask(storage *TaskStorage, config *models.ConfigurationModel, onTaskCompleted func(string)) {
+func BuildConfigurationTask(device IDevice, storage *TaskStorage, config *models.ConfigurationModel, onTaskCompleted func(string)) {
 	if config.ID == 0 || len(config.Command) == 0 {
 		logger.Error("[BuildConfigurationTask] Error in configuration.")
 		return
 	}
 	task := &ConfigurationTask{
-		Storage:            storage,
+		Device:             device,
 		mutex:              &sync.Mutex{},
 		ConfigurationItems: devideConfiguration(config.Command),
 		OnTaskCompleted:    onTaskCompleted,
@@ -48,9 +48,10 @@ func (task *ConfigurationTask) CallbackID() string {
 
 //ConfigurationTask represents task for send config to device
 type ConfigurationTask struct {
-	TaskType           string
-	mutex              *sync.Mutex
-	Storage            *TaskStorage
+	TaskType string
+	mutex    *sync.Mutex
+	//Storage            *TaskStorage
+	Device             IDevice
 	CurrentItem        *list.Element
 	ConfigurationItems *list.List
 	SendAt             time.Time
@@ -80,7 +81,7 @@ func (task *ConfigurationTask) Execute() {
 	}
 
 	stringParameter := task.CurrentItem.Value.(*ConfigItem).Parameter()
-	if err := task.Storage.Device.Send(stringParameter); err != nil {
+	if err := task.Device.Send(stringParameter); err != nil {
 		logger.Error("[ConfigurationTask] Cant send configuration. Error: ", err)
 		return
 	}
@@ -116,7 +117,7 @@ func (task *ConfigurationTask) processAckMessageFromDevice(message *message.AckM
 	if strings.ToUpper(currentCfgItem.Parameter()) == strings.ToUpper(message.Value) {
 		task.CurrentItem.Value.(*ConfigItem).State = 3
 		if currentCfgItem.Name == "24" || currentCfgItem.Name == "500" {
-			task.Storage.Device.NewRequiredParameter(currentCfgItem.Name, currentCfgItem.Value)
+			task.Device.NewRequiredParameter(currentCfgItem.Name, currentCfgItem.Value)
 		}
 	}
 	task.Execute()
@@ -125,7 +126,7 @@ func (task *ConfigurationTask) processAckMessageFromDevice(message *message.AckM
 //Complete call when task is completed
 func (task *ConfigurationTask) Complete() {
 	defer func() {
-		task.Storage = nil
+		task.Device = nil
 	}()
 	task.OnTaskCompleted(task.TaskType)
 }

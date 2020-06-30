@@ -66,7 +66,7 @@ func CounstructRawMessageFactory() *RawMessageFactory {
 				Reg:  diagCan,
 			},
 			{
-				Type: messagetype.Diag,
+				Type: messagetype.DiagJBUS,
 				Reg:  diagJExpr,
 			},
 			{
