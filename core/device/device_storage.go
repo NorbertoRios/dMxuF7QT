@@ -116,6 +116,7 @@ func (storage *Storage) SaveDevice(device *Device) {
 func (storage *Storage) removeDevice(identity string) {
 	storage.Mutex.Lock()
 	defer storage.Mutex.Unlock()
+
 	delete(storage.Devices, identity)
 	logger.Info("[Storage | RemoveDevice] Device ", identity, " removed. Total device count:", len(storage.Devices))
 }

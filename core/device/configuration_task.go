@@ -12,19 +12,18 @@ import (
 )
 
 //BuildConfigurationTask create configuration task
-func BuildConfigurationTask(device IDevice, storage *TaskStorage, config *models.ConfigurationModel, onTaskCompleted func(string)) {
+func BuildConfigurationTask(callbackID string, device IDevice, config *models.ConfigurationModel, onTaskCompleted func(string)) *ConfigurationTask {
 	if config.ID == 0 || len(config.Command) == 0 {
 		logger.Error("[BuildConfigurationTask] Error in configuration.")
-		return
+		return nil
 	}
-	task := &ConfigurationTask{
+	return &ConfigurationTask{
+		id:                 callbackID,
 		Device:             device,
 		mutex:              &sync.Mutex{},
 		ConfigurationItems: devideConfiguration(config.Command),
 		OnTaskCompleted:    onTaskCompleted,
 	}
-	storage.NewTask(task.TaskType, task)
-	go task.Execute()
 }
 
 func devideConfiguration(config string) *list.List {
@@ -43,14 +42,14 @@ func devideConfiguration(config string) *list.List {
 
 //CallbackID for tasks which need send responce to facade
 func (task *ConfigurationTask) CallbackID() string {
-	return ""
+	return task.id
 }
 
 //ConfigurationTask represents task for send config to device
 type ConfigurationTask struct {
-	TaskType string
-	mutex    *sync.Mutex
-	//Storage            *TaskStorage
+	id                 string
+	TaskType           string
+	mutex              *sync.Mutex
 	Device             IDevice
 	CurrentItem        *list.Element
 	ConfigurationItems *list.List

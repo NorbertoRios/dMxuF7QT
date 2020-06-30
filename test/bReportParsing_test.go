@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"genx-go/configuration"
 	"genx-go/core/sensors"
+	"genx-go/logger"
 	"genx-go/parser"
 	"genx-go/test/mock"
+	"strings"
 	"testing"
 	"time"
 )
@@ -46,14 +48,20 @@ import (
 // }
 
 func TestMessageParsing(t *testing.T) {
-	param24 := "1.7.13.36.3.4.23.65.10.17.11.79.46.44.43.82.152.41.48.56.70.77.93.130;"
+	logger.BuildLogger()
+	param24 := "24=1.7.13.36.3.4.23.65.10.17.11.79.46.44.43.82.152.41.48.56.70.77.93.130;"
+	param24 = strings.ReplaceAll(strings.Split(param24, "=")[1], ";", "")
+	param24Columns := strings.Split(param24, ".")
 	file := &mock.File{FilePath: "ReportConfiguration.xml"}
 	xmlProvider := configuration.ConstructXMLProvider(file)
 	config, err := configuration.ConstructReportConfiguration(xmlProvider)
 	if err != nil {
 		t.Error("Error while instantation report configuration")
 	}
-	parser := parser.BuildGenxBinaryReportParser(param24, config)
+	fields := config.GetFieldsByIds(param24Columns)
+	parser := &parser.GenxBinaryReportParser{
+		ReportFields: fields,
+	}
 	if parser == nil {
 		t.Error("Parser is nil")
 	}

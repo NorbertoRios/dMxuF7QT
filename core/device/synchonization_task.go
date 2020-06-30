@@ -8,22 +8,19 @@ import (
 )
 
 //BuildSynchronizarionTask build new SynchronizarionTask
-func BuildSynchronizarionTask(device IDevice, storage *TaskStorage, onTaskCompleted func(string)) {
-	task := &SynchronizarionTask{
+func BuildSynchronizarionTask(device IDevice, onTaskCompleted func(string)) *SynchronizarionTask {
+	return &SynchronizarionTask{
 		TaskType:      SynchronizationTask,
-		TaskStorage:   storage, //вот тут избавлюсь от таск стор
 		taskCompleted: onTaskCompleted,
 		device:        device,
 		state:         Opened,
 	}
-	task.TaskStorage.NewTask(task.TaskType, task)
 }
 
 //SynchronizarionTask task for synchronization
 type SynchronizarionTask struct {
 	TaskType                     string
 	taskCompleted                func(string)
-	TaskStorage                  *TaskStorage
 	currentParameterMessage      *message.ParametersMessage
 	diagRequiredParametersSendAt time.Time
 	device                       IDevice
@@ -90,7 +87,7 @@ func (task *SynchronizarionTask) onParametersReceivedState() {
 		task.Complete()
 		return
 	}
-	BuildConfigurationTask(task.device, task.TaskStorage, task.TaskStorage.Device.OnLoadCurrentConfig(), task.onSubtaskCompleted)
+	task.device.CreateNewTask(ConfigTask, "", task.onSubtaskCompleted)
 	logger.Info(fmt.Sprint("[SynchronizarionTask] New subtask for push current config to device is  created"))
 	task.state = SubtaskIsActive
 	task.Execute()
@@ -116,8 +113,8 @@ func (task *SynchronizarionTask) DeviceResponce(responce interface{}) {
 //Complete calls on task complete
 func (task *SynchronizarionTask) Complete() {
 	defer func() {
-		task.TaskStorage = nil
+		task.device = nil
 	}()
-	task.TaskStorage.Device.OnSynchronizationTaskCompleted()
+	task.device.OnSynchronizationTaskCompleted()
 	task.taskCompleted(task.TaskType)
 }

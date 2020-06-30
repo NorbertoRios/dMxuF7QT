@@ -47,7 +47,7 @@ func (device *Device) updateBinaryReportParser() {
 	file := &utils.File{FilePath: "/configuration/initialize/ReportConfiguration.xml"}
 	xmlProvider := configuration.ConstructXMLProvider(file)
 	config, err := configuration.ConstructReportConfiguration(xmlProvider)
-	if err == nil {
+	if err != nil {
 		logger.Error("[updateBinaryReportParser] Cant create binary message parser")
 		return
 	}
@@ -60,8 +60,6 @@ func (device *Device) updateBinaryReportParser() {
 func (device *Device) periodicalRequests(fields *[]configuration.Field) {
 
 }
-
-
 
 //NewRequiredParameter when configuration task ack device parameter
 func (device *Device) NewRequiredParameter(key, value string) {

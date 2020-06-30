@@ -3,6 +3,7 @@ package device
 import (
 	"genx-go/connection"
 	"genx-go/core/sensors"
+	"genx-go/logger"
 	"genx-go/message"
 	"genx-go/message/messagetype"
 	"genx-go/parser"
@@ -14,6 +15,7 @@ import (
 func BuildBaseDevice(identity string, channel *connection.UDPChannel, state *LastKnownDeviceState,
 	loadConfig func(string, string) *models.ConfigurationModel, deviceSynchronized func(IDevice), publishMessage func(interface{})) IDevice {
 	device := &BaseDevice{
+		quit:                 make(chan struct{}),
 		identity:             identity,
 		Channel:              channel,
 		Sensors:              state.Sensors,
@@ -27,6 +29,7 @@ func BuildBaseDevice(identity string, channel *connection.UDPChannel, state *Las
 
 //BaseDevice unknown device
 type BaseDevice struct {
+	quit                  chan struct{}
 	parameter500          string
 	parameter24           string
 	TaskStorage           *TaskStorage
@@ -37,6 +40,39 @@ type BaseDevice struct {
 	identity              string
 	Channel               *connection.UDPChannel
 	lastActivityTimeStamp time.Time
+	lastSynchronization   time.Time
+}
+
+func (device *BaseDevice) synchronizationCron() {
+	ticker := time.NewTicker(5 * time.Second)
+	go func() {
+		defer func() {
+			if r := recover(); r != nil {
+				logger.Error("[TaskStorage] Recovered in recync cron:", r)
+			}
+			for {
+				select {
+				case <-ticker.C:
+					{
+						if time.Now().UTC().Sub(device.lastSynchronization).Minutes() > 120 {
+							logger.Info("[BaseDevice | synchronizationCron] Start sinchronization task for ", device.identity)
+							device.CreateNewTask(SynchronizationTask, "", nil)
+						}
+					}
+				case <-device.quit:
+					{
+						ticker.Stop()
+						return
+					}
+				}
+			}
+		}()
+	}()
+}
+
+//OnDeviceRemoving on device removing
+func (device *BaseDevice) OnDeviceRemoving() {
+	close(device.quit)
 }
 
 //NewRequiredParameter when configuration task ack device parameter
@@ -75,14 +111,9 @@ func (device *BaseDevice) Identity() string {
 	return device.identity
 }
 
-//OnLoadCurrentConfig returns current config
-func (device *BaseDevice) OnLoadCurrentConfig() *models.ConfigurationModel {
-	return device.LoadConfig(device.identity, CurrentConfig)
-}
-
-//OnLoadNonSendedConfig when need load non sended config
-func (device *BaseDevice) OnLoadNonSendedConfig() *models.ConfigurationModel {
-	return device.LoadConfig(device.identity, Unsended)
+//OnLoadConfig returns config
+func (device *BaseDevice) OnLoadConfig(identity, configType string) *models.ConfigurationModel {
+	return device.LoadConfig(device.identity, configType)
 }
 
 //SendFacadeCallback send callback to facade
@@ -95,6 +126,11 @@ func (device *BaseDevice) OnSynchronizationTaskCompleted() {
 	return
 }
 
+//CreateNewTask new task for device
+func (device *BaseDevice) CreateNewTask(taskType, callbackID string, onCompleteCallback func(string)) {
+	device.TaskStorage.createTask(taskType, callbackID, onCompleteCallback)
+}
+
 //Send command
 func (device *BaseDevice) Send(message string) error {
 	return device.Channel.Send(message)
@@ -102,8 +138,8 @@ func (device *BaseDevice) Send(message string) error {
 
 //MessageArrived on message arrived
 func (device *BaseDevice) MessageArrived(rawMessage *message.RawMessage) {
+	device.lastActivityTimeStamp = time.Now().UTC()
 	switch rawMessage.MessageType {
-
 	case messagetype.Parameter:
 		{
 			device.processSystemMessage(parser.ConstructParametersMessageParser(), rawMessage)

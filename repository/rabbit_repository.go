@@ -3,7 +3,7 @@ package repository
 import (
 	"fmt"
 	"genx-go/configuration"
-	"log"
+	"genx-go/logger"
 
 	"github.com/streadway/amqp"
 )
