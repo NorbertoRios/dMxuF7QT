@@ -54,7 +54,7 @@ func (storage *Storage) start() {
 			select {
 			case <-ticker.C:
 				for identity := range storage.Devices {
-					if time.Now().UTC().Sub(storage.Devices[identity].LastActivityTS()).Seconds() >= 3600 {
+					if time.Now().UTC().Sub(storage.Devices[identity].LastActivityTimeStamp()).Seconds() >= 3600 {
 						storage.removeDevice(identity)
 					}
 				}
@@ -99,7 +99,7 @@ func (storage *Storage) Device(identity string) IDevice {
 
 func (storage *Storage) createDevice(device IDevice) {
 	baseDevice := device.(*BaseDevice)
-	newDevice := BuildDevice(baseDevice)
+	newDevice := BuildDevice(baseDevice, storage.DeviceUpdateState)
 	storage.Mutex.Lock()
 	defer storage.Mutex.Unlock()
 	storage.Devices[newDevice.identity] = newDevice
@@ -109,7 +109,7 @@ func (storage *Storage) createDevice(device IDevice) {
 func (storage *Storage) SaveDevice(device *Device) {
 	storage.Mutex.Lock()
 	defer storage.Mutex.Unlock()
-	storage.Devices[device.identity] = device
+	storage.Devices[device.Identity()] = device
 	logger.Info("[Storage | SaveDevice] Device ", device.identity, " has been added. Total device count:", len(storage.Devices))
 }
 

@@ -112,8 +112,12 @@ func (task *ConfigurationTask) processAckMessageFromDevice(message *message.AckM
 		task.Execute()
 		return
 	}
-	if strings.ToUpper(task.CurrentItem.Value.(*ConfigItem).Parameter()) == strings.ToUpper(message.Value) {
+	currentCfgItem := task.CurrentItem.Value.(*ConfigItem)
+	if strings.ToUpper(currentCfgItem.Parameter()) == strings.ToUpper(message.Value) {
 		task.CurrentItem.Value.(*ConfigItem).State = 3
+		if currentCfgItem.Name == "24" || currentCfgItem.Name == "500" {
+			task.Storage.Device.NewRequiredParameter(currentCfgItem.Name, currentCfgItem.Value)
+		}
 	}
 	task.Execute()
 }

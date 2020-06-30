@@ -10,32 +10,7 @@ import (
 
 //GenxBinaryReportParser parse message from genx
 type GenxBinaryReportParser struct {
-	reportFields []*configuration.Field
-}
-
-//BuildGenxBinaryReportParser returns new report parser
-func BuildGenxBinaryReportParser(param24 string, cfg *configuration.ReportConfiguration) *GenxBinaryReportParser {
-	// 	param24 = strings.ReplaceAll(strings.Split(param24, "=")[1], ";", "")
-	// 	param24Columns := strings.Split(param24, ".")
-	// 	file := &utils.File{FilePath: "/configuration/initialize/ReportConfiguration.xml"}
-	// 	xmlProvider := configuration.ConstructXMLProvider(file)
-	// 	config, err := configuration.ConstructReportConfiguration(xmlProvider)
-	// 	if err == nil {
-	// 		loggerPrintln("[BuildGenxBinaryReportParser] Cant create binary message parser")
-	// 		return nil
-	// 	}
-	// 	fields := config.GetFieldsByIds(param24Columns)
-	// 	return &GenxBinaryReportParser{
-	// 		reportFields: fields,
-	// 	}
-	return nil
-}
-
-//ConstructGenxBinaryReportParser returns new report parser
-func ConstructGenxBinaryReportParser(fields []*configuration.Field) *GenxBinaryReportParser {
-	return &GenxBinaryReportParser{
-		reportFields: fields,
-	}
+	ReportFields []*configuration.Field
 }
 
 //Parse parser for location message
@@ -54,7 +29,7 @@ func (parser *GenxBinaryReportParser) Parse(rawMessage *message.RawMessage) ([]*
 	firstLen := 0
 	for position < len(rawMessage.RawData) && position+firstLen < len(rawMessage.RawData) {
 		data := make(map[string]interface{})
-		for _, f := range parser.reportFields {
+		for _, f := range parser.ReportFields {
 			value, count := parser.readField(rawMessage, position, f)
 			position = position + count
 			data[f.Name] = value

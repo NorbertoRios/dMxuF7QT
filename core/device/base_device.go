@@ -27,22 +27,37 @@ func BuildBaseDevice(identity string, channel *connection.UDPChannel, state *Las
 
 //BaseDevice unknown device
 type BaseDevice struct {
-	parameter500         string
-	parameter24          string
-	TaskStorage          *TaskStorage
-	PublishMessage       func(interface{})
-	Sensors              []sensors.ISensor
-	OnDeviceSynchronized func(IDevice)
-	LoadConfig           func(string, string) *models.ConfigurationModel
-	identity             string
-	Channel              *connection.UDPChannel
-	LatsConfigLoadingTS  time.Time
-	lastActivityTS       time.Time
+	parameter500          string
+	parameter24           string
+	TaskStorage           *TaskStorage
+	PublishMessage        func(interface{})
+	Sensors               []sensors.ISensor
+	OnDeviceSynchronized  func(IDevice)
+	LoadConfig            func(string, string) *models.ConfigurationModel
+	identity              string
+	Channel               *connection.UDPChannel
+	lastActivityTimeStamp time.Time
 }
 
-//LastActivityTS returns device last activity
-func (device *BaseDevice) LastActivityTS() time.Time {
-	return device.lastActivityTS
+//NewRequiredParameter when configuration task ack device parameter
+func (device *BaseDevice) NewRequiredParameter(key, value string) {
+	switch key {
+	case "24":
+		{
+			device.parameter24 = value
+			return
+		}
+	case "500":
+		{
+			device.parameter500 = value
+			return
+		}
+	}
+}
+
+//LastActivityTimeStamp returns device last activity
+func (device *BaseDevice) LastActivityTimeStamp() time.Time {
+	return device.lastActivityTimeStamp
 }
 
 //Parameter500 returns 500 parameter
@@ -72,13 +87,10 @@ func (device *BaseDevice) OnLoadNonSendedConfig() *models.ConfigurationModel {
 
 //SendFacadeCallback send callback to facade
 func (device *BaseDevice) SendFacadeCallback(callbackID string) {
-
 }
 
 //OnSynchronizationTaskCompleted when synchonization complete
-func (device *BaseDevice) OnSynchronizationTaskCompleted(param24, param500 string) {
-	device.parameter24 = param24
-	device.parameter500 = param500
+func (device *BaseDevice) OnSynchronizationTaskCompleted() {
 	device.OnDeviceSynchronized(device)
 	return
 }

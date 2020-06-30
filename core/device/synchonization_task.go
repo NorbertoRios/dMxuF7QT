@@ -65,14 +65,6 @@ func (task *SynchronizarionTask) Execute() {
 		{
 			task.onParametersReceivedState()
 		}
-	// case Completed:
-	// 	{
-	// 		task.Complete()
-	// 	}
-	default:
-		{
-
-		}
 	}
 }
 
@@ -95,7 +87,7 @@ func (task *SynchronizarionTask) onParametersReceivedState() {
 	}
 	if task.device.Parameter24() == task.currentParameterMessage.Parameters["24"] &&
 		task.device.Parameter500() == task.currentParameterMessage.Parameters["500"] {
-		task.Complete(task.currentParameterMessage.Parameters["24"], task.currentParameterMessage.Parameters["500"])
+		task.Complete()
 		return
 	}
 	BuildConfigurationTask(task.TaskStorage, task.TaskStorage.Device.OnLoadCurrentConfig(), task.onSubtaskCompleted)
@@ -122,7 +114,7 @@ func (task *SynchronizarionTask) DeviceResponce(responce interface{}) {
 }
 
 //Complete calls on task complete
-func (task *SynchronizarionTask) Complete(param24, param500 string) {
+func (task *SynchronizarionTask) Complete() {
 	defer func() {
 		task.TaskStorage = nil
 	}()

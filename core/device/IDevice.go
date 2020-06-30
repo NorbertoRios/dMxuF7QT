@@ -11,11 +11,12 @@ type IDevice interface {
 	Parameter24() string
 	Parameter500() string
 	Send(string) error
+	NewRequiredParameter(string, string)
 	OnLoadCurrentConfig() *models.ConfigurationModel
 	OnLoadNonSendedConfig() *models.ConfigurationModel
 	SendFacadeCallback(string)
-	OnSynchronizationTaskCompleted(string, string)
+	OnSynchronizationTaskCompleted()
 	MessageArrived(*message.RawMessage)
-	LastActivityTS() time.Time
+	LastActivityTimeStamp() time.Time
 	Identity() string
 }
