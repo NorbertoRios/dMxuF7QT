@@ -1,4 +1,4 @@
-package device
+package task
 
 import "time"
 
@@ -13,6 +13,7 @@ func NewCanceledElectricLockTask(_task *ElectricLockTask, description string) *C
 
 //CanceledElectricLockTask ...
 type CanceledElectricLockTask struct {
+	ElectricLockTask
 	task                *ElectricLockTask
 	canceledTime        time.Time
 	canseledDescription string

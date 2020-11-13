@@ -8,14 +8,12 @@ import (
 
 //NewWatchdog ...
 func NewWatchdog(_commands *list.List, _device interfaces.IDevice, _duration int) *Watchdog {
-	wd := &Watchdog{
+	return &Watchdog{
 		duration:    _duration,
 		device:      _device,
 		commands:    _commands,
 		stopChannel: make(chan struct{}),
 	}
-	wd.start()
-	return wd
 }
 
 //Watchdog ...
@@ -31,7 +29,8 @@ func (wd *Watchdog) Stop() {
 	wd.stopChannel <- struct{}{}
 }
 
-func (wd *Watchdog) start() {
+//Start ...
+func (wd *Watchdog) Start() {
 	go func() {
 		ticker := time.NewTicker(time.Duration(wd.duration) * time.Minute)
 		for {

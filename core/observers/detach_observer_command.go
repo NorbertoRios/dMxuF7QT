@@ -19,6 +19,6 @@ type DetachObserverCommand struct {
 
 //Execute ..
 func (c *DetachObserverCommand) Execute(device interfaces.IDevice) *list.List {
-	device.GetObservable().Detach(c.observer)
+	device.Observable().Detach(c.observer)
 	return nil
 }

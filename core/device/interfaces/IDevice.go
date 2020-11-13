@@ -8,11 +8,12 @@ import (
 
 //IDevice device interface
 type IDevice interface {
-	GetObservable() IObservable
+	Observable() IObservable
 	Send(interface{}) error
 	ProccessCommands(*list.List)
 	PushToRabbit(string, string)
 	State() map[sensors.ISensor]time.Time
 	Immobilizer(int, string) IImmobilizer
+	ElectricLock(int) ILock
 	MessageArrived(interface{})
 }

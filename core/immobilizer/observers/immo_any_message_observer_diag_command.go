@@ -22,7 +22,7 @@ type AnyImmoDiagObserver struct {
 //Update ...
 func (observer *AnyImmoDiagObserver) Update(msg interface{}) *list.List {
 	cList := list.New()
-	cList.PushBack(NewImmoSendDiagCommand("DIAG HARDWARE"))
+	cList.PushBack(observers.NewSendStringCommand("DIAG HARDWARE"))
 	cList.PushBack(observers.NewDetachObserverCommand(observer))
 	return cList
 }

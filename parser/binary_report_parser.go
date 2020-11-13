@@ -40,7 +40,6 @@ func (parser *GenxBinaryReportParser) Parse(rawMessage *message.RawMessage) ([]*
 		}
 		msg := message.BuildMessage(data, rawMessage.MessageType, rawMessage.Identity())
 		messages = append(messages, msg)
-		logger.Logger().WriteToLog(logger.Error, "[DEBUG] Messages ", len(messages))
 	}
 	return messages, parser.buildAck(rawMessage.RawData)
 }

@@ -3,23 +3,28 @@ package mock
 import (
 	"genx-go/core/device"
 	"genx-go/core/device/interfaces"
-	"genx-go/core/immostorage"
+	"genx-go/core/peripherystorage"
+	"genx-go/core/sensors"
 	"genx-go/logger"
 	"sync"
+	"time"
 )
 
 var createdDevice interfaces.IDevice
 
-//NewMockDevice returns new mock device
-func NewMockDevice() interfaces.IDevice {
-	d := &Device{}
-	d.Observable = device.NewObservable()
-	d.UDPChannel = &UDPChannel{}
-	d.Mutex = &sync.Mutex{}
-	d.ImmoStorage = immostorage.NewImmobilizerStorage()
-	d.SerialNumber = "000003870006"
-	createdDevice = d
-	return d
+//NewDevice ...
+func NewDevice() interfaces.IDevice {
+	dev := &Device{}
+	dev.Param24 = []string{}
+	dev.CurrentState = make(map[sensors.ISensor]time.Time)
+	dev.UDPChannel = &UDPChannel{}
+	dev.SerialNumber = "000003870006"
+	dev.Mutex = &sync.Mutex{}
+	dev.DeviceObservable = device.NewObservable()
+	dev.ImmoStorage = peripherystorage.NewImmobilizerStorage()
+	dev.LockStorage = peripherystorage.NewElectricLockStorage()
+	createdDevice = dev
+	return dev
 }
 
 //Device mock device
