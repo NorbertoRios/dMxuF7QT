@@ -8,10 +8,6 @@ import (
 
 func TestImmobilizerCommandGeneration(t *testing.T) {
 	data := &request.ChangeImmoStateRequest{
-		// ChangeStateRequest: &request.ChangeImmoStateRequest{
-		// 	Port:     "OUT0",
-		// 	Identity: "genx_000003870006",
-		// },
 		SafetyOption: true,
 		State:        "armed",
 		Trigger:      "high",

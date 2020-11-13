@@ -26,6 +26,7 @@ func (observer *WaitingImmoAckObserver) Attached() {
 	wdList.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
 	wd := watchdog.NewWatchdog(wdList, observer.task.Device(), 5)
 	observer.Watchdog = wd
+	observer.Watchdog.Start()
 	logger.Logger().WriteToLog(logger.Info, "[WaitingImmoAckObserver] Successfuly attached")
 }
 
@@ -49,11 +50,11 @@ func (observer *WaitingImmoAckObserver) Update(msg interface{}) *list.List {
 			ackMessage := msg.(*message.AckMessage)
 			setRelayDrive := NewSetRelayDrive(observer.task.Request().(*request.ChangeImmoStateRequest))
 			if ackMessage.Value == setRelayDrive.Command() {
-				observer.Watchdog.Stop()
+				go observer.Watchdog.Stop()
 				immoConfObserver := NewImmoConfitmationObserver(observer.task)
 				commands.PushBack(observers.NewDetachObserverCommand(observer))
 				commands.PushBack(observers.NewAttachObserverCommand(immoConfObserver))
-				commands.PushBack(NewImmoSendDiagCommand("DIAG HARDWARE"))
+				commands.PushBack(observers.NewSendStringCommand("DIAG HARDWARE"))
 			}
 		}
 	}

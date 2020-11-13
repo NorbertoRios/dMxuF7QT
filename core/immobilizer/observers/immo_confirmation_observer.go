@@ -71,7 +71,7 @@ func (observer *ImmoConfitmationObserver) checkSensorState(messgaeSensors []sens
 			{
 				relay := sens.(*sensors.Relay)
 				if relay.ID == outNum && relay.State == state {
-					observer.Watchdog.Stop()
+					go observer.Watchdog.Stop()
 					observer.task.Done()
 					//resp := &response.Response{
 					//	CallbackID: req.FacadeCallbackID,

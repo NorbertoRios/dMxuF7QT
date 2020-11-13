@@ -1,4 +1,4 @@
-package immostorage
+package peripherystorage
 
 import (
 	"genx-go/core/device/interfaces"

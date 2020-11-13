@@ -1,7 +1,8 @@
-package commands
+package observers
 
 import (
 	"fmt"
+	"genx-go/core/lock/request"
 	bReq "genx-go/core/request"
 )
 
@@ -20,5 +21,5 @@ type ElectricLockSetRelayDrive struct {
 //Command ...
 func (srd *ElectricLockSetRelayDrive) Command() string {
 	output := &bReq.OutputNumber{Data: srd.request.Port}
-	return fmt.Sprintf("SETRELAYDRIVE%v%v SERIALFILTER %v", output.Index(), srd.request.Pulse(), srd.request.Serial())
+	return fmt.Sprintf("SETRELAYDRIVE%vX%v SERIALFILTER %v", output.Index(), srd.request.Pulse(), srd.request.Serial())
 }

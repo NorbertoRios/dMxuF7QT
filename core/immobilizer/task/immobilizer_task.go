@@ -44,7 +44,7 @@ func (task *ImmobilizerTask) Request() interface{} {
 
 //Observers returns task's observer
 func (task *ImmobilizerTask) Observers() []interfaces.IObserver {
-	filter := filter.NewObserversFilter(task.device.GetObservable())
+	filter := filter.NewObserversFilter(task.device.Observable())
 	return filter.Extract(task)
 }
 

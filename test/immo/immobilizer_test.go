@@ -12,10 +12,6 @@ import (
 
 var factory = message.CounstructRawMessageFactory()
 
-func TestImmoLogicUsingActualState(t *testing.T) {
-
-}
-
 func TestImmobilizerLogic(t *testing.T) {
 	req := &request.ChangeImmoStateRequest{
 		SafetyOption: true,
@@ -25,7 +21,7 @@ func TestImmobilizerLogic(t *testing.T) {
 	req.Port = "OUT0"
 	req.Identity = "genx_000003870006"
 	req.FacadeCallbackID = "testCallback"
-	device := mock.NewMockDevice()
+	device := mock.NewDevice()
 	out := &bRequest.OutputNumber{Data: req.Port}
 	immo := device.Immobilizer(out.Index(), req.Trigger)
 	immo.NewRequest(req)

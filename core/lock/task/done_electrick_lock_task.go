@@ -1,12 +1,6 @@
-package device
+package task
 
 import "time"
-
-//DoneElectricLockTask ...
-type DoneElectricLockTask struct {
-	Task     *ElectricLockTask
-	doneTime time.Time
-}
 
 //NewDoneElectricLockTask ...
 func NewDoneElectricLockTask(_task *ElectricLockTask) *DoneElectricLockTask {
@@ -14,4 +8,11 @@ func NewDoneElectricLockTask(_task *ElectricLockTask) *DoneElectricLockTask {
 		Task:     _task,
 		doneTime: time.Now().UTC(),
 	}
+}
+
+//DoneElectricLockTask ...
+type DoneElectricLockTask struct {
+	ElectricLockTask
+	Task     *ElectricLockTask
+	doneTime time.Time
 }

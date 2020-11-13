@@ -1,46 +1,70 @@
-package device
+package observers
 
 import (
 	"container/list"
+	"genx-go/core/device/interfaces"
+	"genx-go/core/filter"
+	"genx-go/core/lock/request"
+	"genx-go/core/observers"
+	"genx-go/core/watchdog"
 	"genx-go/logger"
 	"genx-go/message"
 )
 
-//NewWaitingelEctricLockAck ..
-func NewWaitingelEctricLockAck(_task *ElectricLockTask) *WaitingelEctricLockAck {
-	return &WaitingelEctricLockAck{
+func watchdogCommands(_task interfaces.ITask) *list.List {
+	cList := list.New()
+	taskFilter := filter.NewObserversFilter(_task.Device().Observable())
+	onservers := taskFilter.Extract(_task)
+	for _, o := range onservers {
+		cList.PushBack(observers.NewDetachObserverCommand(o))
+	}
+	return cList
+}
+
+//NewWaitingEctricLockAck ..
+func NewWaitingEctricLockAck(_task interfaces.ITask) *WaitingEctricLockAck {
+	return &WaitingEctricLockAck{
 		task: _task,
+		wd:   watchdog.NewElectricLockWatchdog(_task, watchdogCommands(_task)),
 	}
 }
 
-//WaitingelEctricLockAck ..
-type WaitingelEctricLockAck struct {
-	task *ElectricLockTask
+//WaitingEctricLockAck ..
+type WaitingEctricLockAck struct {
+	task interfaces.ITask
+	wd   *watchdog.ElectricLockWatchdog
 }
 
 //Attached ..
-func (observer *WaitingelEctricLockAck) Attached() {
-	logger.Logger().WriteToLog(logger.Info, "[WaitingelEctricLockAck] Successfuly attached")
+func (observer *WaitingEctricLockAck) Attached() {
+	observer.wd.Start()
+	logger.Logger().WriteToLog(logger.Info, "[WaitingEctricLockAck] Successfuly attached")
 }
 
 //Task returns observer's task
-func (observer *WaitingelEctricLockAck) Task() ITask {
+func (observer *WaitingEctricLockAck) Task() interfaces.ITask {
 	return observer.task
 }
 
 //Update ...
-func (observer *WaitingelEctricLockAck) Update(msg interface{}) *list.List {
+func (observer *WaitingEctricLockAck) Update(msg interface{}) *list.List {
+	setRelayDrive := NewElectricLockSetRelayDrive(observer.task.Request().(*request.UnlockRequest))
 	commands := list.New()
 	switch msg.(type) {
 	case *message.AckMessage:
 		{
 			ackMessage := msg.(*message.AckMessage)
-			setRelayDrive := NewElectricLockSetRelayDrive(observer.task.Request)
 			if ackMessage.Value == setRelayDrive.Command() {
-				commands := list.New()
-				commands.PushBack(NewDetachObserverCommand(observer))
+				go observer.wd.Stop()
+				//commands.PushBack(observers.NewDetachObserverCommand(observer))
 				observer.task.Done()
+			} else {
+				commands.PushBack(observers.NewSendStringCommand(setRelayDrive.Command()))
 			}
+		}
+	default:
+		{
+			commands.PushBack(observers.NewSendStringCommand(setRelayDrive.Command()))
 		}
 	}
 	return commands
