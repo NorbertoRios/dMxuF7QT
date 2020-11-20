@@ -88,7 +88,7 @@ func (immo *Immobilizer) competitivenessOfTasks(task *task.ImmobilizerTask) {
 }
 
 func (immo *Immobilizer) taskCanceled(canseledTask *task.ImmobilizerTask, description string) {
-	logger.Logger().WriteToLog(logger.Info, "Task is canceled")
+	logger.Logger().WriteToLog(logger.Info, "Task is canceled. ", description)
 	immo.mutex.Lock()
 	immo.tasks.PushBack(task.NewCanceledImmoTask(canseledTask, description))
 	immo.mutex.Unlock()

@@ -10,11 +10,12 @@ import (
 )
 
 //NewWaitingConfigAckObserver ...
-func NewWaitingConfigAckObserver(_task interfaces.ITask) *WaitingConfigAckObserver {
+func NewWaitingConfigAckObserver(_task interfaces.ITask, _command string) *WaitingConfigAckObserver {
 	observer := &WaitingConfigAckObserver{
-		task: _task,
+		task:    _task,
+		command: _command,
 	}
-	anyMessageObserver := NewAnyMessageObserver(_task)
+	anyMessageObserver := NewAnyMessageObserver(_task, _command)
 	wdList := list.New()
 	wdList.PushBack(observers.NewDetachObserverCommand(observer))
 	wdList.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
@@ -27,6 +28,7 @@ func NewWaitingConfigAckObserver(_task interfaces.ITask) *WaitingConfigAckObserv
 type WaitingConfigAckObserver struct {
 	task     interfaces.ITask
 	watchdog *watchdog.Watchdog
+	command  string
 }
 
 //Update ...
@@ -36,8 +38,9 @@ func (observer *WaitingConfigAckObserver) Update(msg interface{}) *list.List {
 	case *message.AckMessage:
 		{
 			ackMessage := msg.(*message.AckMessage)
-			command := NewConfig(observer.task.Request().(string))
-			if ackMessage.Value == command.Command() {
+			command := NewConfig(observer.command)
+			cmd := command.Command()
+			if ackMessage.Value == cmd {
 				go observer.watchdog.Stop()
 				commands.PushBack(observers.NewDetachObserverCommand(observer))
 				observer.task.Done()

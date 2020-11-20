@@ -8,19 +8,23 @@ import (
 )
 
 //NewAnyMessageObserver ...
-func NewAnyMessageObserver(_task interfaces.ITask) *AnyMessageObserver {
-	return &AnyMessageObserver{}
+func NewAnyMessageObserver(_task interfaces.ITask, _command string) *AnyMessageObserver {
+	return &AnyMessageObserver{
+		task:    _task,
+		command: _command,
+	}
 }
 
 //AnyMessageObserver ...
 type AnyMessageObserver struct {
-	task interfaces.ITask
+	task    interfaces.ITask
+	command string
 }
 
 //Update ...
 func (observer *AnyMessageObserver) Update(msg interface{}) *list.List {
 	commands := list.New()
-	commands.PushBack(NewSendConfigCommand(observer.task))
+	commands.PushBack(NewSendConfigCommand(observer.task, observer.command))
 	commands.PushBack(observers.NewDetachObserverCommand(observer))
 	return commands
 }

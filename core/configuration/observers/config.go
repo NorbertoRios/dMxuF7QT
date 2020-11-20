@@ -25,5 +25,5 @@ func (config *Config) Command() string {
 	if strings.Contains(config.command, "SETBOUNDARY") {
 		return fmt.Sprintf("%v BACKUPNVRAM;", config.command)
 	}
-	return fmt.Sprintf("SETPARAMVERIFY;%v ENDPARAM;BACKUPNVRAM;", config.command)
+	return fmt.Sprintf("SETPARAMVERIFY;%vENDPARAM;BACKUPNVRAM;", config.command)
 }

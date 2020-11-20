@@ -1,25 +1,19 @@
 package request
 
-//NewRequest ..
-func NewRequest(_identity string, _config []string) *ConfigurationRequest {
-	return &ConfigurationRequest{
-		identity: _identity,
-		config:   _config,
-	}
-}
+import (
+	"container/list"
+	"genx-go/core/request"
+	"genx-go/types"
+)
 
 //ConfigurationRequest ...
 type ConfigurationRequest struct {
-	identity string
-	config   []string
+	request.BaseRequest
+	Config []string `json:"Configs"`
 }
 
 //Commands ...
-func (request *ConfigurationRequest) Commands() []string {
-	return request.config
-}
-
-//Identity ...
-func (request *ConfigurationRequest) Identity() string {
-	return request.identity
+func (request *ConfigurationRequest) Commands() *list.List {
+	sType := &types.StringArray{Data: request.Config}
+	return sType.List()
 }
