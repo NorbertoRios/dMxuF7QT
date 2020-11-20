@@ -15,17 +15,17 @@ func NewWaitingImmoAckObserver(_task interfaces.ITask) *WaitingImmoAckObserver {
 	observer := &WaitingImmoAckObserver{
 		task: _task,
 	}
+	anyMessageObserver := NewAnyImmoMessageObserver(_task)
+	wdList := list.New()
+	wdList.PushBack(observers.NewDetachObserverCommand(observer))
+	wdList.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
+	wd := watchdog.NewWatchdog(wdList, observer.task.Device(), 5)
+	observer.Watchdog = wd
 	return observer
 }
 
 //Attached ..
 func (observer *WaitingImmoAckObserver) Attached() {
-	wdList := list.New()
-	anyMessageObserver := NewAnyImmoMessageObserver(observer.task)
-	wdList.PushBack(observers.NewDetachObserverCommand(observer))
-	wdList.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
-	wd := watchdog.NewWatchdog(wdList, observer.task.Device(), 5)
-	observer.Watchdog = wd
 	observer.Watchdog.Start()
 	logger.Logger().WriteToLog(logger.Info, "[WaitingImmoAckObserver] Successfuly attached")
 }

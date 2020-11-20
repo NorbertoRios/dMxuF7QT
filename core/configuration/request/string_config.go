@@ -1,4 +1,4 @@
-package configuration
+package request
 
 import (
 	"genx-go/logger"
@@ -6,16 +6,34 @@ import (
 	"strings"
 )
 
+//NewStringConfigByArray ...
+func NewStringConfigByArray(_configArr []string) *StringConfig {
+	_config := strings.Join(_configArr, "\n")
+	return NewStringConfig(_config)
+}
+
+//NewStringConfig ...
+func NewStringConfig(_config string) *StringConfig {
+	return &StringConfig{
+		config: _config,
+	}
+}
+
 //StringConfig stringConfig for configuration
 type StringConfig struct {
-	Config string
+	config string
+}
+
+//ParametersArray ...
+func (stringConfig *StringConfig) ParametersArray() []string {
+	re := regexp.MustCompile(`(\n)|(\r\n)`)
+	return re.Split(stringConfig.config, -1)
 }
 
 //Parameters returns configs as map[string]string
 func (stringConfig *StringConfig) Parameters() map[string]string {
 	responce := make(map[string]string)
-	re := regexp.MustCompile(`(\n)|(\r\n)`)
-	configurations := re.Split(stringConfig.Config, -1)
+	configurations := stringConfig.ParametersArray()
 	for _, cfg := range configurations {
 		if len(cfg) == 0 ||
 			strings.Contains(strings.ToUpper(cfg), "SETPARAM") ||
@@ -40,13 +58,13 @@ func (stringConfig *StringConfig) Parameters() map[string]string {
 //ParameterByName returns parameters by name
 func (stringConfig *StringConfig) ParameterByName(parameters ...string) map[string]string {
 	config := stringConfig.Parameters()
-	responce := make(map[string]string)
+	response := make(map[string]string)
 	for _, param := range parameters {
 		if _, f := config[param]; !f {
 			logger.Logger().WriteToLog(logger.Error, "[StringConfig | ParameterByName] Сould not find \"", param, "\" in configuration")
 			continue
 		}
-		responce[param] = config[param]
+		response[param] = config[param]
 	}
-	return responce
+	return response
 }
