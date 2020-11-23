@@ -152,7 +152,7 @@ func checkBReportSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 				case 1:
 					{
 						assert("Relay1ID", sensor.ID, int(1), t)
-						assert("Relay1State", sensor.State, byte(1), t)
+						assert("Relay1State", sensor.State, byte(0), t)
 					}
 				case 2:
 					{

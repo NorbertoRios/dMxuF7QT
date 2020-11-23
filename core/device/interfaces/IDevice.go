@@ -10,7 +10,7 @@ import (
 type IDevice interface {
 	Observable() IObservable
 	Send(interface{}) error
-	ProccessCommands(*list.List)
+	ProcessCommands(*list.List)
 	PushToRabbit(string, string)
 	State() map[sensors.ISensor]time.Time
 	Immobilizer(int, string) IImmobilizer

@@ -42,7 +42,7 @@ func (task *ElectricLockTask) Start() {
 	cList := list.New()
 	cList.PushFront(observers.NewElectricLockSendCommand(task))
 	logger.Logger().WriteToLog(logger.Info, "[ElectricLockTask | Start] Task starded. Task expiration time: ", task.FacadeRequest.Time().String(), ". Current time: ", time.Now().UTC().String())
-	task.device.ProccessCommands(cList)
+	task.device.ProcessCommands(cList)
 }
 
 //Request ...
@@ -66,7 +66,7 @@ func (task *ElectricLockTask) detachAllTaskObservers() {
 	for _, observer := range task.Observers() {
 		cList.PushBack(coreObservers.NewDetachObserverCommand(observer))
 	}
-	task.device.ProccessCommands(cList)
+	task.device.ProcessCommands(cList)
 	logger.Logger().WriteToLog(logger.Info, "ALL OBSERVERS DETACHED", task.Observers())
 }
 

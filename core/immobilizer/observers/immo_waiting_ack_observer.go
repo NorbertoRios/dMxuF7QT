@@ -24,7 +24,7 @@ func (observer *WaitingImmoAckObserver) Attached() {
 	anyMessageObserver := NewAnyImmoMessageObserver(observer.task)
 	wdList.PushBack(observers.NewDetachObserverCommand(observer))
 	wdList.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
-	wd := watchdog.NewWatchdog(wdList, observer.task.Device(), 5)
+	wd := watchdog.NewWatchdog(wdList, observer.task.Device(), 300)
 	observer.Watchdog = wd
 	observer.Watchdog.Start()
 	logger.Logger().WriteToLog(logger.Info, "[WaitingImmoAckObserver] Successfuly attached")

@@ -32,7 +32,7 @@ func (observer *ImmoConfitmationObserver) Attached() {
 	anyMessageObserver := NewAnyImmoDiagObserver(observer.task)
 	wdList.PushBack(observers.NewDetachObserverCommand(observer))
 	wdList.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
-	wd := watchdog.NewWatchdog(wdList, observer.task.Device(), 5)
+	wd := watchdog.NewWatchdog(wdList, observer.task.Device(), 300)
 	observer.Watchdog = wd
 	logger.Logger().WriteToLog(logger.Info, "[ImmoConfitmationObserver] Successfuly attached")
 }
