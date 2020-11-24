@@ -15,8 +15,8 @@ type Relay struct {
 //BuildRelay return new switch
 func BuildRelay(index int, swMask interface{}) *Relay {
 	bValue := columns.Byte{RawValue: swMask}
-	switchMask := &types.Byte{Data: bValue.Value()}
-	boolState := &types.Bool{Data: switchMask.BitIsSet(index)}
+	mask := &types.Byte{Data: bValue.Value()}
+	boolState := &types.Bool{Data: mask.BitIsSet(3 - index)}
 	return &Relay{ID: index, State: boolState.ToByte()}
 }
 

@@ -32,13 +32,13 @@ func (wd *Watchdog) Stop() {
 //Start ...
 func (wd *Watchdog) Start() {
 	go func() {
-		ticker := time.NewTicker(time.Duration(wd.duration) * time.Minute)
+		ticker := time.NewTicker(time.Duration(wd.duration) * time.Second)
 		for {
 			select {
 			case <-ticker.C:
 				{
 					ticker.Stop()
-					wd.device.ProccessCommands(wd.commands)
+					wd.device.ProcessCommands(wd.commands)
 					return
 				}
 			case <-wd.stopChannel:

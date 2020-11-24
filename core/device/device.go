@@ -68,7 +68,7 @@ func (device *Device) PushToRabbit(message, destination string) {
 //MessageArrived new message
 func (device *Device) MessageArrived(msg interface{}) {
 	commands := device.DeviceObservable.Notify(msg)
-	device.ProccessCommands(commands)
+	device.ProcessCommands(commands)
 }
 
 //Immobilizer ...
@@ -81,8 +81,8 @@ func (device *Device) Observable() interfaces.IObservable {
 	return device.DeviceObservable
 }
 
-//ProccessCommands process commands
-func (device *Device) ProccessCommands(commands *list.List) {
+//ProcessCommands process commands
+func (device *Device) ProcessCommands(commands *list.List) {
 	device.Mutex.Lock()
 	defer device.Mutex.Unlock()
 	for commands.Len() > 0 {

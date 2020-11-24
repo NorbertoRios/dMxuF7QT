@@ -58,7 +58,7 @@ func (task *ImmobilizerTask) Start() {
 	} else {
 		cList.PushFront(observers.NewImmoSendRelayCommand(task))
 	}
-	task.device.ProccessCommands(cList)
+	task.device.ProcessCommands(cList)
 }
 
 //Marshal ...
@@ -76,7 +76,7 @@ func (task *ImmobilizerTask) Done() {
 	// cList := list.New()
 	// command := NewPushToRabbitMessageCommand("dasdas",FacadeResponse)
 	// cList.PushBack(command)
-	// task.device.ProccessCommands(cList)
+	// task.device.ProcessCommands(cList)
 	task.onDone(task)
 }
 
