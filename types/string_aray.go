@@ -1,7 +1,5 @@
 package types
 
-import "container/list"
-
 //StringArray string array sArray
 type StringArray struct {
 	Data []string
@@ -31,13 +29,4 @@ func (sArray *StringArray) Unique() []string {
 		}
 	}
 	return responce
-}
-
-//List ...
-func (sArray *StringArray) List() *list.List {
-	cList := list.New()
-	for _, s := range sArray.Data {
-		cList.PushBack(s)
-	}
-	return cList
 }

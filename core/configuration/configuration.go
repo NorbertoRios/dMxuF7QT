@@ -5,19 +5,16 @@ import (
 	"genx-go/core/configuration/request"
 	"genx-go/core/configuration/task"
 	"genx-go/core/device/interfaces"
-	core "genx-go/core/interfaces"
-	"genx-go/core/observers"
 	"genx-go/logger"
 	"sync"
 )
 
 //NewConfiguration ...
-func NewConfiguration(_device interfaces.IDevice, _client core.IClient) *Configuration {
+func NewConfiguration(_device interfaces.IDevice) *Configuration {
 	return &Configuration{
 		mutex:  &sync.Mutex{},
 		device: _device,
 		tasks:  list.New(),
-		client: _client,
 	}
 }
 
@@ -27,7 +24,6 @@ type Configuration struct {
 	device      interfaces.IDevice
 	currentTask interfaces.ITask
 	tasks       *list.List
-	client      core.IClient
 }
 
 //CurrentTask ...
@@ -42,33 +38,12 @@ func (config *Configuration) Tasks() *list.List {
 
 //NewRequest ..
 func (config *Configuration) NewRequest(req *request.ConfigurationRequest) {
-	configTask := task.New(req, config.device, config.taskCancel, config.taskDone)
-	if config.currentTask == nil {
-		config.currentTask = configTask
-	} else {
-		config.pauseCurrentTask()
-		config.competitivenessOfTasks(req)
+	newTask := task.New(req, config.device, config.taskCancel, config.taskDone)
+	if config.currentTask != nil {
+		config.currentTask.Cancel("Deprecated")
 	}
-	config.currentTask.Start()
-}
-
-func (config *Configuration) competitivenessOfTasks(req *request.ConfigurationRequest) {
-	commands := config.client.Execute(NewFacadeRequest(req.Identity, config.currentTask.(*task.ConfigTask).SentCommands, req.Commands()))
-	if commands.(*list.List).Len() == 0 {
-		logger.Logger().WriteToLog(logger.Info, "[Configuration | competitivenessOfTasks] Facade response does not contains commands. The current task remains the same.")
-		return
-	}
-	newTask := task.NewConfigTask(commands.(*list.List), config.currentTask.(*task.ConfigTask).SentCommands, req, config.device, config.taskCancel, config.taskDone)
-	config.currentTask.Cancel("Deprecated")
 	config.currentTask = newTask
-}
-
-func (config *Configuration) pauseCurrentTask() {
-	cList := list.New()
-	for _, observer := range config.currentTask.Observers() {
-		cList.PushBack(observers.NewDetachObserverCommand(observer))
-	}
-	config.device.ProccessCommands(cList)
+	config.currentTask.Start()
 }
 
 //Done ...

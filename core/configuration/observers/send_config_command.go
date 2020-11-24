@@ -3,7 +3,7 @@ package observers
 import (
 	"container/list"
 	"genx-go/core/device/interfaces"
-	"genx-go/core/observers"
+	coreObservers "genx-go/core/observers"
 	"genx-go/logger"
 )
 
@@ -24,10 +24,9 @@ type SendConfigCommand struct {
 //Execute ...
 func (c *SendConfigCommand) Execute(device interfaces.IDevice) *list.List {
 	commands := list.New()
-	config := NewConfig(c.command)
-	if err := device.Send(config.Command()); err != nil {
-		logger.Logger().WriteToLog(logger.Error, "[ImmoSendRelayCommand | Execute] Error while sending command ", config.Command())
+	if err := device.Send(c.command); err != nil {
+		logger.Logger().WriteToLog(logger.Error, "[ImmoSendRelayCommand | Execute] Error while sending command ", c.command)
 	}
-	commands.PushBack(observers.NewAttachObserverCommand(NewWaitingConfigAckObserver(c.task, c.command)))
+	commands.PushBack(coreObservers.NewAttachObserverCommand(NewWaitingConfigAckObserver(c.task, c.command)))
 	return commands
 }

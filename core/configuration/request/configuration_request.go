@@ -3,7 +3,6 @@ package request
 import (
 	"container/list"
 	"genx-go/core/request"
-	"genx-go/types"
 )
 
 //ConfigurationRequest ...
@@ -14,6 +13,6 @@ type ConfigurationRequest struct {
 
 //Commands ...
 func (request *ConfigurationRequest) Commands() *list.List {
-	sType := &types.StringArray{Data: request.Config}
-	return sType.List()
+	config := NewConfig(request.Config)
+	return config.List()
 }
