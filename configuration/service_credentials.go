@@ -6,4 +6,8 @@ type ServiceCredentials struct {
 	WebAPIPort                       int
 	DeviceFacadeHost                 string
 	Rabbit                           *RabbitCredentials
+	SystemExchange                   string
+	FacadeCallbackExchange           string
+	FacadeCallbackRoutingKey         string
+	OrleansDebugRoutingKey           string
 }
