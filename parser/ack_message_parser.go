@@ -21,7 +21,7 @@ type AckMessageParser struct {
 }
 
 //Parse parse ack message
-func (parser *AckMessageParser) Parse(rMessage *message.RawMessage) *message.AckMessage {
+func (parser *AckMessageParser) Parse(rMessage *message.RawMessage) interface{} {
 	if parser.AckExpression.Match(rMessage.RawData) {
 		if value := parser.parseStringValue(rMessage.RawData); value != "" {
 			return &message.AckMessage{

@@ -33,7 +33,7 @@ type GenxHardwareMessageParser struct {
 }
 
 //Parse parse genx hardware message
-func (parser *GenxHardwareMessageParser) Parse(rawMessage *message.RawMessage) *message.HardwareMessage {
+func (parser *GenxHardwareMessageParser) Parse(rawMessage *message.RawMessage) interface{} {
 	messageSensors := make([]sensors.ISensor, 0)
 	for expr, builder := range parser.SensorBuilders {
 		if expr.Match(rawMessage.RawData) {

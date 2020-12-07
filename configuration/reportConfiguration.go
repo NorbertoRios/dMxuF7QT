@@ -11,15 +11,15 @@ type ReportConfiguration struct {
 }
 
 //ConstructReportConfiguration create report config instance
-func ConstructReportConfiguration(provider IReportConfigProvider) (*ReportConfiguration, error) {
+func ConstructReportConfiguration(provider IReportConfigProvider) *ReportConfiguration {
 	fields, err := provider.Provide()
 	if err != nil {
-		return nil, err
+		logger.Logger().WriteToLog(logger.Fatal, "[ReportConfiguration | ConstructReportConfiguration] Error while constructing report configuration. Error: ", err)
 	}
 	configuration := &ReportConfiguration{
 		Fields: fields,
 	}
-	return configuration, nil
+	return configuration
 }
 
 //GetFieldByID returns description for field by id
@@ -39,7 +39,7 @@ func (reportConfiguration *ReportConfiguration) GetFieldsByIds(ids []string) []*
 		if reportField, err := reportConfiguration.GetFieldByID(id); err == nil {
 			result = append(result, reportField)
 		} else {
-			logger.Logger().WriteToLog(logger.Error,"[GetReportColumnsByIds] ", err)
+			logger.Logger().WriteToLog(logger.Error, "[GetReportColumnsByIds] ", err)
 		}
 	}
 	return result

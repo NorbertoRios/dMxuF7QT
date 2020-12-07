@@ -20,10 +20,7 @@ func locationMessage(t *testing.T) *message.Message {
 	param24Columns := strings.Split(param24, ".")
 	file := &mock.File{FilePath: "../ReportConfiguration.xml"}
 	xmlProvider := configuration.ConstructXMLProvider(file)
-	config, err := configuration.ConstructReportConfiguration(xmlProvider)
-	if err != nil {
-		t.Error("Error while instantation report configuration")
-	}
+	config := configuration.ConstructReportConfiguration(xmlProvider)
 	fields := config.GetFieldsByIds(param24Columns)
 	parser := &parser.GenxBinaryReportParser{
 		ReportFields: fields,

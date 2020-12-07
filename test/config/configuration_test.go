@@ -2,18 +2,14 @@ package config
 
 import (
 	"fmt"
-	"genx-go/core/configuration"
 	"genx-go/core/configuration/request"
 	"genx-go/core/configuration/task"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/filter"
-	"genx-go/message"
-	"genx-go/parser"
+	"genx-go/core/usecase"
 	"genx-go/test/mock"
 	"testing"
 )
-
-var factory = message.CounstructRawMessageFactory()
 
 func TestConfigurationLogic(t *testing.T) {
 	req := &request.ConfigurationRequest{
@@ -38,20 +34,14 @@ func TestConfigurationLogic(t *testing.T) {
 	req.Identity = "genx_000003870006"
 	req.FacadeCallbackID = "testCallback"
 	device := mock.NewDevice()
-	configuration := configuration.NewConfiguration(device)
-	configuration.NewRequest(req)
+	usecase.NewConfigUseCase(device, req).Launch()
 	for i := 0; i < 3; i++ {
-		packet := []byte(commandAcks[i])
-		rm := factory.BuildRawMessage(packet)
-		p := parser.ConstructAckMesageParser()
-		ackMessage := p.Parse(rm)
-		device.MessageArrived(ackMessage)
+		usecase.NewMessageArrivedUseCase(device, []byte(commandAcks[i])).Launch()
 	}
-	ct := configuration.CurrentTask()
-	currentTask := ct.(*task.ConfigTask)
+	ct := device.Configuration().CurrentTask().(*task.ConfigTask)
 	sentCount := 0
 	notSentCount := 0
-	for cmd := currentTask.Commands.Front(); cmd != nil; cmd = cmd.Next() {
+	for cmd := ct.ConfigCommands.Front(); cmd != nil; cmd = cmd.Next() {
 		if cmd.Value.(*request.Command).State() {
 			sentCount++
 		} else {
@@ -91,17 +81,13 @@ func TestConfigurationLogic(t *testing.T) {
 		"000003870006 ACK <SETPARAMVERIFY;9=NNNine;ENDPARAM;BACKUPNVRAM;>",
 		"000003870006 ACK <SETPARAMVERIFY;10=TTTen;ENDPARAM;BACKUPNVRAM;>",
 	}
-	configuration.NewRequest(newReq)
+	usecase.NewConfigUseCase(device, newReq).Launch()
 	for i := 0; i < len(commandAcks); i++ {
-		packet := []byte(commandAcks[i])
-		rm := factory.BuildRawMessage(packet)
-		p := parser.ConstructAckMesageParser()
-		ackMessage := p.Parse(rm)
-		device.MessageArrived(ackMessage)
+		usecase.NewMessageArrivedUseCase(device, []byte(commandAcks[i])).Launch()
 	}
 	doneTasks := 0
 	canceledTasks := 0
-	for tsk := configuration.Tasks().Front(); tsk != nil; tsk = tsk.Next() {
+	for tsk := device.Configuration().Tasks().Front(); tsk != nil; tsk = tsk.Next() {
 		switch tsk.Value.(type) {
 		case *task.CanceledConfigTask:
 			{

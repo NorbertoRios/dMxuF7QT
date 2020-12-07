@@ -6,7 +6,16 @@ import (
 	"genx-go/core"
 	"genx-go/logger"
 	"genx-go/message"
+	"genx-go/types"
 )
+
+//NewGenxBinaryReportParser ...
+func NewGenxBinaryReportParser(param24 []string, file types.IFile) *GenxBinaryReportParser {
+	config := configuration.ConstructReportConfiguration(configuration.ConstructXMLProvider(file))
+	return &GenxBinaryReportParser{
+		ReportFields: config.GetFieldsByIds(param24),
+	}
+}
 
 //GenxBinaryReportParser parse message from genx
 type GenxBinaryReportParser struct {
@@ -14,7 +23,7 @@ type GenxBinaryReportParser struct {
 }
 
 //Parse parser for location message
-func (parser *GenxBinaryReportParser) Parse(rawMessage *message.RawMessage) ([]*message.Message, string) {
+func (parser *GenxBinaryReportParser) Parse(rawMessage *message.RawMessage) interface{} {
 	defer func() {
 		if r := recover(); r != nil {
 			logger.Logger().WriteToLog(logger.Error, "panic:Recovered in ParseLocationMessage:", r)
@@ -22,8 +31,8 @@ func (parser *GenxBinaryReportParser) Parse(rawMessage *message.RawMessage) ([]*
 	}()
 	messages := make([]*message.Message, 0)
 	if len(rawMessage.RawData) == 0 {
-		logger.Logger().WriteToLog(logger.Error, "[ParseLocationMessage] Cant parse empty  packet")
-		return nil, ""
+		logger.Logger().WriteToLog(logger.Error, "[ParseLocationMessage] Cant parse empty packet")
+		return message.NewEmptyLocationMessage()
 	}
 	position := 0
 	firstLen := 0
@@ -41,7 +50,7 @@ func (parser *GenxBinaryReportParser) Parse(rawMessage *message.RawMessage) ([]*
 		msg := message.BuildMessage(data, rawMessage.MessageType, rawMessage.Identity())
 		messages = append(messages, msg)
 	}
-	return messages, parser.buildAck(rawMessage.RawData)
+	return message.NewLocationMessage(messages, parser.buildAck(rawMessage.RawData))
 }
 
 func (parser *GenxBinaryReportParser) buildAck(packet []byte) string {

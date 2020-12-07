@@ -48,7 +48,7 @@ type OneWireMessageParser struct {
 }
 
 //Parse parse 1WireMessage
-func (parser *OneWireMessageParser) Parse(rawMessage *message.RawMessage) *message.Message {
+func (parser *OneWireMessageParser) Parse(rawMessage *message.RawMessage) interface{} {
 	if !parser.OneWireExpression.Match(rawMessage.RawData) {
 		return &message.Message{
 			Identity:    rawMessage.Identity(),

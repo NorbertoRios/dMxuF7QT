@@ -8,7 +8,7 @@ const (
 	Poll           = "poll"
 	DiagHardware   = "diag_hardware_brief"
 	Diag1Wire      = "diag_1wire"
-	GraminMessage  = "message"
+	GarminMessage  = "message"
 	DiagCAN        = "diag_can"
 	DiagJBUS       = "diag_jbus"
 	Diag           = "diag"

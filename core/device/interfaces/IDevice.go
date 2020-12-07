@@ -15,5 +15,7 @@ type IDevice interface {
 	State() map[sensors.ISensor]time.Time
 	Immobilizer(int, string) IImmobilizer
 	ElectricLock(int) ILock
-	MessageArrived(interface{})
+	MessageArrived(interface{}) *list.List
+	LocationRequest() ILocationRequest
+	Configuration() IConfiguration
 }

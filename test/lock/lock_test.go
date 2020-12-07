@@ -6,14 +6,11 @@ import (
 	lockRequest "genx-go/core/lock/request"
 	"genx-go/core/lock/task"
 	bRequest "genx-go/core/request"
-	"genx-go/message"
-	"genx-go/parser"
+	"genx-go/core/usecase"
 	"genx-go/test/mock"
 	"testing"
 	"time"
 )
-
-var factory = message.CounstructRawMessageFactory()
 
 func TestLockLogic(t *testing.T) {
 	exT := time.Now().UTC().Add(1 * time.Minute)
@@ -24,15 +21,11 @@ func TestLockLogic(t *testing.T) {
 	req.Port = "OUT0"
 	req.Identity = "genx_000003870006"
 	device := mock.NewDevice()
+	usecase.NewLockUseCase(device, req).Launch()
+	packet := []byte("000003870006 ACK < SETRELAYDRIVE1X3FFFFFFF SERIALFILTER 000003870006>")
+	usecase.NewMessageArrivedUseCase(device, packet).Launch()
 	out := bRequest.OutputNumber{Data: req.Port}
 	lock := device.ElectricLock(out.Index())
-	lock.NewRequest(req)
-	packet := []byte("000003870006 ACK < SETRELAYDRIVE1X3FFFFFFF SERIALFILTER 000003870006>")
-	rm := factory.BuildRawMessage(packet)
-	p := parser.ConstructAckMesageParser()
-	ackMessage := p.Parse(rm)
-	device.MessageArrived(ackMessage)
-	lock = device.ElectricLock(out.Index())
 	if lock.CurrentTask() != nil {
 		t.Error("CurrentTask should be nil")
 	}

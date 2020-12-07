@@ -42,14 +42,14 @@ func (immo *Immobilizer) CurrentTask() interfaces.ITask {
 }
 
 //NewRequest process new request to device
-func (immo *Immobilizer) NewRequest(req *request.ChangeImmoStateRequest) {
+func (immo *Immobilizer) NewRequest(req *request.ChangeImmoStateRequest) *list.List {
 	newTask := task.NewImmobilizerTask(req, immo.device, immo.taskCanceled, immo.taskDone)
 	if immo.currentTask == nil {
 		immo.currentTask = newTask
-		immo.currentTask.Start()
-		return
+		commands := immo.currentTask.Commands()
+		return commands
 	}
-	immo.competitivenessOfTasks(newTask)
+	return immo.competitivenessOfTasks(newTask)
 }
 
 //State ...
@@ -75,15 +75,17 @@ func (immo *Immobilizer) Tasks() *list.List {
 	return immo.tasks
 }
 
-func (immo *Immobilizer) competitivenessOfTasks(task *task.ImmobilizerTask) {
+func (immo *Immobilizer) competitivenessOfTasks(task *task.ImmobilizerTask) *list.List {
 	req := immo.currentTask.Request().(*request.ChangeImmoStateRequest)
 	if req.Equal(task.Request().(*request.ChangeImmoStateRequest)) {
 		task.Cancel("Duplicate")
+		return list.New()
 	} else {
 		immo.currentTask.Cancel("Deprecated")
 		immo.currentTask = task
-		immo.currentTask.Start()
+		cmds := immo.currentTask.Commands()
 		logger.Logger().WriteToLog(logger.Info, "Task created and run")
+		return cmds
 	}
 }
 

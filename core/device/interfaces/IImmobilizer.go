@@ -8,7 +8,7 @@ import (
 //IImmobilizer ...
 type IImmobilizer interface {
 	Trigger() string
-	NewRequest(*request.ChangeImmoStateRequest)
+	NewRequest(*request.ChangeImmoStateRequest) *list.List
 	State() string
 	CurrentTask() ITask
 	Tasks() *list.List

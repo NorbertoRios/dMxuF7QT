@@ -37,13 +37,13 @@ func (config *Configuration) Tasks() *list.List {
 }
 
 //NewRequest ..
-func (config *Configuration) NewRequest(req *request.ConfigurationRequest) {
+func (config *Configuration) NewRequest(req *request.ConfigurationRequest) *list.List {
 	newTask := task.New(req, config.device, config.taskCancel, config.taskDone)
 	if config.currentTask != nil {
 		config.currentTask.Cancel("Deprecated")
 	}
 	config.currentTask = newTask
-	config.currentTask.Start()
+	return config.currentTask.Commands()
 }
 
 //Done ...

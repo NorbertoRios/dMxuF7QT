@@ -20,7 +20,7 @@ import (
 func NewGenxService() *GenxService {
 	file := &mock.File{FilePath: "ReportConfiguration.xml"}
 	xmlProvider := configuration.ConstructXMLProvider(file)
-	config, _ := configuration.ConstructReportConfiguration(xmlProvider)
+	config := configuration.ConstructReportConfiguration(xmlProvider)
 	return &GenxService{
 		udpServer:     connection.ConstructUDPServer("", 10164),
 		Configuration: config,

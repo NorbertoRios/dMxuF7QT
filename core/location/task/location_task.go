@@ -28,11 +28,11 @@ type LocationTask struct {
 	request      *request.BaseRequest
 }
 
-//Start ..
-func (task *LocationTask) Start() {
+//Commands ..
+func (task *LocationTask) Commands() *list.List {
 	cList := list.New()
 	cList.PushBack(observers.NewSendLocationRequest(task))
-	task.device.ProcessCommands(cList)
+	return cList
 }
 
 //Observers ..

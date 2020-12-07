@@ -1,6 +1,7 @@
 package location
 
 import (
+	"container/list"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/location/task"
 	"genx-go/core/observers"
@@ -22,14 +23,15 @@ type Request struct {
 }
 
 //NewRequest ...
-func (request *Request) NewRequest(req *request.BaseRequest) {
+func (request *Request) NewRequest(req *request.BaseRequest) *list.List {
 	if request.task != nil {
 		request.task.Cancel("Deprecated")
 	}
 	request.task = task.NewLocationTask(req, request.device, request.cancel, request.done)
-	request.task.Start()
+	return request.task.Commands()
 }
 
+//Task ...
 func (request *Request) Task() interfaces.ITask {
 	return request.task
 }

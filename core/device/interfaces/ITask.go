@@ -1,8 +1,10 @@
 package interfaces
 
+import "container/list"
+
 //ITask itask interface
 type ITask interface {
-	Start()
+	Commands() *list.List
 	Observers() []IObserver
 	Device() IDevice
 	Cancel(string)

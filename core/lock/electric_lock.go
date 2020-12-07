@@ -29,25 +29,24 @@ type ElectricLock struct {
 }
 
 //NewRequest ..
-func (lock *ElectricLock) NewRequest(req *request.UnlockRequest) {
+func (lock *ElectricLock) NewRequest(req *request.UnlockRequest) *list.List {
 	newTask := task.NewElectricLockTask(req, lock.device, lock.taskCanceled, lock.taskDone)
 	if lock.currentTask == nil {
 		lock.currentTask = newTask
-		lock.currentTask.Start()
-		return
+		return lock.currentTask.Commands()
 	}
-	lock.competitivenessOfTasks(newTask)
+	return lock.competitivenessOfTasks(newTask)
 }
 
-func (lock *ElectricLock) competitivenessOfTasks(newTask interfaces.ITask) {
+func (lock *ElectricLock) competitivenessOfTasks(newTask interfaces.ITask) *list.List {
 	if lock.currentTask.Request().(*request.UnlockRequest).Equal(newTask.Request().(*request.UnlockRequest)) {
 		newTask.Cancel("Duplicate")
-	} else {
-		lock.currentTask.Cancel("Deprecated")
-		lock.currentTask = newTask
-		lock.currentTask.Start()
-		logger.Logger().WriteToLog(logger.Info, "Task created and run")
+		return list.New()
 	}
+	lock.currentTask.Cancel("Deprecated")
+	lock.currentTask = newTask
+	logger.Logger().WriteToLog(logger.Info, "Task created and run")
+	return lock.currentTask.Commands()
 }
 
 //CurrentTask ..

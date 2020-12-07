@@ -48,8 +48,8 @@ func (task *ImmobilizerTask) Observers() []interfaces.IObserver {
 	return filter.Extract(task)
 }
 
-//Start ..
-func (task *ImmobilizerTask) Start() {
+//Commands ..
+func (task *ImmobilizerTask) Commands() *list.List {
 	cList := list.New()
 	out := &bRequest.OutputNumber{Data: task.FacadeRequest.Port}
 	immo := task.device.Immobilizer(out.Index(), task.FacadeRequest.Trigger)
@@ -58,7 +58,7 @@ func (task *ImmobilizerTask) Start() {
 	} else {
 		cList.PushFront(observers.NewImmoSendRelayCommand(task))
 	}
-	task.device.ProcessCommands(cList)
+	return cList
 }
 
 //Marshal ...

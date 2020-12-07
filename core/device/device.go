@@ -3,7 +3,9 @@ package device
 import (
 	"container/list"
 	"genx-go/connection"
+	"genx-go/core/configuration"
 	"genx-go/core/device/interfaces"
+	"genx-go/core/location"
 	"genx-go/core/peripherystorage"
 	"genx-go/core/sensors"
 	"genx-go/logger"
@@ -13,7 +15,7 @@ import (
 
 //NewDevice ...
 func NewDevice(_serial string, _param24 []string, _channel connection.IChannel) interfaces.IDevice {
-	return &Device{
+	device := &Device{
 		Param24:             _param24,
 		CurrentState:        make(map[sensors.ISensor]time.Time),
 		UDPChannel:          _channel,
@@ -24,6 +26,8 @@ func NewDevice(_serial string, _param24 []string, _channel connection.IChannel) 
 		ImmoStorage:         peripherystorage.NewImmobilizerStorage(),
 		LockStorage:         peripherystorage.NewElectricLockStorage(),
 	}
+	device.LocationTask = location.New(device)
+	return device
 }
 
 //Device struct
@@ -31,10 +35,12 @@ type Device struct {
 	Param24             []string
 	DeviceObservable    *Observable
 	LastStateUpdateTime time.Time
+	Config              interfaces.IConfiguration
 	ImmoStorage         *peripherystorage.ImmobilizerStorage
 	LockStorage         *peripherystorage.ElectricLockStorage
 	UDPChannel          connection.IChannel
 	Mutex               *sync.Mutex
+	LocationTask        interfaces.ILocationRequest
 	SerialNumber        string
 	CurrentState        map[sensors.ISensor]time.Time
 }
@@ -47,6 +53,19 @@ func (device *Device) Send(message interface{}) error {
 		return err
 	}
 	return nil
+}
+
+//Configuration ..
+func (device *Device) Configuration() interfaces.IConfiguration {
+	if device.Config == nil {
+		device.Config = configuration.NewConfiguration(device)
+	}
+	return device.Config
+}
+
+//LocationRequest ..
+func (device *Device) LocationRequest() interfaces.ILocationRequest {
+	return device.LocationTask
 }
 
 //ElectricLock ..
@@ -66,9 +85,8 @@ func (device *Device) PushToRabbit(message, destination string) {
 }
 
 //MessageArrived new message
-func (device *Device) MessageArrived(msg interface{}) {
-	commands := device.DeviceObservable.Notify(msg)
-	device.ProcessCommands(commands)
+func (device *Device) MessageArrived(msg interface{}) *list.List {
+	return device.DeviceObservable.Notify(msg)
 }
 
 //Immobilizer ...

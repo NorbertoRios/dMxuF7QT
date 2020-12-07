@@ -30,7 +30,7 @@ type CANMessageParser struct {
 }
 
 //Parse parse CAN message
-func (parser *CANMessageParser) Parse(rawMessage *message.RawMessage) *message.Message {
+func (parser *CANMessageParser) Parse(rawMessage *message.RawMessage) interface{} {
 	if parser.CANBaseExpression.Match(rawMessage.RawData) {
 		sensorsArr := make([]sensors.ISensor, 0)
 		if fl := parser.parseFuelLevel(rawMessage.RawData); fl != nil {

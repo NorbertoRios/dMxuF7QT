@@ -32,17 +32,17 @@ type ElectricLockTask struct {
 	onDone        func(*ElectricLockTask)
 }
 
-//Start ...
-func (task *ElectricLockTask) Start() {
+//Commands ...
+func (task *ElectricLockTask) Commands() *list.List {
 	if task.FacadeRequest.Time().Before(time.Now().UTC()) {
 		logger.Logger().WriteToLog(logger.Info, "[ElectricLockTask | Start] Task time is over. Task expiration time: ", task.FacadeRequest.Time().String(), ". Current time: ", time.Now().UTC().String())
 		task.Cancel("Task timed out")
-		return
+		return list.New()
 	}
 	cList := list.New()
 	cList.PushFront(observers.NewElectricLockSendCommand(task))
 	logger.Logger().WriteToLog(logger.Info, "[ElectricLockTask | Start] Task starded. Task expiration time: ", task.FacadeRequest.Time().String(), ". Current time: ", time.Now().UTC().String())
-	task.device.ProcessCommands(cList)
+	return cList
 }
 
 //Request ...

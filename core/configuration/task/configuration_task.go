@@ -7,18 +7,19 @@ import (
 	"genx-go/core/device/interfaces"
 	"genx-go/core/filter"
 	coreObservers "genx-go/core/observers"
+	"genx-go/core/usecase"
 	"time"
 )
 
 //New ...
 func New(_request *request.ConfigurationRequest, device interfaces.IDevice, _onCancel func(*ConfigTask, string), _onDone func(*ConfigTask)) *ConfigTask {
 	return &ConfigTask{
-		BornTime:      time.Now().UTC(),
-		FacadeRequest: _request,
-		Commands:      _request.Commands(),
-		device:        device,
-		onCancel:      _onCancel,
-		onDone:        _onDone,
+		BornTime:       time.Now().UTC(),
+		FacadeRequest:  _request,
+		ConfigCommands: _request.Commands(),
+		device:         device,
+		onCancel:       _onCancel,
+		onDone:         _onDone,
 	}
 }
 
@@ -26,7 +27,7 @@ func New(_request *request.ConfigurationRequest, device interfaces.IDevice, _onC
 type ConfigTask struct {
 	BornTime       time.Time                     `json:"CreatedAt"`
 	FacadeRequest  *request.ConfigurationRequest `json:"FacadeRequest"`
-	Commands       *list.List                    `json:"Commands"`
+	ConfigCommands *list.List                    `json:"Commands"`
 	currentCommand *list.Element
 	device         interfaces.IDevice
 	onCancel       func(*ConfigTask, string)
@@ -38,14 +39,14 @@ func (task *ConfigTask) Device() interfaces.IDevice {
 	return task.device
 }
 
-//Start ...
-func (task *ConfigTask) Start() {
+//Commands ...
+func (task *ConfigTask) Commands() *list.List {
 	if task.currentCommand == nil {
-		task.currentCommand = task.Commands.Front()
+		task.currentCommand = task.ConfigCommands.Front()
 	}
 	cList := list.New()
 	cList.PushBack(observers.NewSendConfigCommand(task, task.currentCommand.Value.(*request.Command).Command()))
-	task.device.ProccessCommands(cList)
+	return cList
 }
 
 //Observers ...
@@ -74,6 +75,7 @@ func (task *ConfigTask) NextStep() *list.List {
 
 //Done ...
 func (task *ConfigTask) Done() {
+	task.cleanObservers()
 	task.onDone(task)
 }
 
@@ -89,5 +91,6 @@ func (task *ConfigTask) cleanObservers() {
 	for _, o := range oFilter.Extract(task) {
 		cList.PushBack(coreObservers.NewDetachObserverCommand(o))
 	}
-	task.device.ProccessCommands(cList)
+	useCase := usecase.NewBaseUseCase(task.device, cList)
+	useCase.Launch()
 }

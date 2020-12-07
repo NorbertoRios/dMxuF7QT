@@ -7,7 +7,7 @@ import (
 
 //ILock ...
 type ILock interface {
-	NewRequest(*request.UnlockRequest)
+	NewRequest(*request.UnlockRequest) *list.List
 	CurrentTask() ITask
 	Tasks() *list.List
 }
