@@ -3,6 +3,7 @@ package interfaces
 import (
 	"container/list"
 	"genx-go/core/sensors"
+	"genx-go/parser"
 	"time"
 )
 
@@ -18,4 +19,5 @@ type IDevice interface {
 	MessageArrived(interface{}) *list.List
 	LocationRequest() ILocationRequest
 	Configuration() IConfiguration
+	Parser() parser.IParser
 }

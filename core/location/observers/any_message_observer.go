@@ -26,7 +26,7 @@ func (observer *LocationAnyMessageObserver) Attached() {
 func (observer *LocationAnyMessageObserver) Update(msg interface{}) *list.List {
 	cList := list.New()
 	cList.PushFront(observers.NewDetachObserverCommand(observer))
-	if _, f := msg.(*message.Message); f {
+	if _, f := msg.(*message.LocationMessage); f {
 		observer.task.Done()
 	} else {
 		cList.PushBack(NewSendLocationRequest(observer.task))

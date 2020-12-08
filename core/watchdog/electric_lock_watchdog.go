@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/lock/request"
+	"genx-go/logger"
 	"time"
 )
 
@@ -40,6 +41,7 @@ func (wd *ElectricLockWatchdog) Start() {
 			default:
 				{
 					if wd.expirationTime.Before(time.Now().UTC()) {
+						logger.Logger().WriteToLog(logger.Info, "[ElectricLockWatchdog] Electric lock change task canceled by time.")
 						wd.task.Cancel("Time is over")
 						return
 					}

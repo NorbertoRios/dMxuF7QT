@@ -3,6 +3,8 @@ package watchdog
 import (
 	"container/list"
 	"genx-go/core/device/interfaces"
+	baseInterface "genx-go/core/interfaces"
+	"genx-go/core/usecase"
 	"time"
 )
 
@@ -10,8 +12,7 @@ import (
 func NewWatchdog(_commands *list.List, _device interfaces.IDevice, _duration int) *Watchdog {
 	return &Watchdog{
 		duration:    _duration,
-		device:      _device,
-		commands:    _commands,
+		useCase:     usecase.NewBaseUseCase(_device, _commands),
 		stopChannel: make(chan struct{}),
 	}
 }
@@ -19,8 +20,7 @@ func NewWatchdog(_commands *list.List, _device interfaces.IDevice, _duration int
 //Watchdog ...
 type Watchdog struct {
 	duration    int
-	device      interfaces.IDevice
-	commands    *list.List
+	useCase     baseInterface.IUseCase
 	stopChannel chan struct{}
 }
 
@@ -38,7 +38,7 @@ func (wd *Watchdog) Start() {
 			case <-ticker.C:
 				{
 					ticker.Stop()
-					wd.device.ProcessCommands(wd.commands)
+					wd.useCase.Launch()
 					return
 				}
 			case <-wd.stopChannel:

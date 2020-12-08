@@ -6,12 +6,11 @@ import (
 	"genx-go/core"
 	"genx-go/logger"
 	"genx-go/message"
-	"genx-go/types"
 )
 
 //NewGenxBinaryReportParser ...
-func NewGenxBinaryReportParser(param24 []string, file types.IFile) *GenxBinaryReportParser {
-	config := configuration.ConstructReportConfiguration(configuration.ConstructXMLProvider(file))
+func NewGenxBinaryReportParser(param24 []string, provider configuration.IReportConfigProvider) *GenxBinaryReportParser {
+	config := configuration.ConstructReportConfiguration(provider)
 	return &GenxBinaryReportParser{
 		ReportFields: config.GetFieldsByIds(param24),
 	}

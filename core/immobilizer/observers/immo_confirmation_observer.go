@@ -45,9 +45,15 @@ func (observer *ImmoConfitmationObserver) Task() interfaces.ITask {
 //Update ...
 func (observer *ImmoConfitmationObserver) Update(msg interface{}) *list.List {
 	switch msg.(type) {
-	case *message.Message:
+	case *message.LocationMessage:
 		{
-			return observer.checkSensorState(msg.(*message.Message).Sensors)
+			locationMessage := msg.(*message.LocationMessage)
+			for _, simpleMessage := range locationMessage.Messages {
+				if commands := observer.checkSensorState(simpleMessage.Sensors); commands != nil {
+					return commands
+				}
+				continue
+			}
 		}
 	case *message.HardwareMessage:
 		{

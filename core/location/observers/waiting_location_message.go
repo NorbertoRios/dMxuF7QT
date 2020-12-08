@@ -31,7 +31,7 @@ type WaitingLocationMessageObserver struct {
 //Update ...
 func (observer *WaitingLocationMessageObserver) Update(msg interface{}) *list.List {
 	cList := list.New()
-	if _, f := msg.(*message.Message); f {
+	if _, f := msg.(*message.LocationMessage); f {
 		observer.watchdog.Stop()
 		observer.task.Done()
 	}

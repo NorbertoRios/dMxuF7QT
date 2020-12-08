@@ -10,6 +10,13 @@ type IFile interface {
 	Path() string
 }
 
+//NewFile ...
+func NewFile(_path string) *File {
+	return &File{
+		FilePath: _path,
+	}
+}
+
 //File utils for files (configs)
 type File struct {
 	FilePath string
