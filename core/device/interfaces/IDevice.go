@@ -15,7 +15,7 @@ type IDevice interface {
 	PushToRabbit(string, string)
 	State() map[sensors.ISensor]time.Time
 	Immobilizer(int, string) IImmobilizer
-	ElectricLock(int) ILock
+	ElectricLock(int) IProcess
 	MessageArrived(interface{}) *list.List
 	LocationRequest() ILocationRequest
 	Configuration() IConfiguration

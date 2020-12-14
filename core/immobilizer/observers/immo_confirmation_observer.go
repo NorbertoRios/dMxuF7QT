@@ -5,7 +5,6 @@ import (
 
 	"genx-go/core/device/interfaces"
 	"genx-go/core/immobilizer/request"
-	"genx-go/core/observers"
 	bRequest "genx-go/core/request"
 	"genx-go/core/sensors"
 	"genx-go/core/watchdog"
@@ -16,25 +15,21 @@ import (
 //NewImmoConfitmationObserver ...
 func NewImmoConfitmationObserver(_task interfaces.ITask) *ImmoConfitmationObserver {
 	return &ImmoConfitmationObserver{
-		task: _task,
+		task:     _task,
+		Watchdog: watchdog.NewDiagImmoWatchdog(_task, 300),
 	}
 }
 
 //ImmoConfitmationObserver ...
 type ImmoConfitmationObserver struct {
 	task     interfaces.ITask
-	Watchdog *watchdog.Watchdog
+	Watchdog *watchdog.DiagImmoWatchdog
 }
 
 //Attached ...
 func (observer *ImmoConfitmationObserver) Attached() {
-	wdList := list.New()
-	anyMessageObserver := NewAnyImmoDiagObserver(observer.task)
-	wdList.PushBack(observers.NewDetachObserverCommand(observer))
-	wdList.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
-	wd := watchdog.NewWatchdog(wdList, observer.task.Device(), 300)
-	observer.Watchdog = wd
 	logger.Logger().WriteToLog(logger.Info, "[ImmoConfitmationObserver] Successfuly attached")
+	observer.Watchdog.Start()
 }
 
 //Task ...
@@ -60,7 +55,7 @@ func (observer *ImmoConfitmationObserver) Update(msg interface{}) *list.List {
 			return observer.checkSensorState(msg.(*message.HardwareMessage).Sensors)
 		}
 	}
-	return nil
+	return list.New()
 }
 
 func (observer *ImmoConfitmationObserver) checkSensorState(messgaeSensors []sensors.ISensor) *list.List {
@@ -77,20 +72,11 @@ func (observer *ImmoConfitmationObserver) checkSensorState(messgaeSensors []sens
 			{
 				relay := sens.(*sensors.Relay)
 				if relay.ID == outNum && relay.State == state {
-					go observer.Watchdog.Stop()
-					observer.task.Done()
-					//resp := &response.Response{
-					//	CallbackID: req.FacadeCallbackID,
-					//	Code:       "Done",
-					//	Success:    true,
-					//}
-					commands := list.New()
-					commands.PushBack(observers.NewDetachObserverCommand(observer))
-					//commands.PushBack(observers.NewPushToRabbitMessageCommand(resp.Marshal(), FacadeResponse, Message))
-					return commands
+					observer.Watchdog.Stop()
+					return observer.task.Invoker().DoneTask(observer.task)
 				}
 			}
 		}
 	}
-	return nil
+	return list.New()
 }

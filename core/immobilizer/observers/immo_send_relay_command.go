@@ -28,6 +28,5 @@ func (c *ImmoSendRelayCommand) Execute(device interfaces.IDevice) *list.List {
 		logger.Logger().WriteToLog(logger.Error, "[ImmoSendRelayCommand | Execute] Error while sending command ", setRelayDrive.Command())
 	}
 	commands.PushBack(observers.NewAttachObserverCommand(NewWaitingImmoAckObserver(c.task)))
-	//commands.PushBack(NewPushToRabbitMessageCommand(setRelayDrive.Command(), Message))
 	return commands
 }

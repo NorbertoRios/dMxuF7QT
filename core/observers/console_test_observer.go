@@ -39,5 +39,5 @@ type WriteToConsoleCommand struct {
 //Execute ..
 func (command *WriteToConsoleCommand) Execute(device interfaces.IDevice) *list.List {
 	logger.Logger().WriteToLog(logger.Info, command.msg)
-	return nil
+	return list.New()
 }

@@ -12,28 +12,22 @@ import (
 
 //NewWaitingImmoAckObserver ...
 func NewWaitingImmoAckObserver(_task interfaces.ITask) *WaitingImmoAckObserver {
-	observer := &WaitingImmoAckObserver{
-		task: _task,
+	return &WaitingImmoAckObserver{
+		task:     _task,
+		Watchdog: watchdog.NewAckImmoWatchdog(_task, 300),
 	}
-	anyMessageObserver := NewAnyImmoMessageObserver(_task)
-	wdList := list.New()
-	wdList.PushBack(observers.NewDetachObserverCommand(observer))
-	wdList.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
-	wd := watchdog.NewWatchdog(wdList, observer.task.Device(), 300)
-	observer.Watchdog = wd
-	return observer
 }
 
 //Attached ..
 func (observer *WaitingImmoAckObserver) Attached() {
-	observer.Watchdog.Start()
 	logger.Logger().WriteToLog(logger.Info, "[WaitingImmoAckObserver] Successfuly attached")
+	observer.Watchdog.Start()
 }
 
 //WaitingImmoAckObserver ...
 type WaitingImmoAckObserver struct {
 	task     interfaces.ITask
-	Watchdog *watchdog.Watchdog
+	Watchdog *watchdog.AckImmoWatchdog
 }
 
 //Task returns observer's task
@@ -50,7 +44,7 @@ func (observer *WaitingImmoAckObserver) Update(msg interface{}) *list.List {
 			ackMessage := msg.(*message.AckMessage)
 			setRelayDrive := NewSetRelayDrive(observer.task.Request().(*request.ChangeImmoStateRequest))
 			if ackMessage.Value == setRelayDrive.Command() {
-				go observer.Watchdog.Stop()
+				observer.Watchdog.Stop()
 				immoConfObserver := NewImmoConfitmationObserver(observer.task)
 				commands.PushBack(observers.NewDetachObserverCommand(observer))
 				commands.PushBack(observers.NewAttachObserverCommand(immoConfObserver))

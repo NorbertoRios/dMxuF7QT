@@ -7,7 +7,6 @@ type ITask interface {
 	Commands() *list.List
 	Observers() []IObserver
 	Device() IDevice
-	Cancel(string)
-	Done()
 	Request() interface{}
+	Invoker() IInvoker
 }

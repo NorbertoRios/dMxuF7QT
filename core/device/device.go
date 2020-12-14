@@ -85,7 +85,7 @@ func (device *Device) LocationRequest() interfaces.ILocationRequest {
 }
 
 //ElectricLock ..
-func (device *Device) ElectricLock(index int) interfaces.ILock {
+func (device *Device) ElectricLock(index int) interfaces.IProcess {
 	return device.LockStorage.ElectricLock(index, device)
 }
 

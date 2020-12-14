@@ -20,5 +20,5 @@ type AttachObserverCommand struct {
 //Execute ..
 func (c *AttachObserverCommand) Execute(device interfaces.IDevice) *list.List {
 	device.Observable().Attach(c.observer)
-	return nil
+	return list.New()
 }

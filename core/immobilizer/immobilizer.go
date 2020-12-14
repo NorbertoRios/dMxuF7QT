@@ -36,20 +36,31 @@ func (immo *Immobilizer) Trigger() string {
 	return immo.trigger
 }
 
+//Device ...
+func (immo *Immobilizer) Device() interfaces.IDevice {
+	return immo.device
+}
+
 //CurrentTask ...
 func (immo *Immobilizer) CurrentTask() interfaces.ITask {
 	return immo.currentTask
 }
 
-//NewRequest process new request to device
+//NewRequest ...
 func (immo *Immobilizer) NewRequest(req *request.ChangeImmoStateRequest) *list.List {
-	newTask := task.NewImmobilizerTask(req, immo.device, immo.taskCanceled, immo.taskDone)
+	newTask := task.NewImmobilizerTask(req, immo, immo.Device())
 	if immo.currentTask == nil {
 		immo.currentTask = newTask
-		commands := immo.currentTask.Commands()
-		return commands
+		return task.Commands()
 	}
-	return immo.competitivenessOfTasks(newTask)
+	req := immo.currentTask.Request().(*request.ChangeImmoStateRequest)
+	if req.Equal(task.Request().(*request.ChangeImmoStateRequest)) {
+		task.Invoker().Cancel(task, "Duplicate")
+		return list.New()
+	}
+	immo.currentTask.Cancel("Deprecated")
+	immo.currentTask = newTask
+	return immo.currentTask.Commands()
 }
 
 //State ...
@@ -75,32 +86,24 @@ func (immo *Immobilizer) Tasks() *list.List {
 	return immo.tasks
 }
 
-func (immo *Immobilizer) competitivenessOfTasks(task *task.ImmobilizerTask) *list.List {
-	req := immo.currentTask.Request().(*request.ChangeImmoStateRequest)
-	if req.Equal(task.Request().(*request.ChangeImmoStateRequest)) {
-		task.Cancel("Duplicate")
-		return list.New()
-	} else {
-		immo.currentTask.Cancel("Deprecated")
-		immo.currentTask = task
-		cmds := immo.currentTask.Commands()
-		logger.Logger().WriteToLog(logger.Info, "Task created and run")
-		return cmds
-	}
-}
-
-func (immo *Immobilizer) taskCanceled(canseledTask *task.ImmobilizerTask, description string) {
+//TaskCanceled ...
+func (immo *Immobilizer) TaskCanceled(canseledTask interfaces.ITask, description string) {
 	logger.Logger().WriteToLog(logger.Info, "Task is canceled. ", description)
-	immo.mutex.Lock()
-	immo.tasks.PushBack(task.NewCanceledImmoTask(canseledTask, description))
-	immo.mutex.Unlock()
-	immo.currentTask = nil
+	immo.pushToTasks(doneTask, false)
 }
 
-func (immo *Immobilizer) taskDone(doneTask *task.ImmobilizerTask) {
+//TaskDone ...
+func (immo *Immobilizer) TaskDone(doneTask interfaces.ITask) {
 	logger.Logger().WriteToLog(logger.Info, "Task is done")
+	immo.pushToTasks(doneTask, true)
+}
+
+func (immo *Immobilizer) pushToTasks(_task interfaces.ITask, isFront bool) {
 	immo.mutex.Lock()
-	immo.tasks.PushFront(task.NewDoneImmoTask(doneTask))
-	immo.mutex.Unlock()
-	immo.currentTask = nil
+	defer immo.mutex.Unlock()
+	if isFront {
+		immo.tasks.PushFront(task.NewDoneImmoTask(_task))
+	} else {
+		immo.tasks.PushBack(task.NewDoneImmoTask(_task))
+	}
 }

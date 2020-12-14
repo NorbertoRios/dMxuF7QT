@@ -7,29 +7,28 @@ import (
 	"genx-go/core/filter"
 	"genx-go/core/immobilizer/observers"
 	"genx-go/core/immobilizer/request"
+	"genx-go/core/invoker"
 	bRequest "genx-go/core/request"
 	"genx-go/logger"
 	"time"
 )
 
 //NewImmobilizerTask ...
-func NewImmobilizerTask(_request *request.ChangeImmoStateRequest, _device interfaces.IDevice, _onCancel func(*ImmobilizerTask, string), _onDone func(*ImmobilizerTask)) *ImmobilizerTask {
+func NewImmobilizerTask(_request *request.ChangeImmoStateRequest, immo interfaces.IImmobilizer, _device interfaces.IDevice) *ImmobilizerTask {
 	return &ImmobilizerTask{
 		BornTime:      time.Now().UTC(),
 		FacadeRequest: _request,
 		device:        _device,
-		onCancel:      _onCancel,
-		onDone:        _onDone,
+		invoker:       invoker.NewProcessInvoker(immo),
 	}
 }
 
 //ImmobilizerTask in progress state
 type ImmobilizerTask struct {
+	invoker       interfaces.IImmoInvoker
 	BornTime      time.Time                       `json:"CreatedAt"`
 	FacadeRequest *request.ChangeImmoStateRequest `json:"FacadeRequest"`
 	device        interfaces.IDevice
-	onCancel      func(*ImmobilizerTask, string)
-	onDone        func(*ImmobilizerTask)
 }
 
 //Device returns task's observer
@@ -40,6 +39,11 @@ func (task *ImmobilizerTask) Device() interfaces.IDevice {
 //Request ...
 func (task *ImmobilizerTask) Request() interface{} {
 	return task.FacadeRequest
+}
+
+//Invoker ...
+func (task *ImmobilizerTask) Invoker() interfaces.IInvoker {
+	return task.invoker
 }
 
 //Observers returns task's observer
@@ -54,7 +58,7 @@ func (task *ImmobilizerTask) Commands() *list.List {
 	out := &bRequest.OutputNumber{Data: task.FacadeRequest.Port}
 	immo := task.device.Immobilizer(out.Index(), task.FacadeRequest.Trigger)
 	if immo.State() == task.FacadeRequest.State {
-		immo.CurrentTask().Cancel("Actual")
+		immo.CurrentTask().Invoker().CanselTask(immo.CurrentTask(), "Actual")
 	} else {
 		cList.PushFront(observers.NewImmoSendRelayCommand(task))
 	}
@@ -69,18 +73,4 @@ func (task *ImmobilizerTask) Marshal() string {
 		return ""
 	}
 	return string(jTask)
-}
-
-//Done task
-func (task *ImmobilizerTask) Done() {
-	// cList := list.New()
-	// command := NewPushToRabbitMessageCommand("dasdas",FacadeResponse)
-	// cList.PushBack(command)
-	// task.device.ProcessCommands(cList)
-	task.onDone(task)
-}
-
-//Cancel task
-func (task *ImmobilizerTask) Cancel(description string) {
-	task.onCancel(task, description)
 }

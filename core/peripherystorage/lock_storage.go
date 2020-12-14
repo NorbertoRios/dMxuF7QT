@@ -21,7 +21,7 @@ type ElectricLockStorage struct {
 }
 
 //ElectricLock ...
-func (storage *ElectricLockStorage) ElectricLock(index int, device interfaces.IDevice) interfaces.ILock {
+func (storage *ElectricLockStorage) ElectricLock(index int, device interfaces.IDevice) interfaces.IProcess {
 	storage.mutex.Lock()
 	defer storage.mutex.Unlock()
 	var eLock interfaces.ILock

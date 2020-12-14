@@ -3,23 +3,12 @@ package observers
 import (
 	"container/list"
 	"genx-go/core/device/interfaces"
-	"genx-go/core/filter"
 	"genx-go/core/lock/request"
 	"genx-go/core/observers"
 	"genx-go/core/watchdog"
 	"genx-go/logger"
 	"genx-go/message"
 )
-
-func watchdogCommands(_task interfaces.ITask) *list.List {
-	cList := list.New()
-	taskFilter := filter.NewObserversFilter(_task.Device().Observable())
-	onservers := taskFilter.Extract(_task)
-	for _, o := range onservers {
-		cList.PushBack(observers.NewDetachObserverCommand(o))
-	}
-	return cList
-}
 
 //NewWaitingEctricLockAck ..
 func NewWaitingEctricLockAck(_task interfaces.ITask) *WaitingEctricLockAck {
@@ -55,9 +44,8 @@ func (observer *WaitingEctricLockAck) Update(msg interface{}) *list.List {
 		{
 			ackMessage := msg.(*message.AckMessage)
 			if ackMessage.Value == setRelayDrive.Command() {
-				go observer.wd.Stop()
-				//commands.PushBack(observers.NewDetachObserverCommand(observer))
-				observer.task.Done()
+				observer.wd.Stop()
+				observer.task.Invoker().DoneTask(observer.task)
 			} else {
 				commands.PushBack(observers.NewSendStringCommand(setRelayDrive.Command()))
 			}
