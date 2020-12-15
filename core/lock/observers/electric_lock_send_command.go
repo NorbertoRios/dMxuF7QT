@@ -28,13 +28,11 @@ func (c *ElectricLockSendCommand) Execute(device interfaces.IDevice) *list.List 
 	setRelayDrive := NewElectricLockSetRelayDrive(req)
 	if req.Time().Before(time.Now().UTC()) {
 		logger.Logger().WriteToLog(logger.Info, "[ElectricLockSendCommand | Execute] Time is over. ExpirationTime: ", req.Time().String(), ". Current time: ", time.Now().UTC().String())
-		c.task.Cancel("Time is over")
-		return commands
+		return c.task.Invoker().CanselTask(c.task, "Time is over")
 	}
 	if err := device.Send(setRelayDrive.Command()); err != nil {
 		logger.Logger().WriteToLog(logger.Error, "[ElectricLockSendCommand | Execute] Error while sending command ", setRelayDrive.Command())
 	}
-	commands.PushBack(observers.NewAttachObserverCommand(NewWaitingEctricLockAck(c.task)))	
-	//commands.PushBack(NewPushToRabbitMessageCommand(setRelayDrive.Command(), Message))
+	commands.PushBack(observers.NewAttachObserverCommand(NewWaitingEctricLockAck(c.task)))
 	return commands
 }

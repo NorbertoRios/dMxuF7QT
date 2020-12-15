@@ -23,7 +23,7 @@ type Configuration struct {
 	mutex       *sync.Mutex
 	device      interfaces.IDevice
 	currentTask interfaces.ITask
-	tasks       *list.List
+	tasks       *list.List	
 }
 
 //CurrentTask ...
@@ -46,20 +46,24 @@ func (config *Configuration) NewRequest(req *request.ConfigurationRequest) *list
 	return config.currentTask.Commands()
 }
 
-//Done ...
-func (config *Configuration) taskDone(_task *task.ConfigTask) {
-	logger.Logger().WriteToLog(logger.Info, "Task is done")
-	config.mutex.Lock()
-	config.tasks.PushFront(task.NewDoneConfigTask(_task))
-	config.mutex.Unlock()
-	config.currentTask = nil
+//TaskCancel ...
+func (config *Configuration) TaskCancel(canseledTask interfaces.ITask, description string) {
+	logger.Logger().WriteToLog(logger.Info, "Task is canceled. ", description)
+	config.pushToTasks(task.NewCanceledConfigTask(canseledTask, description), false)
 }
 
-//Cancel ...
-func (config *Configuration) taskCancel(_task *task.ConfigTask, description string) {
-	logger.Logger().WriteToLog(logger.Info, "Task is canceled. ", description)
+//TaskDone ...
+func (config *Configuration) TaskDone(doneTask interfaces.ITask) {
+	logger.Logger().WriteToLog(logger.Info, "Task is done")
+	config.pushToTasks(task.NewDoneConfigTask(doneTask), true)
+}
+
+func (config *Configuration) pushToTasks(_task interfaces.ITask, isDone bool) {
 	config.mutex.Lock()
-	config.tasks.PushBack(task.NewCanceledConfigTask(_task, description))
-	config.mutex.Unlock()
-	config.currentTask = nil
+	defer config.mutex.Unlock()
+	if isDone {
+		config.tasks.PushFront(_task)
+	} else {
+		config.tasks.PushBack(_task)
+	}
 }

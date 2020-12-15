@@ -1,11 +1,12 @@
 package task
 
 import (
+	"genx-go/core/device/interfaces"
 	"time"
 )
 
 //NewDoneImmoTask ..
-func NewDoneImmoTask(_task *ImmobilizerTask) *DoneImmoTask {
+func NewDoneImmoTask(_task interfaces.ITask) *DoneImmoTask {
 	return &DoneImmoTask{
 		Task:     _task,
 		doneTime: time.Now().UTC(),
@@ -14,6 +15,7 @@ func NewDoneImmoTask(_task *ImmobilizerTask) *DoneImmoTask {
 
 //DoneImmoTask done immovilizer task
 type DoneImmoTask struct {
-	Task     *ImmobilizerTask
+	ImmobilizerTask
+	Task     interfaces.ITask
 	doneTime time.Time
 }

@@ -5,6 +5,7 @@ import (
 	"genx-go/core/device/interfaces"
 	"genx-go/core/lock/request"
 	"genx-go/core/lock/task"
+	baseRequest "genx-go/core/request"
 	"genx-go/logger"
 	"sync"
 )
@@ -29,24 +30,25 @@ type ElectricLock struct {
 }
 
 //NewRequest ..
-func (lock *ElectricLock) NewRequest(req *request.UnlockRequest) *list.List {
-	newTask := task.NewElectricLockTask(req, lock.device, lock.taskCanceled, lock.taskDone)
+func (lock *ElectricLock) NewRequest(req baseRequest.IRequest) *list.List {
+	newTask := task.NewElectricLockTask(req, lock.device, lock)
 	if lock.currentTask == nil {
 		lock.currentTask = newTask
 		return lock.currentTask.Commands()
 	}
-	return lock.competitivenessOfTasks(newTask)
+	return lock.competitivenessOfTasks(newTask, lock.currentTask.Request().(*request.UnlockRequest))
 }
 
-func (lock *ElectricLock) competitivenessOfTasks(newTask interfaces.ITask) *list.List {
-	if lock.currentTask.Request().(*request.UnlockRequest).Equal(newTask.Request().(*request.UnlockRequest)) {
-		newTask.Cancel("Duplicate")
-		return list.New()
+func (lock *ElectricLock) competitivenessOfTasks(newTask interfaces.ITask, currentReq *request.UnlockRequest) *list.List {
+	if currentReq.Equal(newTask.Request().(*request.UnlockRequest)) {
+		return newTask.Invoker().CanselTask(newTask, "Duplicate")
 	}
-	lock.currentTask.Cancel("Deprecated")
+	cmdList := list.New()
+	cmdList.PushBackList(lock.currentTask.Invoker().CanselTask(lock.currentTask, "Deprecated"))
 	lock.currentTask = newTask
+	cmdList.PushBackList(lock.currentTask.Commands())
 	logger.Logger().WriteToLog(logger.Info, "Task created and run")
-	return lock.currentTask.Commands()
+	return cmdList
 }
 
 //CurrentTask ..
@@ -59,18 +61,24 @@ func (lock *ElectricLock) Tasks() *list.List {
 	return lock.tasks
 }
 
-func (lock *ElectricLock) taskCanceled(cancelTask *task.ElectricLockTask, description string) {
+//TaskCancel ...
+func (lock *ElectricLock) TaskCancel(canseledTask interfaces.ITask, description string) {
 	logger.Logger().WriteToLog(logger.Info, "Task is canceled. ", description)
-	lock.mutex.Lock()
-	lock.tasks.PushBack(task.NewCanceledElectricLockTask(cancelTask, description))
-	lock.mutex.Unlock()
-	lock.currentTask = nil
+	lock.pushToTasks(task.NewCanceledElectricLockTask(canseledTask, description), false)
 }
 
-func (lock *ElectricLock) taskDone(doneTask *task.ElectricLockTask) {
+//TaskDone ...
+func (lock *ElectricLock) TaskDone(doneTask interfaces.ITask) {
 	logger.Logger().WriteToLog(logger.Info, "Task is done")
+	lock.pushToTasks(task.NewDoneElectricLockTask(doneTask), true)
+}
+
+func (lock *ElectricLock) pushToTasks(_task interfaces.ITask, isDone bool) {
 	lock.mutex.Lock()
-	lock.tasks.PushFront(task.NewDoneElectricLockTask(doneTask))
-	lock.mutex.Unlock()
-	lock.currentTask = nil
+	defer lock.mutex.Unlock()
+	if isDone {
+		lock.tasks.PushFront(_task)
+	} else {
+		lock.tasks.PushBack(_task)
+	}
 }

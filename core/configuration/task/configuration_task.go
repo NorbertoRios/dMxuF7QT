@@ -6,20 +6,18 @@ import (
 	"genx-go/core/configuration/request"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/filter"
-	coreObservers "genx-go/core/observers"
-	"genx-go/core/usecase"
+	"genx-go/core/invoker"
 	"time"
 )
 
 //New ...
-func New(_request *request.ConfigurationRequest, device interfaces.IDevice, _onCancel func(*ConfigTask, string), _onDone func(*ConfigTask)) *ConfigTask {
+func New(_request *request.ConfigurationRequest, device interfaces.IDevice, _config interfaces.IProcess) *ConfigTask {
 	return &ConfigTask{
 		BornTime:       time.Now().UTC(),
 		FacadeRequest:  _request,
 		ConfigCommands: _request.Commands(),
 		device:         device,
-		onCancel:       _onCancel,
-		onDone:         _onDone,
+		invoker:        invoker.NewConfigInvoker(_config),
 	}
 }
 
@@ -30,8 +28,7 @@ type ConfigTask struct {
 	ConfigCommands *list.List                    `json:"Commands"`
 	currentCommand *list.Element
 	device         interfaces.IDevice
-	onCancel       func(*ConfigTask, string)
-	onDone         func(*ConfigTask)
+	invoker        interfaces.IConfigInvoker
 }
 
 //Device ...
@@ -49,6 +46,11 @@ func (task *ConfigTask) Commands() *list.List {
 	return cList
 }
 
+//Invoker ..
+func (task *ConfigTask) Invoker() interfaces.IInvoker {
+	return task.invoker
+}
+
 //Observers ...
 func (task *ConfigTask) Observers() []interfaces.IObserver {
 	f := filter.NewObserversFilter(task.device.Observable())
@@ -62,35 +64,12 @@ func (task *ConfigTask) Request() interface{} {
 
 //NextStep ...
 func (task *ConfigTask) NextStep() *list.List {
-	cList := list.New()
 	task.currentCommand.Value.(*request.Command).Complete()
 	if cmd := task.currentCommand.Next(); cmd != nil {
+		cList := list.New()
 		task.currentCommand = cmd
 		cList.PushBack(observers.NewSendConfigCommand(task, task.currentCommand.Value.(*request.Command).Command()))
-	} else {
-		task.Done()
+		return cList
 	}
-	return cList
-}
-
-//Done ...
-func (task *ConfigTask) Done() {
-	task.cleanObservers()
-	task.onDone(task)
-}
-
-//Cancel ...
-func (task *ConfigTask) Cancel(description string) {
-	task.cleanObservers()
-	task.onCancel(task, description)
-}
-
-func (task *ConfigTask) cleanObservers() {
-	cList := list.New()
-	oFilter := filter.NewObserversFilter(task.device.Observable())
-	for _, o := range oFilter.Extract(task) {
-		cList.PushBack(coreObservers.NewDetachObserverCommand(o))
-	}
-	useCase := usecase.NewBaseUseCase(task.device, cList)
-	useCase.Launch()
+	return task.Invoker().DoneTask(task)
 }

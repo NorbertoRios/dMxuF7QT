@@ -10,7 +10,7 @@ import (
 )
 
 //NewLocationTask ...
-func NewLocationTask(_request *request.BaseRequest, _device interfaces.IDevice, onCancel func(*LocationTask, string), onDone func(*LocationTask)) *LocationTask {
+func NewLocationTask(_request *request.BaseRequest, _device interfaces.IDevice) *LocationTask {
 	return &LocationTask{
 		request:      _request,
 		device:       _device,

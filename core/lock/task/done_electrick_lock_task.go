@@ -1,9 +1,12 @@
 package task
 
-import "time"
+import (
+	"genx-go/core/device/interfaces"
+	"time"
+)
 
 //NewDoneElectricLockTask ...
-func NewDoneElectricLockTask(_task *ElectricLockTask) *DoneElectricLockTask {
+func NewDoneElectricLockTask(_task interfaces.ITask) *DoneElectricLockTask {
 	return &DoneElectricLockTask{
 		Task:     _task,
 		doneTime: time.Now().UTC(),
@@ -13,6 +16,6 @@ func NewDoneElectricLockTask(_task *ElectricLockTask) *DoneElectricLockTask {
 //DoneElectricLockTask ...
 type DoneElectricLockTask struct {
 	ElectricLockTask
-	Task     *ElectricLockTask
+	Task     interfaces.ITask
 	doneTime time.Time
 }

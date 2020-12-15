@@ -4,7 +4,6 @@ import (
 	"container/list"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/location/task"
-	"genx-go/core/observers"
 	"genx-go/core/request"
 	"genx-go/logger"
 )
@@ -31,22 +30,22 @@ func (request *Request) NewRequest(req *request.BaseRequest) *list.List {
 	return request.task.Commands()
 }
 
-//Task ...
-func (request *Request) Task() interfaces.ITask {
+//CurrentTask ...
+func (request *Request) CurrentTask() interfaces.ITask {
 	return request.task
 }
 
-func (request *Request) detachTaskObservers(_task interfaces.ITask) {
-	detach := observers.NewDetachTaskObservers(_task)
-	request.device.ProcessCommands(detach.Commands())
+//Tasks ...
+func (request *Request) Tasks() *list.List {
+	return list.New()
 }
 
-func (request *Request) done(_task *task.LocationTask) {
+//TaskCancel ...
+func (request *Request) TaskCancel(_task interfaces.ITask) {
 	logger.Logger().WriteToLog(logger.Info, "[LocationRequest | done] Task done")
-	request.detachTaskObservers(_task)
 }
 
-func (request *Request) cancel(_task *task.LocationTask, description string) {
+//TaskDone ...
+func (request *Request) TaskDone(_task interfaces.ITask, description string) {
 	logger.Logger().WriteToLog(logger.Info, "[LocationRequest | cancel] Task canceled. Description: ", description)
-	request.detachTaskObservers(_task)
 }

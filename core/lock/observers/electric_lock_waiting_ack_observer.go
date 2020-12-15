@@ -14,7 +14,7 @@ import (
 func NewWaitingEctricLockAck(_task interfaces.ITask) *WaitingEctricLockAck {
 	return &WaitingEctricLockAck{
 		task: _task,
-		wd:   watchdog.NewElectricLockWatchdog(_task, watchdogCommands(_task)),
+		wd:   watchdog.NewElectricLockWatchdog(_task),
 	}
 }
 
@@ -45,10 +45,9 @@ func (observer *WaitingEctricLockAck) Update(msg interface{}) *list.List {
 			ackMessage := msg.(*message.AckMessage)
 			if ackMessage.Value == setRelayDrive.Command() {
 				observer.wd.Stop()
-				observer.task.Invoker().DoneTask(observer.task)
-			} else {
-				commands.PushBack(observers.NewSendStringCommand(setRelayDrive.Command()))
+				return observer.task.Invoker().DoneTask(observer.task)
 			}
+			commands.PushBack(observers.NewSendStringCommand(setRelayDrive.Command()))
 		}
 	default:
 		{

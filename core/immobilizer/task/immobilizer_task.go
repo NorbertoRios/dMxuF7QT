@@ -19,7 +19,7 @@ func NewImmobilizerTask(_request *request.ChangeImmoStateRequest, immo interface
 		BornTime:      time.Now().UTC(),
 		FacadeRequest: _request,
 		device:        _device,
-		invoker:       invoker.NewProcessInvoker(immo),
+		invoker:       invoker.NewImmobilizerInvoker(immo),
 	}
 }
 

@@ -1,9 +1,12 @@
 package task
 
-import "time"
+import (
+	"genx-go/core/device/interfaces"
+	"time"
+)
 
 //NewCanceledConfigTask ..
-func NewCanceledConfigTask(_task *ConfigTask, _description string) *CanceledConfigTask {
+func NewCanceledConfigTask(_task interfaces.ITask, _description string) *CanceledConfigTask {
 	return &CanceledConfigTask{
 		Task:                _task,
 		canceledTime:        time.Now().UTC(),
@@ -13,7 +16,8 @@ func NewCanceledConfigTask(_task *ConfigTask, _description string) *CanceledConf
 
 //CanceledConfigTask ...
 type CanceledConfigTask struct {
-	Task                *ConfigTask
+	ConfigTask
+	Task                interfaces.ITask
 	canceledTime        time.Time
 	canseledDescription string
 }
