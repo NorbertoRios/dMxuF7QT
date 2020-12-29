@@ -6,4 +6,5 @@ import "container/list"
 type IConfigTask interface {
 	ITask
 	NextStep() *list.List
+	CurrentCommand() string
 }

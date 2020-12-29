@@ -2,7 +2,9 @@ package invoker
 
 import (
 	"container/list"
+	confObservers "genx-go/core/configuration/observers"
 	"genx-go/core/device/interfaces"
+	"genx-go/core/observers"
 )
 
 //NewConfigInvoker ...
@@ -17,12 +19,16 @@ type ConfigInvoker struct {
 	BaseInvoker
 }
 
-//Next ...
-func (invoker *ConfigInvoker) Next(_task interfaces.ITask) *list.List {
-	return _task.(interfaces.IConfigTask).NextStep()
+//SendConfigAfterAnyMessage ...
+func (invoker *ConfigInvoker) SendConfigAfterAnyMessage(task interfaces.IConfigTask) *list.List {
+	cmd := list.New()
+	cmd.PushBack(observers.NewAttachObserverCommand(confObservers.NewAnyMessageObserver(task)))
+	return cmd
 }
 
-//SendConfigAfterAnyMessage ...
-func (invoker *ConfigInvoker) SendConfigAfterAnyMessage(_task interfaces.ITask) *list.List {
-
+//SendCommand ...
+func (invoker *ConfigInvoker) SendCommand(task interfaces.IConfigTask) *list.List {
+	cmd := list.New()
+	cmd.PushBack(confObservers.NewSendConfigCommand(task))
+	return cmd
 }

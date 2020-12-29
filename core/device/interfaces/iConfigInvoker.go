@@ -7,6 +7,6 @@ import (
 //IConfigInvoker ...
 type IConfigInvoker interface {
 	IInvoker
-	Next(ITask) *list.List
-	SendConfigAfterAnyMessage(ITask) *list.List
+	SendConfigAfterAnyMessage(IConfigTask) *list.List
+	SendCommand(IConfigTask)
 }
