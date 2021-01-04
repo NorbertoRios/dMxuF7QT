@@ -19,16 +19,17 @@ type ConfigIterator struct {
 }
 
 func (i *ConfigIterator) nextExisting() bool {
-	return i.current.Next() != nil
+	return i.currentCommand.Next() != nil
 }
 
 func (i *ConfigIterator) goToNext() {
-	if !i.nextExisting() {
-		return ""
-	}
 	i.currentCommand = i.currentCommand.Next()
 }
 
 func (i *ConfigIterator) current() *request.Command {
-	i.currentCommand.Value.(*request.Command)
+	return i.currentCommand.Value.(*request.Command)
+}
+
+func (i *ConfigIterator) configCommands() *list.List {
+	return i.commands
 }

@@ -2,30 +2,34 @@ package task
 
 import (
 	"container/list"
+	"encoding/json"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/filter"
 	"genx-go/core/location/observers"
 	"genx-go/core/request"
+	"genx-go/logger"
 	"time"
 )
 
 //NewLocationTask ...
 func NewLocationTask(_request *request.BaseRequest, _device interfaces.IDevice) *LocationTask {
 	return &LocationTask{
-		request:      _request,
-		device:       _device,
-		onTaskCancel: onCancel,
-		onTaskDone:   onDone,
+		FacadeRequest: _request,
+		device:        _device,
 	}
 }
 
 //LocationTask ...
 type LocationTask struct {
-	BornTieme    time.Time
-	device       interfaces.IDevice
-	onTaskCancel func(*LocationTask, string)
-	onTaskDone   func(*LocationTask)
-	request      *request.BaseRequest
+	BornTime      time.Time            `json:"CreatedAt"`
+	FacadeRequest *request.BaseRequest `json:"FacadeRequest"`
+	invoker       interfaces.ILocationInvoker
+	device        interfaces.IDevice
+}
+
+//Invoker ...
+func (task *LocationTask) Invoker() interfaces.IInvoker {
+	return task.invoker
 }
 
 //Commands ..
@@ -46,17 +50,17 @@ func (task *LocationTask) Device() interfaces.IDevice {
 	return task.device
 }
 
-//Cancel ..
-func (task *LocationTask) Cancel(description string) {
-	task.onTaskCancel(task, description)
-}
-
-//Done ..
-func (task *LocationTask) Done() {
-	task.onTaskDone(task)
-}
-
 //Request ...
 func (task *LocationTask) Request() interface{} {
-	return task.request
+	return task.FacadeRequest
+}
+
+//Marshal ...
+func (task *LocationTask) Marshal() string {
+	jTask, jerr := json.Marshal(task)
+	if jerr != nil {
+		logger.Logger().WriteToLog(logger.Error, "[ImmobilizerTask | Marshal] Error while marshaling task. Error:", jerr)
+		return ""
+	}
+	return string(jTask)
 }

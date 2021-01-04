@@ -3,24 +3,24 @@ package watchdog
 import (
 	"container/list"
 	"genx-go/core/device/interfaces"
-	"genx-go/core/lock/request"
 	"genx-go/core/usecase"
 	"genx-go/logger"
 	"time"
 )
 
 //NewElectricLockWatchdog ...
-func NewElectricLockWatchdog(_task interfaces.ITask) *ElectricLockWatchdog {
+func NewElectricLockWatchdog(_device interfaces.IDevice, _commands *list.List, _expirationTime time.Time) *ElectricLockWatchdog {
 	wd := &ElectricLockWatchdog{
-		expirationTime: _task.Request().(*request.UnlockRequest).Time(),
+		expirationTime: _expirationTime,
 	}
-	wd.task = _task
+	wd.device = _device
+	wd.commands = _commands
 	return wd
 }
 
 //ElectricLockWatchdog ...
 type ElectricLockWatchdog struct {
-	BaseWatchdog
+	Watchdog
 	expirationTime time.Time
 }
 
@@ -37,17 +37,11 @@ func (wd *ElectricLockWatchdog) Start() {
 				{
 					if wd.expirationTime.Before(time.Now().UTC()) {
 						logger.Logger().WriteToLog(logger.Info, "[ElectricLockWatchdog] Electric lock change task canceled by time.")
-						usecase.NewBaseUseCase(wd.task.Device(), wd.commands()).Launch()
+						usecase.NewBaseUseCase(wd.device, wd.commands).Launch()
 						return
 					}
 				}
 			}
 		}
 	}()
-}
-
-func (wd *ElectricLockWatchdog) commands() *list.List {
-	cmdList := list.New()
-	cmdList.PushBackList(wd.task.Invoker().CanselTask(wd.task, "Time is over"))
-	return cmdList
 }

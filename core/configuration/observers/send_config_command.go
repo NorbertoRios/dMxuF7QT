@@ -22,8 +22,8 @@ type SendConfigCommand struct {
 //Execute ...
 func (c *SendConfigCommand) Execute(device interfaces.IDevice) *list.List {
 	commands := list.New()
-	if err := device.Send(c.task.CurrentCommand()); err != nil {
-		logger.Logger().WriteToLog(logger.Error, "[ImmoSendRelayCommand | Execute] Error while sending command ", c.task.CurrentCommand())
+	if err := device.Send(c.task.CurrentStringCommand()); err != nil {
+		logger.Logger().WriteToLog(logger.Error, "[ImmoSendRelayCommand | Execute] Error while sending command ", c.task.CurrentStringCommand())
 	}
 	commands.PushBack(coreObservers.NewAttachObserverCommand(NewWaitingConfigAckObserver(c.task)))
 	return commands

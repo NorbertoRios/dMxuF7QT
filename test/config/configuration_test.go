@@ -41,7 +41,7 @@ func TestConfigurationLogic(t *testing.T) {
 	ct := device.Configuration().CurrentTask().(*task.ConfigTask)
 	sentCount := 0
 	notSentCount := 0
-	for cmd := ct.ConfigCommands.Front(); cmd != nil; cmd = cmd.Next() {
+	for cmd := ct.ConfigCommands().Front(); cmd != nil; cmd = cmd.Next() {
 		if cmd.Value.(*request.Command).State() {
 			sentCount++
 		} else {

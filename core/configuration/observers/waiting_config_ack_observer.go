@@ -13,14 +13,14 @@ import (
 func NewWaitingConfigAckObserver(_task interfaces.IConfigTask) *WaitingConfigAckObserver {
 	return &WaitingConfigAckObserver{
 		task:     _task,
-		watchdog: watchdog.NewConfigWatchdog(_task, 10),
+		watchdog: watchdog.NewWatchdog(_task.Device(), _task.Invoker().(interfaces.IConfigInvoker).SendConfigAfterAnyMessage(_task), 10),
 	}
 }
 
 //WaitingConfigAckObserver ..
 type WaitingConfigAckObserver struct {
 	task     interfaces.IConfigTask
-	watchdog *watchdog.ConfigWatchdog
+	watchdog *watchdog.Watchdog
 }
 
 //Update ...
@@ -30,10 +30,16 @@ func (observer *WaitingConfigAckObserver) Update(msg interface{}) *list.List {
 	case *message.AckMessage:
 		{
 			ackMessage := msg.(*message.AckMessage)
-			if ackMessage.Value == observer.task.CurrentCommand() {
+			if ackMessage.Value == observer.task.CurrentStringCommand() {
 				observer.watchdog.Stop()
 				commands.PushBack(observers.NewDetachObserverCommand(observer))
-				commands.PushBackList(observer.task.(interfaces.IConfigTask).NextStep())
+				observer.task.(interfaces.IConfigTask).CommandComplete()
+				if observer.task.IsNextExist() {
+					observer.task.GoToNextCommand()
+					commands.PushBackList(observer.task.Commands())
+				} else {
+					commands.PushBackList(observer.task.Invoker().DoneTask(observer.task))
+				}
 			}
 		}
 	}

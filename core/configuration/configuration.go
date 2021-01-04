@@ -5,6 +5,7 @@ import (
 	"genx-go/core/configuration/request"
 	"genx-go/core/configuration/task"
 	"genx-go/core/device/interfaces"
+	baseRequest "genx-go/core/request"
 	"genx-go/logger"
 	"sync"
 )
@@ -23,7 +24,7 @@ type Configuration struct {
 	mutex       *sync.Mutex
 	device      interfaces.IDevice
 	currentTask interfaces.ITask
-	tasks       *list.List	
+	tasks       *list.List
 }
 
 //CurrentTask ...
@@ -37,13 +38,15 @@ func (config *Configuration) Tasks() *list.List {
 }
 
 //NewRequest ..
-func (config *Configuration) NewRequest(req *request.ConfigurationRequest) *list.List {
-	newTask := task.New(req, config.device, config.taskCancel, config.taskDone)
+func (config *Configuration) NewRequest(req baseRequest.IRequest) *list.List {
+	cList := list.New()
+	newTask := task.New(req.(*request.ConfigurationRequest), config.device, config)
 	if config.currentTask != nil {
-		config.currentTask.Cancel("Deprecated")
+		cList.PushBackList(config.currentTask.Invoker().CanselTask(config.currentTask, "Deprecated"))
 	}
 	config.currentTask = newTask
-	return config.currentTask.Commands()
+	cList.PushBackList(config.currentTask.Commands())
+	return cList
 }
 
 //TaskCancel ...

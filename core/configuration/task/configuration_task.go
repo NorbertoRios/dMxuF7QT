@@ -2,7 +2,6 @@ package task
 
 import (
 	"container/list"
-	"genx-go/core/configuration/observers"
 	"genx-go/core/configuration/request"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/filter"
@@ -30,19 +29,19 @@ type ConfigTask struct {
 	invoker       interfaces.IConfigInvoker
 }
 
+//Commands ...
+func (task *ConfigTask) Commands() *list.List {
+	return task.invoker.SendCurrectCommand(task)
+}
+
 //Device ...
 func (task *ConfigTask) Device() interfaces.IDevice {
 	return task.device
 }
 
-//Commands ...
-func (task *ConfigTask) Commands() *list.List {
-	if task.currentCommand == nil {
-		task.currentCommand = task.ConfigCommands.Front()
-	}
-	cList := list.New()
-	cList.PushBack(observers.NewSendConfigCommand(task, task.currentCommand.Value.(*request.Command).Command()))
-	return cList
+//ConfigCommands ...
+func (task *ConfigTask) ConfigCommands() *list.List {
+	return task.iterator.configCommands()
 }
 
 //Invoker ..
@@ -50,8 +49,8 @@ func (task *ConfigTask) Invoker() interfaces.IInvoker {
 	return task.invoker
 }
 
-//CurrentCommand ...
-func (task *ConfigTask) CurrentCommand() string {
+//CurrentStringCommand ...
+func (task *ConfigTask) CurrentStringCommand() string {
 	return task.iterator.current().Command()
 }
 
@@ -66,20 +65,17 @@ func (task *ConfigTask) Request() interface{} {
 	return task.FacadeRequest
 }
 
-//NextStep ...
-func (task *ConfigTask) CommandComplete() *list.List {
+//CommandComplete ...
+func (task *ConfigTask) CommandComplete() {
 	task.iterator.current().Complete()
-	if !task.iterator.nextExisting() {
-		return task.Invoker().DoneTask(task)
-	}
+}
+
+//IsNextExist ...
+func (task *ConfigTask) IsNextExist() bool {
+	return task.iterator.nextExisting()
+}
+
+//GoToNextCommand ..
+func (task *ConfigTask) GoToNextCommand() {
 	task.iterator.goToNext()
-	return task.invoker.Next()
-	// task.currentCommand.Value.(*request.Command).Complete()
-	// if cmd := task.currentCommand.Next(); cmd != nil {
-	// 	cList := list.New()
-	// 	task.currentCommand = cmd
-	// 	cList.PushBack(observers.NewSendConfigCommand(task, task.currentCommand.Value.(*request.Command).Command()))
-	// 	return cList
-	// }
-	// return task.Invoker().DoneTask(task)
 }

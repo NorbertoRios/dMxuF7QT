@@ -22,30 +22,32 @@ type Request struct {
 }
 
 //NewRequest ...
-func (request *Request) NewRequest(req *request.BaseRequest) *list.List {
-	if request.task != nil {
-		request.task.Cancel("Deprecated")
+func (lRequest *Request) NewRequest(req request.IRequest) *list.List {
+	cList := list.New()
+	if lRequest.task != nil {
+		cList.PushBackList(lRequest.task.Invoker().CanselTask(lRequest.task, "Deprecated"))
 	}
-	request.task = task.NewLocationTask(req, request.device, request.cancel, request.done)
-	return request.task.Commands()
+	lRequest.task = task.NewLocationTask(req.(*request.BaseRequest), lRequest.device)
+	cList.PushBackList(lRequest.task.Commands())
+	return cList
 }
 
 //CurrentTask ...
-func (request *Request) CurrentTask() interfaces.ITask {
-	return request.task
+func (lRequest *Request) CurrentTask() interfaces.ITask {
+	return lRequest.task
 }
 
 //Tasks ...
-func (request *Request) Tasks() *list.List {
+func (Request) Tasks() *list.List {
 	return list.New()
 }
 
-//TaskCancel ...
-func (request *Request) TaskCancel(_task interfaces.ITask) {
-	logger.Logger().WriteToLog(logger.Info, "[LocationRequest | done] Task done")
+//TaskDone ...
+func (Request) TaskDone(_task interfaces.ITask) {
+	logger.Logger().WriteToLog(logger.Info, "[LocationRequest | Done] Task done")
 }
 
-//TaskDone ...
-func (request *Request) TaskDone(_task interfaces.ITask, description string) {
-	logger.Logger().WriteToLog(logger.Info, "[LocationRequest | cancel] Task canceled. Description: ", description)
+//TaskCancel ...
+func (Request) TaskCancel(_task interfaces.ITask, description string) {
+	logger.Logger().WriteToLog(logger.Info, "[LocationRequest | Cancel] Task canceled. Description: ", description)
 }

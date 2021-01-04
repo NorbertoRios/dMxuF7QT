@@ -14,7 +14,7 @@ import (
 func NewWaitingImmoAckObserver(_task interfaces.ITask) *WaitingImmoAckObserver {
 	return &WaitingImmoAckObserver{
 		task:     _task,
-		Watchdog: watchdog.NewAckImmoWatchdog(_task, 300),
+		Watchdog: watchdog.NewWatchdog(_task.Device(), _task.Invoker().(interfaces.IImmoInvoker).AckWatchdogsCommands(_task), 30),
 	}
 }
 
@@ -27,7 +27,7 @@ func (observer *WaitingImmoAckObserver) Attached() {
 //WaitingImmoAckObserver ...
 type WaitingImmoAckObserver struct {
 	task     interfaces.ITask
-	Watchdog *watchdog.AckImmoWatchdog
+	Watchdog *watchdog.Watchdog
 }
 
 //Task returns observer's task

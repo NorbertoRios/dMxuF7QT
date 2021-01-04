@@ -1,6 +1,9 @@
 package request
 
-import "strings"
+import (
+	"reflect"
+	"strings"
+)
 
 //BaseRequest ...
 type BaseRequest struct {
@@ -17,4 +20,12 @@ func (data *BaseRequest) Serial() string {
 //CallbackID ...
 func (data *BaseRequest) CallbackID() string {
 	return data.FacadeCallbackID
+}
+
+//Equal ...
+func (data *BaseRequest) Equal(req IRequest) bool {
+	if _, v := req.(*BaseRequest); v {
+		return reflect.DeepEqual(data, req)
+	}
+	return false
 }

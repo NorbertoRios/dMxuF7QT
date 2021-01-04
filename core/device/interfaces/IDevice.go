@@ -17,7 +17,7 @@ type IDevice interface {
 	Immobilizer(int, string) IImmobilizer
 	ElectricLock(int) IProcess
 	MessageArrived(interface{}) *list.List
-	LocationRequest() ILocationRequest
-	Configuration() IConfiguration
+	LocationRequest() IProcess
+	Configuration() IProcess
 	Parser() parser.IParser
 }

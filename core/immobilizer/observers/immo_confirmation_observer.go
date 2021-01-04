@@ -16,14 +16,14 @@ import (
 func NewImmoConfitmationObserver(_task interfaces.ITask) *ImmoConfitmationObserver {
 	return &ImmoConfitmationObserver{
 		task:     _task,
-		Watchdog: watchdog.NewDiagImmoWatchdog(_task, 300),
+		Watchdog: watchdog.NewWatchdog(_task.Device(), _task.Invoker().(interfaces.IImmoInvoker).DiagWatchdogsCommands(_task), 30),
 	}
 }
 
 //ImmoConfitmationObserver ...
 type ImmoConfitmationObserver struct {
 	task     interfaces.ITask
-	Watchdog *watchdog.DiagImmoWatchdog
+	Watchdog *watchdog.Watchdog
 }
 
 //Attached ...

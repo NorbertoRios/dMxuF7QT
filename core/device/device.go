@@ -40,13 +40,13 @@ type Device struct {
 	Param24             []string
 	DeviceObservable    *Observable
 	LastStateUpdateTime time.Time
-	Config              interfaces.IConfiguration
+	Config              interfaces.IProcess
 	DeviceParser        parser.IParser
 	ImmoStorage         *peripherystorage.ImmobilizerStorage
 	LockStorage         *peripherystorage.ElectricLockStorage
 	UDPChannel          connection.IChannel
 	Mutex               *sync.Mutex
-	LocationTask        interfaces.ILocationRequest
+	LocationTask        interfaces.IProcess
 	SerialNumber        string
 	CurrentState        map[sensors.ISensor]time.Time
 }
@@ -72,7 +72,7 @@ func (device *Device) Parser() parser.IParser {
 }
 
 //Configuration ..
-func (device *Device) Configuration() interfaces.IConfiguration {
+func (device *Device) Configuration() interfaces.IProcess {
 	if device.Config == nil {
 		device.Config = configuration.NewConfiguration(device)
 	}
@@ -80,7 +80,7 @@ func (device *Device) Configuration() interfaces.IConfiguration {
 }
 
 //LocationRequest ..
-func (device *Device) LocationRequest() interfaces.ILocationRequest {
+func (device *Device) LocationRequest() interfaces.IProcess {
 	return device.LocationTask
 }
 
