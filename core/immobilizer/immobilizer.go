@@ -2,34 +2,35 @@ package immobilizer
 
 import (
 	"container/list"
+	"fmt"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/immobilizer/request"
 	"genx-go/core/immobilizer/task"
+	"genx-go/core/process"
 	baseRequest "genx-go/core/request"
 	"genx-go/core/sensors"
 	"genx-go/logger"
+	"reflect"
 	"sync"
 )
 
 //NewImmobilizer ...
 func NewImmobilizer(_device interfaces.IDevice, index int, trigger string) *Immobilizer {
-	return &Immobilizer{
-		device:       _device,
-		tasks:        list.New(),
+	immo := &Immobilizer{
 		OutputNumber: index,
 		trigger:      trigger,
-		mutex:        &sync.Mutex{},
 	}
+	immo.Mutex = &sync.Mutex{}
+	immo.ProcessDevice = _device
+	immo.ProcessTasks = list.New()
+	return immo
 }
 
 //Immobilizer process
 type Immobilizer struct {
-	mutex        *sync.Mutex
-	device       interfaces.IDevice
+	process.BaseProcess
 	OutputNumber int
 	trigger      string
-	currentTask  interfaces.ITask
-	tasks        *list.List
 }
 
 //Trigger ...
@@ -37,40 +38,31 @@ func (immo *Immobilizer) Trigger() string {
 	return immo.trigger
 }
 
-//Device ...
-func (immo *Immobilizer) Device() interfaces.IDevice {
-	return immo.device
-}
-
-//CurrentTask ...
-func (immo *Immobilizer) CurrentTask() interfaces.ITask {
-	return immo.currentTask
-}
-
 //NewRequest ...
 func (immo *Immobilizer) NewRequest(req baseRequest.IRequest) *list.List {
 	newTask := task.NewImmobilizerTask(req.(*request.ChangeImmoStateRequest), immo, immo.Device())
-	if immo.currentTask == nil {
-		immo.currentTask = newTask
+	if immo.ProcessCurrentTask == nil {
+		immo.ProcessCurrentTask = newTask
 		return newTask.Commands()
 	}
-	return immo.competitivenessOfTasks(newTask, immo.currentTask.Request().(*request.ChangeImmoStateRequest))
+	return immo.competitivenessOfTasks(newTask, immo.ProcessCurrentTask.Request().(*request.ChangeImmoStateRequest))
 }
 
 func (immo *Immobilizer) competitivenessOfTasks(newTask interfaces.ITask, currentRequest *request.ChangeImmoStateRequest) *list.List {
 	if currentRequest.Equal(newTask.Request().(*request.ChangeImmoStateRequest)) {
+		logger.Logger().WriteToLog(logger.Info, fmt.Sprintf("[Immobilizer | competitivenessOfTasks] Duplicate request %v", currentRequest.Marshal()))
 		return newTask.Invoker().CanselTask(newTask, "Duplicate")
 	}
 	cmdList := list.New()
-	cmdList.PushBackList(immo.currentTask.Invoker().CanselTask(immo.currentTask, "Deprecated"))
-	immo.currentTask = newTask
-	cmdList.PushBackList(immo.currentTask.Commands())
+	cmdList.PushBackList(immo.ProcessCurrentTask.Invoker().CanselTask(immo.ProcessCurrentTask, "Deprecated"))
+	cmdList.PushBackList(immo.ProcessCurrentTask.Commands())
+	immo.ProcessCurrentTask = newTask
 	return cmdList
 }
 
 //State ...
 func (immo *Immobilizer) State() string {
-	deviceState := immo.device.State()
+	deviceState := immo.ProcessDevice.State()
 	for sensor := range deviceState {
 		switch sensor.(type) {
 		case *sensors.Relay:
@@ -86,29 +78,20 @@ func (immo *Immobilizer) State() string {
 	return ""
 }
 
-//Tasks ...
-func (immo *Immobilizer) Tasks() *list.List {
-	return immo.tasks
-}
-
 //TaskCancel ...
 func (immo *Immobilizer) TaskCancel(canseledTask interfaces.ITask, description string) {
-	logger.Logger().WriteToLog(logger.Info, "Task is canceled. ", description)
-	immo.pushToTasks(task.NewCanceledImmoTask(canseledTask, description), false)
+	if reflect.DeepEqual(immo.ProcessCurrentTask, canseledTask) {
+		logger.Logger().WriteToLog(logger.Info, "[Immobilizer] Current task canceled. Reason: ", description)
+		immo.ProcessCurrentTask = nil
+	} else {
+		logger.Logger().WriteToLog(logger.Info, "[Immobilizer] Task is canceled. ", description)
+	}
+	immo.PushToTasks(task.NewCanceledImmoTask(canseledTask, description), false)
 }
 
 //TaskDone ...
 func (immo *Immobilizer) TaskDone(doneTask interfaces.ITask) {
-	logger.Logger().WriteToLog(logger.Info, "Task is done")
-	immo.pushToTasks(task.NewDoneImmoTask(doneTask), true)
-}
-
-func (immo *Immobilizer) pushToTasks(_task interfaces.ITask, isDone bool) {
-	immo.mutex.Lock()
-	defer immo.mutex.Unlock()
-	if isDone {
-		immo.tasks.PushFront(_task)
-	} else {
-		immo.tasks.PushBack(_task)
-	}
+	immo.ProcessCurrentTask = nil
+	logger.Logger().WriteToLog(logger.Info, "[Immobilizer] Task is done")
+	immo.PushToTasks(task.NewDoneImmoTask(doneTask), true)
 }

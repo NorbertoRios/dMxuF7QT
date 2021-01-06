@@ -6,7 +6,7 @@ import (
 )
 
 //NewDoneImmoTask ..
-func NewDoneImmoTask(_task interfaces.ITask) *DoneImmoTask {
+func NewDoneImmoTask(_task interfaces.ITask) interfaces.ITask {
 	return &DoneImmoTask{
 		Task:     _task,
 		doneTime: time.Now().UTC(),

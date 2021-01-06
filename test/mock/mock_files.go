@@ -4,11 +4,12 @@ import "path/filepath"
 
 //File mock file for tests
 type File struct {
-	FilePath string
+	fileDest string
+	dir      string
 }
 
 //Path returns absolute file path
 func (file File) Path() string {
-	absPath, _ := filepath.Abs(file.FilePath)
+	absPath, _ := filepath.Abs(filepath.Dir(file.dir) + file.fileDest)
 	return absPath
 }

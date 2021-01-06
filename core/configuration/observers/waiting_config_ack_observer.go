@@ -31,6 +31,7 @@ func (observer *WaitingConfigAckObserver) Update(msg interface{}) *list.List {
 		{
 			ackMessage := msg.(*message.AckMessage)
 			if ackMessage.Value == observer.task.CurrentStringCommand() {
+				logger.Logger().WriteToLog(logger.Info, "[WaitingConfigAckObserver | Update] Config \"", observer.task.CurrentStringCommand(), "\" ack \"", ackMessage.Value, "\" is received")
 				observer.watchdog.Stop()
 				commands.PushBack(observers.NewDetachObserverCommand(observer))
 				observer.task.(interfaces.IConfigTask).CommandComplete()

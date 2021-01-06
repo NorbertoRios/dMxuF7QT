@@ -6,7 +6,7 @@ import (
 )
 
 //NewDoneElectricLockTask ...
-func NewDoneElectricLockTask(_task interfaces.ITask) *DoneElectricLockTask {
+func NewDoneElectricLockTask(_task interfaces.ITask) interfaces.ITask {
 	return &DoneElectricLockTask{
 		Task:     _task,
 		doneTime: time.Now().UTC(),

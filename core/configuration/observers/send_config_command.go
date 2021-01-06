@@ -25,6 +25,7 @@ func (c *SendConfigCommand) Execute(device interfaces.IDevice) *list.List {
 	if err := device.Send(c.task.CurrentStringCommand()); err != nil {
 		logger.Logger().WriteToLog(logger.Error, "[ImmoSendRelayCommand | Execute] Error while sending command ", c.task.CurrentStringCommand())
 	}
+	logger.Logger().WriteToLog(logger.Info, "[ImmoSendRelayCommand | Execute] Command \"", c.task.CurrentStringCommand(), "\" is sent")
 	commands.PushBack(coreObservers.NewAttachObserverCommand(NewWaitingConfigAckObserver(c.task)))
 	return commands
 }

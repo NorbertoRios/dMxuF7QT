@@ -1,11 +1,8 @@
 package config
 
 import (
-	"fmt"
 	"genx-go/core/configuration/request"
 	"genx-go/core/configuration/task"
-	"genx-go/core/device/interfaces"
-	"genx-go/core/filter"
 	"genx-go/core/usecase"
 	"genx-go/test/mock"
 	"testing"
@@ -92,12 +89,10 @@ func TestConfigurationLogic(t *testing.T) {
 		case *task.CanceledConfigTask:
 			{
 				doneTasks++
-				checkTasksObservers(tsk.Value.(*task.CanceledConfigTask).Task, t)
 			}
 		case *task.DoneConfigTask:
 			{
 				canceledTasks++
-				checkTasksObservers(tsk.Value.(*task.DoneConfigTask).Task, t)
 			}
 		default:
 			{
@@ -107,12 +102,5 @@ func TestConfigurationLogic(t *testing.T) {
 	}
 	if doneTasks != 1 || canceledTasks != 1 {
 		t.Error("Unexpected done/canceled tasks count")
-	}
-}
-
-func checkTasksObservers(_task interfaces.ITask, t *testing.T) {
-	oFilter := filter.NewObserversFilter(_task.Device().Observable())
-	if len(oFilter.Extract(_task)) != 0 {
-		t.Error(fmt.Sprintf("Not all observers were detached after task cancel. Task %T", _task))
 	}
 }

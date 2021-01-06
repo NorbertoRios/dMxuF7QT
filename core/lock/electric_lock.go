@@ -5,38 +5,38 @@ import (
 	"genx-go/core/device/interfaces"
 	"genx-go/core/lock/request"
 	"genx-go/core/lock/task"
+	"genx-go/core/process"
 	baseRequest "genx-go/core/request"
 	"genx-go/logger"
+	"reflect"
 	"sync"
 )
 
 //NewElectricLock ...
 func NewElectricLock(_device interfaces.IDevice, _outNum int) *ElectricLock {
-	return &ElectricLock{
-		mutex:        &sync.Mutex{},
-		device:       _device,
+	lock := &ElectricLock{
 		OutputNumber: _outNum,
-		tasks:        list.New(),
 	}
+	lock.Mutex = &sync.Mutex{}
+	lock.ProcessTasks = list.New()
+	lock.ProcessDevice = _device
+	return lock
 }
 
 //ElectricLock ...
 type ElectricLock struct {
-	mutex        *sync.Mutex
-	device       interfaces.IDevice
+	process.BaseProcess
 	OutputNumber int
-	currentTask  interfaces.ITask
-	tasks        *list.List
 }
 
 //NewRequest ..
 func (lock *ElectricLock) NewRequest(req baseRequest.IRequest) *list.List {
-	newTask := task.NewElectricLockTask(req, lock.device, lock)
-	if lock.currentTask == nil {
-		lock.currentTask = newTask
-		return lock.currentTask.Commands()
+	newTask := task.NewElectricLockTask(req, lock.ProcessDevice, lock)
+	if lock.ProcessCurrentTask == nil {
+		lock.ProcessCurrentTask = newTask
+		return lock.ProcessCurrentTask.Commands()
 	}
-	return lock.competitivenessOfTasks(newTask, lock.currentTask.Request().(*request.UnlockRequest))
+	return lock.competitivenessOfTasks(newTask, lock.ProcessCurrentTask.Request().(*request.UnlockRequest))
 }
 
 func (lock *ElectricLock) competitivenessOfTasks(newTask interfaces.ITask, currentReq *request.UnlockRequest) *list.List {
@@ -44,41 +44,27 @@ func (lock *ElectricLock) competitivenessOfTasks(newTask interfaces.ITask, curre
 		return newTask.Invoker().CanselTask(newTask, "Duplicate")
 	}
 	cmdList := list.New()
-	cmdList.PushBackList(lock.currentTask.Invoker().CanselTask(lock.currentTask, "Deprecated"))
-	lock.currentTask = newTask
-	cmdList.PushBackList(lock.currentTask.Commands())
-	logger.Logger().WriteToLog(logger.Info, "Task created and run")
+	cmdList.PushBackList(lock.ProcessCurrentTask.Invoker().CanselTask(lock.ProcessCurrentTask, "Deprecated"))
+	lock.ProcessCurrentTask = newTask
+	cmdList.PushBackList(lock.ProcessCurrentTask.Commands())
+	logger.Logger().WriteToLog(logger.Info, "[ElectricLock] Task created and run")
 	return cmdList
-}
-
-//CurrentTask ..
-func (lock *ElectricLock) CurrentTask() interfaces.ITask {
-	return lock.currentTask
-}
-
-//Tasks ...
-func (lock *ElectricLock) Tasks() *list.List {
-	return lock.tasks
 }
 
 //TaskCancel ...
 func (lock *ElectricLock) TaskCancel(canseledTask interfaces.ITask, description string) {
-	logger.Logger().WriteToLog(logger.Info, "Task is canceled. ", description)
-	lock.pushToTasks(task.NewCanceledElectricLockTask(canseledTask, description), false)
+	if reflect.DeepEqual(canseledTask, lock.ProcessCurrentTask) {
+		lock.ProcessCurrentTask = nil
+		logger.Logger().WriteToLog(logger.Info, "[ElectricLock] Current task is canceled. ", description)
+	} else {
+		logger.Logger().WriteToLog(logger.Info, "[ElectricLock] Task is canceled. ", description)
+	}
+	lock.PushToTasks(task.NewCanceledElectricLockTask(canseledTask, description), false)
 }
 
 //TaskDone ...
 func (lock *ElectricLock) TaskDone(doneTask interfaces.ITask) {
-	logger.Logger().WriteToLog(logger.Info, "Task is done")
-	lock.pushToTasks(task.NewDoneElectricLockTask(doneTask), true)
-}
-
-func (lock *ElectricLock) pushToTasks(_task interfaces.ITask, isDone bool) {
-	lock.mutex.Lock()
-	defer lock.mutex.Unlock()
-	if isDone {
-		lock.tasks.PushFront(_task)
-	} else {
-		lock.tasks.PushBack(_task)
-	}
+	lock.ProcessCurrentTask = nil
+	logger.Logger().WriteToLog(logger.Info, "[ElectricLock] Task is done")
+	lock.PushToTasks(task.NewDoneElectricLockTask(doneTask), true)
 }

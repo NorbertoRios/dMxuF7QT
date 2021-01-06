@@ -5,68 +5,54 @@ import (
 	"genx-go/core/configuration/request"
 	"genx-go/core/configuration/task"
 	"genx-go/core/device/interfaces"
+	"genx-go/core/process"
 	baseRequest "genx-go/core/request"
 	"genx-go/logger"
+	"reflect"
 	"sync"
 )
 
 //NewConfiguration ...
 func NewConfiguration(_device interfaces.IDevice) *Configuration {
-	return &Configuration{
-		mutex:  &sync.Mutex{},
-		device: _device,
-		tasks:  list.New(),
-	}
+	config := &Configuration{}
+	config.Mutex = &sync.Mutex{}
+	config.ProcessDevice = _device
+	config.ProcessTasks = list.New()
+	return config
 }
 
 //Configuration ..
 type Configuration struct {
-	mutex       *sync.Mutex
-	device      interfaces.IDevice
-	currentTask interfaces.ITask
-	tasks       *list.List
-}
-
-//CurrentTask ...
-func (config *Configuration) CurrentTask() interfaces.ITask {
-	return config.currentTask
-}
-
-//Tasks ...
-func (config *Configuration) Tasks() *list.List {
-	return config.tasks
+	process.BaseProcess
 }
 
 //NewRequest ..
 func (config *Configuration) NewRequest(req baseRequest.IRequest) *list.List {
 	cList := list.New()
-	newTask := task.New(req.(*request.ConfigurationRequest), config.device, config)
-	if config.currentTask != nil {
-		cList.PushBackList(config.currentTask.Invoker().CanselTask(config.currentTask, "Deprecated"))
+	newTask := task.New(req.(*request.ConfigurationRequest), config.ProcessDevice, config)
+	if config.ProcessCurrentTask != nil {
+		if _, v := config.ProcessCurrentTask.(*task.ConfigTask); v {
+			cList.PushBackList(config.ProcessCurrentTask.Invoker().CanselTask(config.ProcessCurrentTask, "Deprecated"))
+		}
 	}
-	config.currentTask = newTask
-	cList.PushBackList(config.currentTask.Commands())
+	config.ProcessCurrentTask = newTask
+	cList.PushBackList(config.ProcessCurrentTask.Commands())
 	return cList
 }
 
 //TaskCancel ...
 func (config *Configuration) TaskCancel(canseledTask interfaces.ITask, description string) {
-	logger.Logger().WriteToLog(logger.Info, "Task is canceled. ", description)
-	config.pushToTasks(task.NewCanceledConfigTask(canseledTask, description), false)
+	if reflect.DeepEqual(canseledTask, config.ProcessCurrentTask) {
+		config.ProcessCurrentTask = nil
+		logger.Logger().WriteToLog(logger.Info, "[Configuration] Current task is canceled. ", description)
+	}
+	logger.Logger().WriteToLog(logger.Info, "[Configuration] Task is canceled. ", description)
+	config.PushToTasks(task.NewCanceledConfigTask(canseledTask, description), false)
 }
 
 //TaskDone ...
 func (config *Configuration) TaskDone(doneTask interfaces.ITask) {
+	config.ProcessCurrentTask = nil
 	logger.Logger().WriteToLog(logger.Info, "Task is done")
-	config.pushToTasks(task.NewDoneConfigTask(doneTask), true)
-}
-
-func (config *Configuration) pushToTasks(_task interfaces.ITask, isDone bool) {
-	config.mutex.Lock()
-	defer config.mutex.Unlock()
-	if isDone {
-		config.tasks.PushFront(_task)
-	} else {
-		config.tasks.PushBack(_task)
-	}
+	config.PushToTasks(task.NewDoneConfigTask(doneTask), true)
 }

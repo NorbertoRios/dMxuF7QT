@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/filter"
+	"genx-go/core/invoker"
 	"genx-go/core/location/observers"
 	"genx-go/core/request"
 	"genx-go/logger"
@@ -12,10 +13,11 @@ import (
 )
 
 //NewLocationTask ...
-func NewLocationTask(_request *request.BaseRequest, _device interfaces.IDevice) *LocationTask {
+func NewLocationTask(_request *request.BaseRequest, _device interfaces.IDevice, _process interfaces.IProcess) *LocationTask {
 	return &LocationTask{
 		FacadeRequest: _request,
 		device:        _device,
+		invoker:       invoker.NewLocationInvoker(_process),
 	}
 }
 

@@ -2,7 +2,6 @@ package device
 
 import (
 	"container/list"
-	"fmt"
 	serviceConfiguration "genx-go/configuration"
 	"genx-go/connection"
 	"genx-go/core/configuration"
@@ -13,7 +12,6 @@ import (
 	"genx-go/logger"
 	"genx-go/parser"
 	"genx-go/types"
-	"os"
 	"sync"
 	"time"
 )
@@ -64,7 +62,7 @@ func (device *Device) Send(message interface{}) error {
 //Parser ...
 func (device *Device) Parser() parser.IParser {
 	if device.DeviceParser == nil {
-		file := &types.File{FilePath: fmt.Sprintf("%v/ReportConfiguration.xml", os.Args[0])}
+		file := &types.File{FilePath: "../ReportConfiguration.xml"}
 		xmlProvider := serviceConfiguration.ConstructXMLProvider(file)
 		device.DeviceParser = parser.NewGenxBinaryReportParser(device.Param24, xmlProvider)
 	}

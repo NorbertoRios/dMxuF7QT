@@ -14,7 +14,7 @@ import (
 func NewWaitingEctricLockAck(_task interfaces.ITask) *WaitingEctricLockAck {
 	return &WaitingEctricLockAck{
 		task: _task,
-		wd:   watchdog.NewElectricLockWatchdog(_task.Device(), _task.Invoker().CanselTask(_task, "Time is over"), _task.Request().(*request.UnlockRequest).Time()),
+		wd:   watchdog.NewElectricLockWatchdog(_task),
 	}
 }
 

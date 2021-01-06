@@ -1,7 +1,9 @@
 package request
 
 import (
+	"encoding/json"
 	"genx-go/core/request"
+	"genx-go/logger"
 	"reflect"
 )
 
@@ -19,4 +21,14 @@ func (data *ChangeImmoStateRequest) Equal(req request.IRequest) bool {
 		return reflect.DeepEqual(data, req)
 	}
 	return false
+}
+
+//Marshal ...
+func (data *ChangeImmoStateRequest) Marshal() string {
+	jTask, jerr := json.Marshal(data)
+	if jerr != nil {
+		logger.Logger().WriteToLog(logger.Error, "[ChangeImmoStateRequest | Marshal] Error while marshaling ChangeImmoStateRequest. Error:", jerr)
+		return ""
+	}
+	return string(jTask)
 }

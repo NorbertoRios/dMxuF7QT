@@ -6,7 +6,7 @@ import (
 )
 
 //NewCanceledConfigTask ..
-func NewCanceledConfigTask(_task interfaces.ITask, _description string) *CanceledConfigTask {
+func NewCanceledConfigTask(_task interfaces.ITask, _description string) interfaces.ITask {
 	return &CanceledConfigTask{
 		Task:                _task,
 		canceledTime:        time.Now().UTC(),

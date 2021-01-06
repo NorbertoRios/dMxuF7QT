@@ -24,7 +24,7 @@ func (request *SendLocationRequest) Execute(device interfaces.IDevice) *list.Lis
 	cList := list.New()
 	if err := device.Send("DIAG POLQ"); err != nil {
 		logger.Logger().WriteToLog(logger.Error, "[SendLocationRequest | Execute] Error while sending command \"DIAG POLQ\"")
-	}
+	}	
 	cList.PushBack(observers.NewAttachObserverCommand(NewWaitingLocationMessageObserver(request.task)))
 	//commands.PushBack(NewPushToRabbitMessageCommand(setRelayDrive.Command(), Message))
 	return cList
