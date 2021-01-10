@@ -45,7 +45,7 @@ type Device struct {
 //Parser ...
 func (device *Device) Parser() parser.IParser {
 	if device.DeviceParser == nil {
-		file := &File{dir: "..", fileDest: "/ReportConfiguration.xml"}
+		file := NewFile("..", "/ReportConfiguration.xml")
 		xmlProvider := serviceConfiguration.ConstructXMLProvider(file)
 		device.DeviceParser = parser.NewGenxBinaryReportParser(device.Param24, xmlProvider)
 	}

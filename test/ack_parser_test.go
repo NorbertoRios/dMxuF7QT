@@ -1,6 +1,7 @@
 package test
 
 import (
+	"genx-go/message"
 	"genx-go/parser"
 	"testing"
 )
@@ -14,7 +15,7 @@ func TestAckMessageParsing(t *testing.T) {
 	if deviceMessage == nil {
 		t.Error("Message cant be null")
 	}
-	if deviceMessage.Value != "SETPARAM;7=216.187.77.150;ENDPARAM;BACKUPNVRAM;" {
+	if deviceMessage.(*message.AckMessage).Value != "SETPARAM;7=216.187.77.150;ENDPARAM;BACKUPNVRAM;" {
 		t.Error("Wrong parameter")
 	}
 }

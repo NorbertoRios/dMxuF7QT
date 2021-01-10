@@ -9,9 +9,9 @@ import (
 )
 
 //NewMessageArrivedUseCase ...
-func NewMessageArrivedUseCase(_device interfaces.IDevice, _request []byte) *MessageArrivedUseCase {
+func NewMessageArrivedUseCase(_device interfaces.IDevice, _rMessage *message.RawMessage) *MessageArrivedUseCase {
 	useCase := &MessageArrivedUseCase{
-		caseRequest: _request,
+		rMessage: _rMessage,
 	}
 	useCase.device = _device
 	return useCase
@@ -20,7 +20,7 @@ func NewMessageArrivedUseCase(_device interfaces.IDevice, _request []byte) *Mess
 //MessageArrivedUseCase ...
 type MessageArrivedUseCase struct {
 	BaseUseCase
-	caseRequest []byte
+	rMessage *message.RawMessage
 }
 
 //Launch ...
@@ -31,18 +31,16 @@ func (useCase *MessageArrivedUseCase) Launch() {
 }
 
 func (useCase *MessageArrivedUseCase) prepareMessage() interface{} {
-	factory := message.Factory()
-	rMessage := factory.BuildRawMessage(useCase.caseRequest)
-	switch rMessage.MessageType {
+	switch useCase.rMessage.MessageType {
 	case messagetype.BinaryLocation:
 		{
 			messageParser := useCase.device.Parser()
-			return messageParser.Parse(rMessage)
+			return messageParser.Parse(useCase.rMessage)
 		}
 	case messagetype.Ack:
 		{
 			messageParser := parser.ConstructAckMesageParser()
-			return messageParser.Parse(rMessage)
+			return messageParser.Parse(useCase.rMessage)
 		}
 	case messagetype.Nack:
 		{
@@ -52,7 +50,7 @@ func (useCase *MessageArrivedUseCase) prepareMessage() interface{} {
 	case messagetype.Parameter:
 		{
 			messageParser := parser.ConstructParametersMessageParser()
-			return messageParser.Parse(rMessage)
+			return messageParser.Parse(useCase.rMessage)
 		}
 	case messagetype.Poll:
 		{
@@ -62,12 +60,12 @@ func (useCase *MessageArrivedUseCase) prepareMessage() interface{} {
 	case messagetype.DiagHardware:
 		{
 			messageParser := parser.BuildGenxHardwareMessageParser()
-			return messageParser.Parse(rMessage)
+			return messageParser.Parse(useCase.rMessage)
 		}
 	case messagetype.Diag1Wire:
 		{
 			messageParser := parser.BuildOneWireMessageParser()
-			return messageParser.Parse(rMessage)
+			return messageParser.Parse(useCase.rMessage)
 		}
 	case messagetype.GarminMessage:
 		{
@@ -77,7 +75,7 @@ func (useCase *MessageArrivedUseCase) prepareMessage() interface{} {
 	case messagetype.DiagCAN:
 		{
 			messageParser := parser.BuildCANMessageParser()
-			return messageParser.Parse(rMessage)
+			return messageParser.Parse(useCase.rMessage)
 		}
 	case messagetype.DiagJBUS:
 		{
@@ -91,7 +89,7 @@ func (useCase *MessageArrivedUseCase) prepareMessage() interface{} {
 		}
 	default:
 		{
-			logger.Logger().WriteToLog(logger.Error, "[MessageArrivedUseCase | prepareMessage] Unexpected packet : \"", useCase.caseRequest, "\" message type ", rMessage.MessageType)
+			logger.Logger().WriteToLog(logger.Error, "[MessageArrivedUseCase | prepareMessage] Unexpected packet : \"", useCase.rMessage.RawData, "\" message type ", useCase.rMessage.MessageType)
 			return nil
 		}
 	}

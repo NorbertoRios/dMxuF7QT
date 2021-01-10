@@ -1,6 +1,21 @@
 package models
 
-import "time"
+import (
+	"genx-go/core/device/interfaces"
+	"time"
+)
+
+//NewDeviceActivity ...
+func NewDeviceActivity(_device interfaces.IDevice) *DeviceActivity {
+	return &DeviceActivity{
+		// Identity:           _device.Identity(),
+		// MessageTime:        _device.LastLocationMessage().Time(),
+		// LastUpdateTime:     _device.LastUpdateTime(),
+		// LastMessageID:      _device.LastMessageID(),
+		// LastMessage:        _device.LastLocationMessage().DTO(),
+		// Serializedsoftware: _device.Software(),
+	}
+}
 
 //DeviceActivity device activity model
 type DeviceActivity struct {

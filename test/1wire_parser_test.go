@@ -3,6 +3,7 @@ package test
 import (
 	"fmt"
 	"genx-go/core/sensors"
+	"genx-go/message"
 	"genx-go/parser"
 	"testing"
 )
@@ -35,22 +36,22 @@ func TestPresent1WireMessage3TempSensors(t *testing.T) {
 	packet := []byte("1WIRE:10/Present\n1:10B8993E01080099 TS-65.300003\n2:102E5A080000006A TS-56.299999\n3:109F6108000000AE TS-60.799999\n4:0000000000000000\n5:01AB16430F00004E ID\n000003912835 3912835")
 	rm := factory.BuildRawMessage(packet)
 	parser := parser.BuildOneWireMessageParser()
-	message := parser.Parse(rm)
-	if len(message.Sensors) != 4 {
+	msg := parser.Parse(rm)
+	if len(msg.(*message.Message).Sensors) != 4 {
 		t.Error("Error in count of sensors")
 	}
-	checkTempSensors(message.Sensors[0], byte(1), "10B8993E01080099", float32(65.300003), t)
-	checkTempSensors(message.Sensors[1], byte(2), "102E5A080000006A", float32(56.299999), t)
-	checkTempSensors(message.Sensors[2], byte(3), "109F6108000000AE", float32(60.799999), t)
-	checkIButtonSensor(message.Sensors[3], int32(0xF00004E), t)
+	checkTempSensors(msg.(*message.Message).Sensors[0], byte(1), "10B8993E01080099", float32(65.300003), t)
+	checkTempSensors(msg.(*message.Message).Sensors[1], byte(2), "102E5A080000006A", float32(56.299999), t)
+	checkTempSensors(msg.(*message.Message).Sensors[2], byte(3), "109F6108000000AE", float32(60.799999), t)
+	checkIButtonSensor(msg.(*message.Message).Sensors[3], int32(0xF00004E), t)
 }
 
 func TestNoDevice1WireMessageParsing(t *testing.T) {
 	packet := []byte("1WIRE:10/NoDevice\n1:0000000000000000\n2:0000000000000000\n3:0000000000000000\n4:0000000000000000\n5:0000000000000000\n000003912835 3912835")
 	rm := factory.BuildRawMessage(packet)
 	parser := parser.BuildOneWireMessageParser()
-	message := parser.Parse(rm)
-	if message.Sensors != nil {
+	msg := parser.Parse(rm)
+	if msg.(*message.Message).Sensors != nil {
 		t.Error("Error. No device")
 	}
 }
@@ -59,15 +60,15 @@ func TestPresent1WireMessageParsing(t *testing.T) {
 	packet := []byte("1WIRE:10/Present\n1:10B8993E01080099 TS-65.300003\n2:102E5A080000006A TS-56.299999\n3:109F6108000000AE TS-60.799999\n4:288D19BD01000096 TS-66.199997\n5:01AB16430F00004E ID\n000003912835 3912835")
 	rm := factory.BuildRawMessage(packet)
 	parser := parser.BuildOneWireMessageParser()
-	message := parser.Parse(rm)
-	if len(message.Sensors) != 5 {
+	msg := parser.Parse(rm)
+	if len(msg.(*message.Message).Sensors) != 5 {
 		t.Error("Error in count of sensors")
 	}
-	checkTempSensors(message.Sensors[0], byte(1), "10B8993E01080099", float32(65.300003), t)
-	checkTempSensors(message.Sensors[1], byte(2), "102E5A080000006A", float32(56.299999), t)
-	checkTempSensors(message.Sensors[2], byte(3), "109F6108000000AE", float32(60.799999), t)
-	checkTempSensors(message.Sensors[3], byte(4), "288D19BD01000096", float32(66.199997), t)
-	checkIButtonSensor(message.Sensors[4], int32(0xF00004E), t)
+	checkTempSensors(msg.(*message.Message).Sensors[0], byte(1), "10B8993E01080099", float32(65.300003), t)
+	checkTempSensors(msg.(*message.Message).Sensors[1], byte(2), "102E5A080000006A", float32(56.299999), t)
+	checkTempSensors(msg.(*message.Message).Sensors[2], byte(3), "109F6108000000AE", float32(60.799999), t)
+	checkTempSensors(msg.(*message.Message).Sensors[3], byte(4), "288D19BD01000096", float32(66.199997), t)
+	checkIButtonSensor(msg.(*message.Message).Sensors[4], int32(0xF00004E), t)
 }
 
 func checkIButtonSensor(s sensors.ISensor, driverID int32, t *testing.T) {

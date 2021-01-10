@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-var factory = message.CounstructRawMessageFactory()
+var factory = message.Factory()
 
 func TestBinaryReporPreParsing(t *testing.T) {
 	packet := []byte{0x33, 0x34, 0x36, 0x31, 0x34, 0x37, 0x30, 0x39, 0x00, 0x00, 0x02, 0x78, 0x1C, 0x00, 0x29, 0x5E, 0xC2, 0x83, 0xC3, 0x99, 0xC2, 0x8F, 0x03, 0x28, 0xC2, 0x94, 0xC2, 0x9B, 0x19, 0xC3, 0xB7, 0xC2, 0x82, 0xC3, 0xA5, 0x01, 0x19, 0x61, 0xC2, 0xBB, 0x00, 0x3C, 0x00, 0xC3, 0xB2, 0x01, 0x00, 0x0C, 0xC2, 0xA7, 0x00, 0x00, 0xC3, 0x89, 0x2F, 0x37, 0x77, 0x00}
@@ -46,7 +46,7 @@ func TestPoll(t *testing.T) {
 }
 
 func TestDiagHardwareBrief(t *testing.T) {
-	packet := []byte("3912835:FW:G699.06.78kX\nHW:656, HWOPTID:0016\nOn:431:50:26(48)\nIgn-ON,Volt-12131,Switch-0000,Relay-0000,A2D-4151\n\n000003912835 3912835\n")
+	packet := []byte("MODEL:GNX-5P\nSN:000003912835\nFW:G699.06.78kX 12:59:45 May 25 2012\nHW:656, HWOPTID:0016\nIMEI:357852038210210\nMVER:07.60.00\nGVER:7.03 (45969) 00040007\nOn:485:42:36(48)\nIgn-ON,Volt-12112,Switch-0000,Relay-0000,A2D-3872\nV-12112/12115/12114 Temp-288\nMallocs 0\nCRC:6a10.6ce4.bff5.bff5.60c0.948.2a0f.2a0f.9bfd.9bfd.\n\n000003912835 3912835")
 	res := factory.BuildRawMessage(packet)
 	checkRawMessage("TestDiagHardwareBrief", res, "3912835", messagetype.DiagHardware, t)
 }

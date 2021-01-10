@@ -3,13 +3,14 @@ package device
 import (
 	"container/list"
 	serviceConfiguration "genx-go/configuration"
-	"genx-go/connection"
+	connInterfaces "genx-go/connection/interfaces"
 	"genx-go/core/configuration"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/location"
 	"genx-go/core/peripherystorage"
 	"genx-go/core/sensors"
 	"genx-go/logger"
+	"genx-go/message"
 	"genx-go/parser"
 	"genx-go/types"
 	"sync"
@@ -17,7 +18,7 @@ import (
 )
 
 //NewDevice ...
-func NewDevice(_serial string, _param24 []string, _channel connection.IChannel) interfaces.IDevice {
+func NewDevice(_serial string, _param24 []string, _channel connInterfaces.IChannel) interfaces.IDevice {
 	device := &Device{
 		Param24:             _param24,
 		CurrentState:        make(map[sensors.ISensor]time.Time),
@@ -42,7 +43,7 @@ type Device struct {
 	DeviceParser        parser.IParser
 	ImmoStorage         *peripherystorage.ImmobilizerStorage
 	LockStorage         *peripherystorage.ElectricLockStorage
-	UDPChannel          connection.IChannel
+	UDPChannel          connInterfaces.IChannel
 	Mutex               *sync.Mutex
 	LocationTask        interfaces.IProcess
 	SerialNumber        string
@@ -57,6 +58,11 @@ func (device *Device) Send(message interface{}) error {
 		return err
 	}
 	return nil
+}
+
+//NewChannel ...
+func (device *Device) NewChannel(_channel connInterfaces.IChannel) {
+	device.UDPChannel = _channel
 }
 
 //Parser ...
@@ -75,6 +81,11 @@ func (device *Device) Configuration() interfaces.IProcess {
 		device.Config = configuration.NewConfiguration(device)
 	}
 	return device.Config
+}
+
+//LastDeviceMessage ..
+func (device *Device) LastDeviceMessage() *message.Message {
+	return nil
 }
 
 //LocationRequest ..

@@ -3,12 +3,13 @@ package connection
 import (
 	"encoding/hex"
 	"fmt"
+	"genx-go/connection/controller"
 	"genx-go/logger"
 	"net"
 )
 
 //ConstructUDPServer returns new UDP server
-func ConstructUDPServer(host string, port int) *UDPServer {
+func ConstructUDPServer(host string, port int, _controller *controller.RawDataController) *UDPServer {
 	addr := fmt.Sprintf("%v:%v", host, port)
 	udpAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
@@ -25,6 +26,7 @@ func ConstructUDPServer(host string, port int) *UDPServer {
 	server := &UDPServer{
 		port:       port,
 		connection: udpConn,
+		controller: _controller,
 	}
 	return server
 }
@@ -34,6 +36,7 @@ type UDPServer struct {
 	port        int
 	connection  *net.UDPConn
 	onNewPacket func(channel *UDPChannel, packet []byte)
+	controller  *controller.RawDataController
 }
 
 //OnNewPacket ..
@@ -57,8 +60,8 @@ func (server *UDPServer) Listen() {
 }
 
 //SendBytes send bytes
-func (server *UDPServer) SendBytes(addr *net.UDPAddr, packet []byte) (int64, error) {
-	n, err := server.connection.WriteToUDP(packet, addr)
+func (server *UDPServer) SendBytes(addr interface{}, packet []byte) (int64, error) {
+	n, err := server.connection.WriteToUDP(packet, addr.(*net.UDPAddr))
 	if err != nil {
 		logger.Logger().WriteToLog(logger.Error, "[UDPServer | SendBytes] Error while sending bytes. ", err)
 		return 0, err

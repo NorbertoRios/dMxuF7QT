@@ -2,6 +2,7 @@ package test
 
 import (
 	"fmt"
+	"genx-go/message"
 	"genx-go/parser"
 	"testing"
 )
@@ -19,7 +20,7 @@ func TestParametersMessageParsing(t *testing.T) {
 		"24":  "24=1.2.3.4.5.6.7.89.86.4.2.3;",
 		"500": "500=GFM1212312;",
 	}
-	EqualSlice(deviceMessage.Parameters, shouldValues, t)
+	EqualSlice(deviceMessage.(*message.ParametersMessage).Parameters, shouldValues, t)
 }
 
 func TestAllParametersMessageParsing(t *testing.T) {
@@ -37,7 +38,7 @@ func TestAllParametersMessageParsing(t *testing.T) {
 		"505": "505=0;",
 		"500": "500=GFM121232;",
 	}
-	EqualSlice(deviceMessage.Parameters, shouldValues, t)
+	EqualSlice(deviceMessage.(*message.ParametersMessage).Parameters, shouldValues, t)
 }
 
 func EqualSlice(current, should map[string]string, t *testing.T) bool {

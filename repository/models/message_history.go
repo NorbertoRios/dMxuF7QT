@@ -1,6 +1,14 @@
 package models
 
-import "time"
+import (
+	"genx-go/core/device/interfaces"
+	"time"
+)
+
+//NewMessageHistory ...
+func NewMessageHistory(_device interfaces.IDevice) *MessageHistory {
+	return &MessageHistory{}
+}
 
 //MessageHistory struct
 type MessageHistory struct {

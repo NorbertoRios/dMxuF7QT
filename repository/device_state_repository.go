@@ -1,46 +1,39 @@
 package repository
 
 import (
-	"genx-go/configuration"
+	"genx-go/core/device/interfaces"
 	"genx-go/message"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/gorm"
 )
 
-//ConstructMySQLRepository returns new mysql repository
-func ConstructMySQLRepository(serviceCredentials *configuration.ServiceCredentials) *MySQLRepository {
-	rawdb, rawerr := gorm.Open("mysql", serviceCredentials.MysqDeviceMasterConnectionString)
-	if rawerr != nil {
-		panic("[ConstructMySQLRepository] Error connecting to raw database:" + rawerr.Error())
+//NewDeviceStateRepository returns new mysql repository
+func NewDeviceStateRepository(_connection *gorm.DB) *DeviceStateRepository {
+	return &DeviceStateRepository{
+		Connection: _connection,
 	}
-	rawdb = rawdb.LogMode(true)
-	return &MySQLRepository{Connection: rawdb}
 }
 
-//MySQLRepository represents mysql repository
-type MySQLRepository struct {
+//DeviceStateRepository represents mysql repository
+type DeviceStateRepository struct {
 	Connection *gorm.DB
 }
 
-//LoadDeviceConfig returns not sended device config
-func (db *MySQLRepository) LoadDeviceConfig(identity string, configType string) {
-
-}
-
-//LoadDeviceState returns device last message
-func (db *MySQLRepository) LoadDeviceState(identity string) *message.Message {
+//Save ...
+func (db *DeviceStateRepository) Save(device interfaces.IDevice) error {
 	return nil
 }
 
-func (db *MySQLRepository) saveDeviceActivity(message *message.Message) error {
+//Load returns device last message
+func (db *DeviceStateRepository) Load(identity string) interface{} {
 	return nil
 }
 
-func (db *MySQLRepository) saveMessageHistory(message *message.Message) (uint64, error) {
+func (db *DeviceStateRepository) save(message *message.Message) (uint64, error) {
 	return uint64(0), nil
 }
 
-func (db *MySQLRepository) createMessageHistoryTable(tableName string) error {
+func (db *DeviceStateRepository) createMessageHistoryTable(tableName string) error {
 	return db.Connection.Exec("CREATE TABLE IF NOT EXISTS  raw_data.`" + tableName + "` ( " +
 		"`Id` bigint(20) NOT NULL AUTO_INCREMENT, " +
 		"`DevId` varchar(100) NOT NULL, " +

@@ -2,6 +2,7 @@ package test
 
 import (
 	"genx-go/core/sensors"
+	"genx-go/message"
 	"genx-go/parser"
 	"testing"
 )
@@ -28,22 +29,22 @@ func TestDiagCanResponce(t *testing.T) {
 	packet := []byte("J1939:250kHz\nCE,0,0,0,0,0,2,0,0,2,0\n60415,60671,61183,61440,61441,61443,61444,65170,\nRev 1 Mar.17 17 41110183\n65217,65226,65244,65248,65253,65257,65261,65262,\n65263,65264,65265,65266,65269,65270,65271,65272,\n65274,65276,65279\nAge:0 Spd:53.7 FL:97.2 RPM:1326.5/1326/550 Odo:175093.1\nCT:183.2 TH:3199.4 VIN:2C4RDGBGXDR742233\nJ1708 ENABLED(NO DATA)")
 	rm := factory.BuildRawMessage(packet)
 	parser := parser.BuildCANMessageParser()
-	message := parser.Parse(rm)
-	if len(message.Sensors) != 2 {
+	msg := parser.Parse(rm)
+	if len(msg.(*message.Message).Sensors) != 2 {
 		t.Error("Sensors count error")
 	}
-	checkCanSensors(message.Sensors, t)
+	checkCanSensors(msg.(*message.Message).Sensors, t)
 }
 
 func TestDiagCanResponceWithDTCCodes(t *testing.T) {
 	packet := []byte("CE,0,0,0,134,3,0,0,0,0,136\nOBD(1/1/FD) BFBEB993-8007E019-FED00001 VIN:2C4RDGBGXDR742233\nMIL:4 RPM:754(151936990/1062/31003) Spd:0 Odo:125147575/0\nDSCC:1324/125143\nMAP:35(34) IAT:318 O2:156(244) FL:97.2 CT:88\nOBDDTC:P0128,P0673,P0676,P0675,OBDPDTC:P0128,P0673,P0676,P0675,")
 	rm := factory.BuildRawMessage(packet)
 	parser := parser.BuildCANMessageParser()
-	message := parser.Parse(rm)
-	if len(message.Sensors) != 3 {
+	msg := parser.Parse(rm)
+	if len(msg.(*message.Message).Sensors) != 3 {
 		t.Error("Sensors count error")
 	}
-	checkCanSensors(message.Sensors, t)
+	checkCanSensors(msg.(*message.Message).Sensors, t)
 }
 
 func checkCanSensors(sensorsArr []sensors.ISensor, t *testing.T) {

@@ -20,7 +20,6 @@ func ConstructUDPChannel(addr *net.UDPAddr, server *UDPServer) *UDPChannel {
 type UDPChannel struct {
 	ServerInstance   *UDPServer
 	ConnectedAt      time.Time
-	LastActivityTs   time.Time
 	received         int64
 	transmitted      int64
 	onProcessMessage func()

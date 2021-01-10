@@ -2,7 +2,9 @@ package interfaces
 
 import (
 	"container/list"
+	"genx-go/connection/interfaces"
 	"genx-go/core/sensors"
+	"genx-go/message"
 	"genx-go/parser"
 	"time"
 )
@@ -20,4 +22,8 @@ type IDevice interface {
 	LocationRequest() IProcess
 	Configuration() IProcess
 	Parser() parser.IParser
+
+	//LastDeviceState
+	LastDeviceMessage() *message.Message
+	NewChannel(interfaces.IChannel)
 }
