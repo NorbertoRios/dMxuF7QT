@@ -185,7 +185,7 @@ func checkBReportSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 		case *sensors.QueueSensor:
 			{
 				assert("LockId", sens.(*sensors.QueueSensor).LockID, uint32(22470), t)
-				assert("Trigered", sens.(*sensors.QueueSensor).Trigered, 1, t)
+				assert("Trigered", sens.(*sensors.QueueSensor).TrigeredBy, 1, t)
 				break
 			}
 		case *sensors.TimeSensor:

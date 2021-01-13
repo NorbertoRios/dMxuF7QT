@@ -42,12 +42,9 @@ func (observer *ImmoConfitmationObserver) Update(msg interface{}) *list.List {
 	switch msg.(type) {
 	case *message.LocationMessage:
 		{
-			locationMessage := msg.(*message.LocationMessage)
-			for _, simpleMessage := range locationMessage.Messages {
-				if commands := observer.checkSensorState(simpleMessage.Sensors); commands != nil {
-					return commands
-				}
-				continue
+			locationMessage := msg.(*message.Message)
+			if commands := observer.checkSensorState(locationMessage.Sensors); commands != nil {
+				return commands
 			}
 		}
 	case *message.HardwareMessage:
@@ -68,10 +65,10 @@ func (observer *ImmoConfitmationObserver) checkSensorState(messgaeSensors []sens
 	outNum = outNumDecorator.Index() - 1
 	for _, sens := range messgaeSensors {
 		switch sens.(type) {
-		case *sensors.Relay:
+		case *sensors.Outputs:
 			{
-				relay := sens.(*sensors.Relay)
-				if relay.ID == outNum && relay.State == state {
+				relay := sens.(*sensors.Outputs).Relays
+				if relay[outNum] == state {
 					observer.Watchdog.Stop()
 					return observer.task.Invoker().DoneTask(observer.task)
 				}

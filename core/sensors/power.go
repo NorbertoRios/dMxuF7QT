@@ -3,7 +3,7 @@ package sensors
 import (
 	"genx-go/core"
 	"genx-go/core/columns"
-	"strconv"
+	"time"
 )
 
 //PowerSensor power sensor
@@ -12,9 +12,17 @@ type PowerSensor struct {
 	Supply int32
 }
 
+//ToDTO ..
+func (ps *PowerSensor) ToDTO() map[string]interface{} {
+	hash := make(map[string]interface{})
+	hash["Supply"] = ps.Supply
+	hash["PowerState"] = ps.PowerState()
+	return hash
+}
+
 //PowerState returns power state
 func (ps *PowerSensor) PowerState() string {
-	switch ps.Trigered {
+	switch ps.TrigeredBy {
 	case 1:
 		{
 			return "Powered"
@@ -55,13 +63,17 @@ func BuildPowerSensor(data map[string]interface{}) ISensor {
 		}
 		suply := &columns.Tenth{RawValue: v}
 		sensor := &PowerSensor{Supply: suply.Value()}
-		sensor.Trigered = Trigered(data, posibleReasons)
+		sensor.Trigered(data, posibleReasons)
+		sensor.symbol = "Power"
+		sensor.createdAt = time.Now().UTC()
 		return sensor
 	}
 }
 
 //BuildPowerSensorFromString returns new power sensor
-func BuildPowerSensorFromString(data string) ISensor {
-	supply, _ := strconv.ParseInt(data, 10, 32)
-	return &PowerSensor{Supply: int32(supply)}
+func BuildPowerSensorFromString(data int32, state string) ISensor {
+	sensor := &PowerSensor{Supply: data}
+	sensor.symbol = "Power"
+	sensor.createdAt = time.Now().UTC()
+	return sensor
 }

@@ -1,41 +1,80 @@
 package sensors
 
 import (
-	"genx-go/core"
+	"genx-go/core/columns"
 	"genx-go/types"
+	"time"
 )
 
-//BuildInputs returns array of switches
-func BuildInputs(data map[string]interface{}) []ISensor {
-	v, f := data[core.Switches]
+//Inputs ...
+type Inputs struct {
+	Base
+	Switches map[int]byte
+}
+
+//BuildInputs ...
+func BuildInputs(data map[string]interface{}) ISensor {
+	inputs := newInputs(data)
+	swOnCode := byte(20)
+	swOffCode := byte(24)
+	posibleReasons := map[byte]byte{
+		swOnCode:  1, //switch on
+		swOffCode: 2, //switch off
+	}
+	for i := 0; i < 4; i++ {
+		inputs.Trigered(data, posibleReasons)
+		swOnCode++
+		swOffCode++
+	}
+	return inputs
+}
+
+func newInputs(data map[string]interface{}) *Inputs {
+	v, f := data["Switches"]
 	if !f {
 		return nil
 	}
-	swOnCode := byte(23)
-	swOffCode := byte(27)
-	resultSwitches := make([]ISensor, 0)
+	switches := make(map[int]byte)
 	for i := 0; i < 4; i++ {
-		posibleReasons := map[byte]byte{
-			swOnCode:  1, //switch on
-			swOffCode: 2, //switch off
-		}
-		sw := BuildSwitch(i, v)
-		sw.Trigered = Trigered(data, posibleReasons)
-		resultSwitches = append(resultSwitches, sw)
-		swOffCode--
-		swOnCode--
+		bValue := columns.Byte{RawValue: v}
+		switchMask := &types.Byte{Data: bValue.Value()}
+		boolState := &types.Bool{Data: switchMask.BitIsSet(i)}
+		switches[i+1] = boolState.ToByte()
 	}
-	return resultSwitches
+	s := &Inputs{}
+	s.symbol = "GPIO"
+	s.createdAt = time.Now().UTC()
+	s.Switches = switches
+	return s
 }
 
 //BuildInputsFromString returns switches from string
-func BuildInputsFromString(bitMask string) []ISensor {
+func BuildInputsFromString(bitMask string) ISensor {
 	sType := &types.String{Data: bitMask}
 	byteValue := sType.BitmaskStringToByte()
-	resultSwitches := make([]ISensor, 0)
+	resultSwitches := make(map[int]byte)
 	for i := 0; i < 4; i++ {
-		sw := BuildSwitchFromByte(i, byteValue)
-		resultSwitches = append(resultSwitches, sw)
+		switchMask := &types.Byte{Data: byteValue}
+		boolState := &types.Bool{Data: switchMask.BitIsSet(i)}
+		resultSwitches[i+1] = boolState.ToByte()
 	}
-	return resultSwitches
+	s := &Inputs{Switches: resultSwitches}
+	s.symbol = "GPIO"
+	s.createdAt = time.Now().UTC()
+	return s
+}
+
+//ToDTO ...
+func (s *Inputs) ToDTO() map[string]interface{} {
+	hash := make(map[string]interface{})
+	data := byte(0)
+	for i, r := range s.Switches {
+		data = s.append(i, data, r)
+	}
+	hash[s.symbol] = data
+	return hash
+}
+
+func (Inputs) append(id int, data, value byte) byte {
+	return data | value<<id - 1
 }

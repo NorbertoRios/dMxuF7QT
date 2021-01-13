@@ -2,44 +2,42 @@ package device
 
 import (
 	"container/list"
-	serviceConfiguration "genx-go/configuration"
 	connInterfaces "genx-go/connection/interfaces"
 	"genx-go/core/configuration"
 	"genx-go/core/device/interfaces"
-	"genx-go/core/location"
 	"genx-go/core/peripherystorage"
 	"genx-go/core/sensors"
 	"genx-go/logger"
 	"genx-go/message"
 	"genx-go/parser"
-	"genx-go/types"
 	"sync"
 	"time"
 )
 
 //NewDevice ...
-func NewDevice(_serial string, _param24 []string, _channel connInterfaces.IChannel) interfaces.IDevice {
-	device := &Device{
-		Param24:             _param24,
-		CurrentState:        make(map[sensors.ISensor]time.Time),
-		UDPChannel:          _channel,
-		SerialNumber:        _serial,
-		LastStateUpdateTime: time.Now().UTC(),
-		Mutex:               &sync.Mutex{},
-		DeviceObservable:    NewObservable(),
-		ImmoStorage:         peripherystorage.NewImmobilizerStorage(),
-		LockStorage:         peripherystorage.NewElectricLockStorage(),
-	}
-	device.LocationTask = location.New(device)
-	return device
-}
+// func NewDevice(_serial string, _param24 []string, _channel connInterfaces.IChannel) interfaces.IDevice {
+// 	device := &Device{
+// 		Param24:             _param24,
+// 		CurrentState:        make(map[sensors.ISensor]time.Time),
+// 		UDPChannel:          _channel,
+// 		SerialNumber:        _serial,
+// 		LastStateUpdateTime: time.Now().UTC(),
+// 		Mutex:               &sync.Mutex{},
+// 		DeviceObservable:    NewObservable(),
+// 		ImmoStorage:         peripherystorage.NewImmobilizerStorage(),
+// 		LockStorage:         peripherystorage.NewElectricLockStorage(),
+// 	}
+// 	device.LocationTask = location.New(device)
+// 	return device
+// }
 
 //Device struct
 type Device struct {
-	Param24             []string
+	lastLocationMessage *message.LocationMessage
 	DeviceObservable    *Observable
 	LastStateUpdateTime time.Time
 	Config              interfaces.IProcess
+	CurrentState        *State
 	DeviceParser        parser.IParser
 	ImmoStorage         *peripherystorage.ImmobilizerStorage
 	LockStorage         *peripherystorage.ElectricLockStorage
@@ -47,7 +45,6 @@ type Device struct {
 	Mutex               *sync.Mutex
 	LocationTask        interfaces.IProcess
 	SerialNumber        string
-	CurrentState        map[sensors.ISensor]time.Time
 }
 
 //Send send command to device
@@ -65,16 +62,6 @@ func (device *Device) NewChannel(_channel connInterfaces.IChannel) {
 	device.UDPChannel = _channel
 }
 
-//Parser ...
-func (device *Device) Parser() parser.IParser {
-	if device.DeviceParser == nil {
-		file := &types.File{FilePath: "../ReportConfiguration.xml"}
-		xmlProvider := serviceConfiguration.ConstructXMLProvider(file)
-		device.DeviceParser = parser.NewGenxBinaryReportParser(device.Param24, xmlProvider)
-	}
-	return device.DeviceParser
-}
-
 //Configuration ..
 func (device *Device) Configuration() interfaces.IProcess {
 	if device.Config == nil {
@@ -84,8 +71,8 @@ func (device *Device) Configuration() interfaces.IProcess {
 }
 
 //LastDeviceMessage ..
-func (device *Device) LastDeviceMessage() *message.Message {
-	return nil
+func (device *Device) LastDeviceMessage() *message.LocationMessage {
+	return device.lastLocationMessage
 }
 
 //LocationRequest ..
@@ -99,18 +86,29 @@ func (device *Device) ElectricLock(index int) interfaces.IProcess {
 }
 
 //State returns device current state
-func (device *Device) State() map[sensors.ISensor]time.Time {
+func (device *Device) State() map[string]sensors.ISensor {
 	device.Mutex.Lock()
 	defer device.Mutex.Unlock()
-	return device.CurrentState
+	return device.CurrentState.State()
 }
 
-//PushToRabbit ...
-func (device *Device) PushToRabbit(message, destination string) {
+func (device *Device) handleLocationMessage(msg *message.LocationMessage) {
+	device.lastLocationMessage = msg
+	for _, m := range msg.Messages {
+		device.CurrentState = NewSensorState(device.CurrentState, m.Sensors)
+		device.DeviceObservable.Notify(m)
+	}
 }
 
 //MessageArrived new message
 func (device *Device) MessageArrived(msg interface{}) *list.List {
+	device.LastStateUpdateTime = time.Now().UTC()
+	switch msg.(type) {
+	case *message.LocationMessage:
+		{
+			return device.handleLocationMessage(msg)
+		}
+	}
 	return device.DeviceObservable.Notify(msg)
 }
 

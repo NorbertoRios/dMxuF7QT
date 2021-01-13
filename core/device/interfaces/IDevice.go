@@ -5,25 +5,33 @@ import (
 	"genx-go/connection/interfaces"
 	"genx-go/core/sensors"
 	"genx-go/message"
-	"genx-go/parser"
-	"time"
 )
 
 //IDevice device interface
 type IDevice interface {
+	// Observable() IObservable
+	// Send(interface{}) error
+	// ProcessCommands(*list.List)
+	// State() map[sensors.ISensor]time.Time
+	// Immobilizer(int, string) IImmobilizer
+	// ElectricLock(int) IProcess
+	// MessageArrived(interface{}) *list.List
+	// LocationRequest() IProcess
+	// Configuration() IProcess
+	// Parser() parser.IParser
+
+	//LastDeviceState
+	LastLocationMessage() *message.LocationMessage
 	Observable() IObservable
-	Send(interface{}) error
-	ProcessCommands(*list.List)
-	PushToRabbit(string, string)
-	State() map[sensors.ISensor]time.Time
+	LastDeviceMessage() *message.Message
+	NewChannel(interfaces.IChannel)
+	CurrentDeviceState() []sensors.ISensor
 	Immobilizer(int, string) IImmobilizer
 	ElectricLock(int) IProcess
+	ProcessCommands(*list.List)
+	State() []sensors.ISensor
 	MessageArrived(interface{}) *list.List
 	LocationRequest() IProcess
 	Configuration() IProcess
-	Parser() parser.IParser
-
-	//LastDeviceState
-	LastDeviceMessage() *message.Message
-	NewChannel(interfaces.IChannel)
+	Send(interface{}) error
 }

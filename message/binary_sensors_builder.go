@@ -9,14 +9,13 @@ func BuildBinaryMessageSensors() *BinaryMessageSensors {
 			sensors.BuildTemperatureValueSensor,
 			sensors.BuildIButtonSensor,
 			sensors.BuildGpsSensor,
+			sensors.BuildFuelSensor,
 			sensors.BuildIgnitionSensor,
 			sensors.BuildNetworkSensor,
 			sensors.BuildPowerSensor,
 			sensors.BuildQueueSensor,
 			sensors.BuildTimeSensor,
 			sensors.BuildTripSensor,
-		},
-		SliceSensorBuilders: []func(map[string]interface{}) []sensors.ISensor{
 			sensors.BuildInputs,
 			sensors.BuildOutputs,
 		},
@@ -26,7 +25,6 @@ func BuildBinaryMessageSensors() *BinaryMessageSensors {
 //BinaryMessageSensors represents location binary message sensors
 type BinaryMessageSensors struct {
 	SingleSensorBuilders []func(map[string]interface{}) sensors.ISensor
-	SliceSensorBuilders  []func(map[string]interface{}) []sensors.ISensor
 }
 
 //Build build sensors for message
@@ -36,12 +34,6 @@ func (bms *BinaryMessageSensors) Build(rData map[string]interface{}) []sensors.I
 		sensor := builder(rData)
 		if sensor != nil {
 			returnedValue = append(returnedValue, sensor)
-		}
-	}
-	for _, builder := range bms.SliceSensorBuilders {
-		sensors := builder(rData)
-		if sensors != nil {
-			returnedValue = append(returnedValue, sensors...)
 		}
 	}
 	return returnedValue

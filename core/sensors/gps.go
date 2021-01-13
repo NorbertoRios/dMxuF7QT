@@ -3,6 +3,7 @@ package sensors
 import (
 	"genx-go/core"
 	"genx-go/core/columns"
+	"time"
 )
 
 //GPSSensorRequiredFields required fields for GPS sensor
@@ -24,6 +25,18 @@ type GPSSensor struct {
 	Heading    float32
 	Satellites byte
 	Status     byte
+}
+
+//ToDTO returns sensor implemetation in DTO type
+func (s *GPSSensor) ToDTO() map[string]interface{} {
+	hash := make(map[string]interface{})
+	hash["Speed"] = s.Speed
+	hash["Latitude"] = s.Latitude
+	hash["Longitude"] = s.Longitude
+	hash["Heading"] = s.Heading
+	hash["Satellites"] = s.Satellites
+	hash["GPSStat"] = s.Status
+	return hash
 }
 
 //BuildGpsSensor returns new gps sensor
@@ -50,7 +63,9 @@ func BuildGpsSensor(rData map[string]interface{}) ISensor {
 		Satellites: satelitesColumn.Value(),
 		Status:     gStatusColumn.Value(),
 	}
-	sensor.Trigered = Trigered(rData, posibleReasons)
+	sensor.Trigered(rData, posibleReasons)
+	sensor.symbol = "GPS"
+	sensor.createdAt = time.Now().UTC()
 	return sensor
 }
 

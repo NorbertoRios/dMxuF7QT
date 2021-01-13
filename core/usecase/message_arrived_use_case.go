@@ -34,8 +34,9 @@ func (useCase *MessageArrivedUseCase) prepareMessage() interface{} {
 	switch useCase.rMessage.MessageType {
 	case messagetype.BinaryLocation:
 		{
-			messageParser := useCase.device.Parser()
-			return messageParser.Parse(useCase.rMessage)
+			// messageParser := useCase.device.Parser()
+			// return messageParser.Parse(useCase.rMessage)
+			return nil
 		}
 	case messagetype.Ack:
 		{

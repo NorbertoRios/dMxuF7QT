@@ -3,6 +3,7 @@ package sensors
 import (
 	"genx-go/core"
 	"genx-go/core/columns"
+	"time"
 )
 
 //NetworkSensor network sensor
@@ -31,8 +32,19 @@ func BuildNetworkSensor(data map[string]interface{}) ISensor {
 	}
 	RSSI = &columns.RSSI{RawValue: rv}
 	CSID = &columns.Tenth{RawValue: cv}
-	return &NetworkSensor{
+	n := &NetworkSensor{
 		RSSI: RSSI.Value(),
 		CSID: CSID.Value(),
 	}
+	n.symbol = "Network"
+	n.createdAt = time.Now().UTC()
+	return n
+}
+
+//ToDTO ..
+func (s *NetworkSensor) ToDTO() map[string]interface{} {
+	hash := make(map[string]interface{})
+	hash["RSSI"] = s.RSSI
+	hash["CSID"] = s.CSID
+	return hash
 }

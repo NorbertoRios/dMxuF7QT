@@ -3,6 +3,7 @@ package sensors
 import (
 	"genx-go/core"
 	"genx-go/core/columns"
+	"time"
 )
 
 //IgnitionSensor represents inputs
@@ -20,7 +21,9 @@ func BuildIgnitionSensor(data map[string]interface{}) ISensor {
 	if v, f := data[core.Ignition]; f {
 		ignitionState := &columns.Byte{RawValue: v}
 		sensor := &IgnitionSensor{IgnitionState: ignitionState.Value()}
-		sensor.Trigered = Trigered(data, posibleReasons)
+		sensor.Trigered(data, posibleReasons)
+		sensor.symbol = "Ignition"
+		sensor.createdAt = time.Now().UTC()
 		return sensor
 	}
 	return nil
@@ -37,5 +40,16 @@ func BuildIgnitionSensorFromString(data string) ISensor {
 		state = 0
 		break
 	}
-	return &IgnitionSensor{IgnitionState: state}
+	sensor := &IgnitionSensor{IgnitionState: state}
+	sensor.symbol = "Ignition"
+	sensor.createdAt = time.Now().UTC()
+	return sensor
+
+}
+
+//ToDTO ..
+func (s *IgnitionSensor) ToDTO() map[string]interface{} {
+	hash := make(map[string]interface{})
+	hash[s.symbol] = s.IgnitionState
+	return hash
 }

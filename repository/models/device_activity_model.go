@@ -7,13 +7,9 @@ import (
 
 //NewDeviceActivity ...
 func NewDeviceActivity(_device interfaces.IDevice) *DeviceActivity {
-	return &DeviceActivity{
-		// Identity:           _device.Identity(),
-		// MessageTime:        _device.LastLocationMessage().Time(),
-		// LastUpdateTime:     _device.LastUpdateTime(),
-		// LastMessageID:      _device.LastMessageID(),
-		// LastMessage:        _device.LastLocationMessage().DTO(),
-		// Serializedsoftware: _device.Software(),
+	state := _device.CurrentDeviceState()
+	for _, deviceSensor := range state {
+		
 	}
 }
 

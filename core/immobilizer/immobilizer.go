@@ -63,15 +63,13 @@ func (immo *Immobilizer) competitivenessOfTasks(newTask interfaces.ITask, curren
 //State ...
 func (immo *Immobilizer) State() string {
 	deviceState := immo.ProcessDevice.State()
-	for sensor := range deviceState {
+	for _, sensor := range deviceState {
 		switch sensor.(type) {
-		case *sensors.Relay:
+		case *sensors.Outputs:
 			{
-				relay := sensor.(*sensors.Relay)
-				if relay.ID == immo.OutputNumber {
-					sState := request.NewImmoStateRelayBased(relay.State, immo.trigger)
-					return sState.State()
-				}
+				relays := sensor.(*sensors.Outputs).Relays
+				sState := request.NewImmoStateRelayBased(relays[immo.OutputNumber], immo.trigger)
+				return sState.State()
 			}
 		}
 	}

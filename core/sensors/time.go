@@ -3,6 +3,7 @@ package sensors
 import (
 	"genx-go/core"
 	"genx-go/core/columns"
+	"genx-go/types"
 	"time"
 )
 
@@ -19,6 +20,8 @@ func BuildTimeSensor(data map[string]interface{}) ISensor {
 	etV, etF := data[core.EventTime]
 	var timeStamp *columns.Time
 	var eventTime *columns.Time
+	ts := &TimeSensor{}
+	ts.createdAt = time.Now().UTC()
 	if tsF {
 		timeStamp = &columns.Time{RawValue: tsV}
 	}
@@ -28,13 +31,22 @@ func BuildTimeSensor(data map[string]interface{}) ISensor {
 	if timeStamp == nil && eventTime == nil {
 		return nil
 	} else if timeStamp != nil && eventTime == nil {
-		return &TimeSensor{TimeStamp: timeStamp.Value()}
+		ts.TimeStamp = timeStamp.Value()
+		return ts
 	} else if timeStamp == nil && eventTime != nil {
-		return &TimeSensor{EventTimeGMT: eventTime.Value()}
+		ts.EventTimeGMT = eventTime.Value()
+		return ts
 	} else {
-		return &TimeSensor{
-			EventTimeGMT: eventTime.Value(),
-			TimeStamp:    timeStamp.Value(),
-		}
+		ts.EventTimeGMT = eventTime.Value()
+		ts.TimeStamp = timeStamp.Value()
+		return ts
 	}
+}
+
+//ToDTO ...
+func (s *TimeSensor) ToDTO() map[string]interface{} {
+	hash := make(map[string]interface{})
+	hash["TimeStamp"] = &types.JSONTime{Time: s.TimeStamp}
+	hash["EventTime"] = &types.JSONTime{Time: s.EventTimeGMT}
+	return hash
 }

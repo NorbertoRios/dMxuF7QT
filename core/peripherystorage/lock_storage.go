@@ -10,7 +10,7 @@ import (
 func NewElectricLockStorage() *ElectricLockStorage {
 	return &ElectricLockStorage{
 		mutex: &sync.Mutex{},
-		locks: make(map[int]interfaces.IProcess, 0),
+		locks: make(map[int]interfaces.IProcess),
 	}
 }
 
