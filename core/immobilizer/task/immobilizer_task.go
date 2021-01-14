@@ -57,7 +57,7 @@ func (task *ImmobilizerTask) Commands() *list.List {
 	cList := list.New()
 	out := &bRequest.OutputNumber{Data: task.FacadeRequest.Port}
 	immo := task.device.Immobilizer(out.Index(), task.FacadeRequest.Trigger)
-	if immo.State() == task.FacadeRequest.State {
+	if immo.State(task.device) == task.FacadeRequest.State {
 		immo.CurrentTask().Invoker().CanselTask(immo.CurrentTask(), "Actual")
 	} else {
 		cList.PushFront(observers.NewImmoSendRelayCommand(task))

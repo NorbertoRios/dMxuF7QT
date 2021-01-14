@@ -8,8 +8,8 @@ import (
 
 //BaseProcess ...
 type BaseProcess struct {
-	Mutex              *sync.Mutex
-	ProcessDevice      interfaces.IDevice
+	Mutex *sync.Mutex
+	//ProcessDevice      interfaces.IDevice
 	ProcessCurrentTask interfaces.ITask
 	ProcessTasks       *list.List
 }
@@ -36,6 +36,6 @@ func (process *BaseProcess) PushToTasks(_task interfaces.ITask, isDone bool) {
 }
 
 //Device ...
-func (process *BaseProcess) Device() interfaces.IDevice {
-	return process.ProcessDevice
-}
+// func (process *BaseProcess) Device() interfaces.IDevice {
+// 	return process.ProcessDevice
+// }

@@ -29,7 +29,7 @@ func (storage *ElectricLockStorage) ElectricLock(index int, device interfaces.ID
 	if eLock, f = storage.locks[index]; f {
 		return eLock
 	}
-	eLock = lock.NewElectricLock(device, index)
+	eLock = lock.NewElectricLock(index)
 	storage.locks[index] = eLock
 	return eLock
 }

@@ -8,7 +8,7 @@ import (
 //NewIgnitionObserver ...
 func NewIgnitionObserver() *IgnitionObserver {
 	return &IgnitionObserver{
-		Symbol: "Ignition",
+		Symbol: "IgnitionState",
 	}
 }
 
@@ -20,7 +20,7 @@ type IgnitionObserver struct {
 //Notify ...
 func (o *IgnitionObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if v, f := _message.GetValue(o.Symbol); f {
-		return sensors.BuildIgnitionSensorFromString(v.(string))
+		return sensors.BuildIgnitionSensorFromString(string(v.(float64)))
 	}
-	return sensors.BuildIgnitionSensorFromString("")
+	return nil
 }

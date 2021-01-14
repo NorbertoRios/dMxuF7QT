@@ -1,5 +1,14 @@
 package sensors
 
+//BuildTemperatureSensor ...
+func BuildTemperatureSensor(_id byte, _imei string, _value float32) *TemperatureSensor {
+	return &TemperatureSensor{
+		ID:    _id,
+		Imei:  _imei,
+		Value: _value,
+	}
+}
+
 //TemperatureSensor temp sensor
 type TemperatureSensor struct {
 	Base

@@ -6,7 +6,7 @@ import (
 )
 
 //NewOutputsObserver ...
-func NewOutputsObserver() *OutputsObserver {
+func NewOutputsObserver() *OutputsObserver {	
 	return &OutputsObserver{
 		Symbol: "Relay",
 	}
@@ -22,5 +22,5 @@ func (o *OutputsObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if v, f := _message.GetValue(o.Symbol); f {
 		return sensors.BuildOutputsFromString(v.(string))
 	}
-	return sensors.BuildOutputsFromString("")
+	return nil
 }

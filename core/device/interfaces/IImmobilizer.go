@@ -4,5 +4,5 @@ package interfaces
 type IImmobilizer interface {
 	IProcess
 	Trigger() string
-	State() string
+	State(IDevice) string
 }

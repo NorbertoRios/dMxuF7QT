@@ -5,6 +5,7 @@ import (
 	connInterfaces "genx-go/connection/interfaces"
 	"genx-go/core/configuration"
 	"genx-go/core/device/interfaces"
+	"genx-go/core/location"
 	"genx-go/core/peripherystorage"
 	"genx-go/core/sensors"
 	"genx-go/logger"
@@ -15,25 +16,24 @@ import (
 )
 
 //NewDevice ...
-// func NewDevice(_serial string, _param24 []string, _channel connInterfaces.IChannel) interfaces.IDevice {
-// 	device := &Device{
-// 		Param24:             _param24,
-// 		CurrentState:        make(map[sensors.ISensor]time.Time),
-// 		UDPChannel:          _channel,
-// 		SerialNumber:        _serial,
-// 		LastStateUpdateTime: time.Now().UTC(),
-// 		Mutex:               &sync.Mutex{},
-// 		DeviceObservable:    NewObservable(),
-// 		ImmoStorage:         peripherystorage.NewImmobilizerStorage(),
-// 		LockStorage:         peripherystorage.NewElectricLockStorage(),
-// 	}
-// 	device.LocationTask = location.New(device)
-// 	return device
-// }
+func NewDevice(_param24 []string, _sensors map[string]sensors.ISensor, _channel connInterfaces.IChannel) interfaces.IDevice {
+	return &Device{
+		Parameter24:         _param24,
+		LastLocationMessage: &message.LocationMessage{},
+		DeviceObservable:    NewObservable(),
+		LastStateUpdateTime: time.Now().UTC(),
+		CurrentState:        NewState(_sensors),
+		Mutex:               &sync.Mutex{},
+		UDPChannel:          _channel,
+		ImmoStorage:         peripherystorage.NewImmobilizerStorage(),
+		LockStorage:         peripherystorage.NewElectricLockStorage(),
+	}
+}
 
 //Device struct
 type Device struct {
-	lastLocationMessage *message.LocationMessage
+	Parameter24         []string
+	LastLocationMessage *message.LocationMessage
 	DeviceObservable    *Observable
 	LastStateUpdateTime time.Time
 	Config              interfaces.IProcess
@@ -43,8 +43,7 @@ type Device struct {
 	LockStorage         *peripherystorage.ElectricLockStorage
 	UDPChannel          connInterfaces.IChannel
 	Mutex               *sync.Mutex
-	LocationTask        interfaces.IProcess
-	SerialNumber        string
+	LocationProcess     interfaces.IProcess
 }
 
 //Send send command to device
@@ -65,19 +64,22 @@ func (device *Device) NewChannel(_channel connInterfaces.IChannel) {
 //Configuration ..
 func (device *Device) Configuration() interfaces.IProcess {
 	if device.Config == nil {
-		device.Config = configuration.NewConfiguration(device)
+		device.Config = configuration.NewConfiguration()
 	}
 	return device.Config
 }
 
-//LastDeviceMessage ..
-func (device *Device) LastDeviceMessage() *message.LocationMessage {
-	return device.lastLocationMessage
-}
-
 //LocationRequest ..
 func (device *Device) LocationRequest() interfaces.IProcess {
-	return device.LocationTask
+	if device.LocationProcess == nil {
+		device.LocationProcess = location.New()
+	}
+	return device.LocationProcess
+}
+
+//LastDeviceMessage ..
+func (device *Device) LastDeviceLocationMessage() *message.LocationMessage {
+	return device.LastLocationMessage
 }
 
 //ElectricLock ..
@@ -92,12 +94,14 @@ func (device *Device) State() map[string]sensors.ISensor {
 	return device.CurrentState.State()
 }
 
-func (device *Device) handleLocationMessage(msg *message.LocationMessage) {
-	device.lastLocationMessage = msg
+func (device *Device) handleLocationMessage(msg *message.LocationMessage) *list.List {
+	commands := list.New()
+	device.LastLocationMessage = msg
 	for _, m := range msg.Messages {
 		device.CurrentState = NewSensorState(device.CurrentState, m.Sensors)
-		device.DeviceObservable.Notify(m)
+		commands.PushBackList(device.DeviceObservable.Notify(m))
 	}
+	return commands
 }
 
 //MessageArrived new message
@@ -106,7 +110,7 @@ func (device *Device) MessageArrived(msg interface{}) *list.List {
 	switch msg.(type) {
 	case *message.LocationMessage:
 		{
-			return device.handleLocationMessage(msg)
+			return device.handleLocationMessage(msg.(*message.LocationMessage))
 		}
 	}
 	return device.DeviceObservable.Notify(msg)

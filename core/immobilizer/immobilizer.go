@@ -15,13 +15,12 @@ import (
 )
 
 //NewImmobilizer ...
-func NewImmobilizer(_device interfaces.IDevice, index int, trigger string) *Immobilizer {
+func NewImmobilizer(index int, trigger string) *Immobilizer {
 	immo := &Immobilizer{
 		OutputNumber: index,
 		trigger:      trigger,
 	}
 	immo.Mutex = &sync.Mutex{}
-	immo.ProcessDevice = _device
 	immo.ProcessTasks = list.New()
 	return immo
 }
@@ -39,8 +38,8 @@ func (immo *Immobilizer) Trigger() string {
 }
 
 //NewRequest ...
-func (immo *Immobilizer) NewRequest(req baseRequest.IRequest) *list.List {
-	newTask := task.NewImmobilizerTask(req.(*request.ChangeImmoStateRequest), immo, immo.Device())
+func (immo *Immobilizer) NewRequest(req baseRequest.IRequest, _device interfaces.IDevice) *list.List {
+	newTask := task.NewImmobilizerTask(req.(*request.ChangeImmoStateRequest), immo, _device)
 	if immo.ProcessCurrentTask == nil {
 		immo.ProcessCurrentTask = newTask
 		return newTask.Commands()
@@ -61,8 +60,8 @@ func (immo *Immobilizer) competitivenessOfTasks(newTask interfaces.ITask, curren
 }
 
 //State ...
-func (immo *Immobilizer) State() string {
-	deviceState := immo.ProcessDevice.State()
+func (immo *Immobilizer) State(_device interfaces.IDevice) string {
+	deviceState := _device.State()
 	for _, sensor := range deviceState {
 		switch sensor.(type) {
 		case *sensors.Outputs:

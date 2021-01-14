@@ -62,7 +62,7 @@ func (observer *ImmoConfitmationObserver) checkSensorState(messgaeSensors []sens
 	stateDecorator := &request.ShouldStateByte{Data: req}
 	outNumDecorator := &bRequest.OutputNumber{Data: req.Port}
 	state = stateDecorator.State()
-	outNum = outNumDecorator.Index() - 1
+	outNum = outNumDecorator.Index()
 	for _, sens := range messgaeSensors {
 		switch sens.(type) {
 		case *sensors.Outputs:

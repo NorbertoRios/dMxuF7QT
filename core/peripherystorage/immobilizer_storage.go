@@ -29,7 +29,7 @@ func (storage *ImmobilizerStorage) Immobilizer(index int, trigger string, device
 	if immo, f = storage.immobilizers[index]; f && immo.Trigger() == trigger {
 		return immo
 	}
-	immo = immobilizer.NewImmobilizer(device, index, trigger)
+	immo = immobilizer.NewImmobilizer(index, trigger)
 	storage.immobilizers[index] = immo
 	return immo
 }

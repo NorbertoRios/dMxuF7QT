@@ -13,10 +13,10 @@ import (
 )
 
 //NewConfiguration ...
-func NewConfiguration(_device interfaces.IDevice) *Configuration {
+func NewConfiguration() *Configuration {
 	config := &Configuration{}
 	config.Mutex = &sync.Mutex{}
-	config.ProcessDevice = _device
+	//config.ProcessDevice = _device
 	config.ProcessTasks = list.New()
 	return config
 }
@@ -27,9 +27,9 @@ type Configuration struct {
 }
 
 //NewRequest ..
-func (config *Configuration) NewRequest(req baseRequest.IRequest) *list.List {
+func (config *Configuration) NewRequest(req baseRequest.IRequest, device interfaces.IDevice) *list.List {
 	cList := list.New()
-	newTask := task.New(req.(*request.ConfigurationRequest), config.ProcessDevice, config)
+	newTask := task.New(req.(*request.ConfigurationRequest), device, config)
 	if config.ProcessCurrentTask != nil {
 		if _, v := config.ProcessCurrentTask.(*task.ConfigTask); v {
 			cList.PushBackList(config.ProcessCurrentTask.Invoker().CanselTask(config.ProcessCurrentTask, "Deprecated"))

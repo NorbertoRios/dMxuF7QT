@@ -39,6 +39,21 @@ func (s *GPSSensor) ToDTO() map[string]interface{} {
 	return hash
 }
 
+//BuildAdaptedGpsSensor ...
+func BuildAdaptedGpsSensor(hash map[string]interface{}) ISensor {
+	sensor := &GPSSensor{
+		Speed:      float32(hash["Speed"].(float64)),
+		Latitude:   float32(hash["Latitude"].(float64)),
+		Longitude:  float32(hash["Longitude"].(float64)),
+		Heading:    float32(hash["Heading"].(float64)),
+		Satellites: byte(hash["Satellites"].(float64)),
+		Status:     byte(hash["GPSStat"].(float64)),
+	}
+	sensor.symbol = "GPS"
+	sensor.createdAt = time.Now().UTC()
+	return sensor
+}
+
 //BuildGpsSensor returns new gps sensor
 func BuildGpsSensor(rData map[string]interface{}) ISensor {
 	if !validateGpsFields(rData) {

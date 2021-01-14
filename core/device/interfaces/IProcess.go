@@ -11,5 +11,5 @@ type IProcess interface {
 	TaskDone(ITask)
 	CurrentTask() ITask
 	Tasks() *list.List
-	NewRequest(request.IRequest) *list.List
+	NewRequest(request.IRequest, IDevice) *list.List
 }

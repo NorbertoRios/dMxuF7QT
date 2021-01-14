@@ -13,13 +13,13 @@ import (
 )
 
 //NewElectricLock ...
-func NewElectricLock(_device interfaces.IDevice, _outNum int) *ElectricLock {
+func NewElectricLock(_outNum int) *ElectricLock {
 	lock := &ElectricLock{
 		OutputNumber: _outNum,
 	}
 	lock.Mutex = &sync.Mutex{}
 	lock.ProcessTasks = list.New()
-	lock.ProcessDevice = _device
+	//lock.ProcessDevice = _device
 	return lock
 }
 
@@ -30,8 +30,8 @@ type ElectricLock struct {
 }
 
 //NewRequest ..
-func (lock *ElectricLock) NewRequest(req baseRequest.IRequest) *list.List {
-	newTask := task.NewElectricLockTask(req, lock.ProcessDevice, lock)
+func (lock *ElectricLock) NewRequest(req baseRequest.IRequest, _device interfaces.IDevice) *list.List {
+	newTask := task.NewElectricLockTask(req, _device, lock)
 	if lock.ProcessCurrentTask == nil {
 		lock.ProcessCurrentTask = newTask
 		return lock.ProcessCurrentTask.Commands()

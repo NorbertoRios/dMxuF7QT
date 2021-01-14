@@ -23,12 +23,16 @@ type GPSObserver struct {
 func (o *GPSObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	hash := make(map[string]interface{})
 	for _, symbol := range o.Symbols {
-		if v, f := _message.GetValue(symbol); !f {
+		v, f := _message.GetValue(symbol)
+		if !f {
 			logger.Logger().WriteToLog(logger.Info, fmt.Sprintf("[GPSObserver | Notify] Cant find %v field in last activity. Activity: %v", symbol, _message))
-			continue
-		} else {
-			hash[symbol] = v
+			return nil
 		}
+		hash[symbol] = v
 	}
-	return sensors.BuildGpsSensor(hash)
+	if len(hash) == 0 {
+		logger.Logger().WriteToLog(logger.Info, fmt.Sprintf("[GPSObserver | Notify] GPS sensor not found. Symbols: %v. Message:%v", o.Symbols, _message))
+		return nil
+	}
+	return sensors.BuildAdaptedGpsSensor(hash)
 }

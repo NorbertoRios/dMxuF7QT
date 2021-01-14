@@ -25,6 +25,6 @@ type LockUseCase struct {
 func (lCase *LockUseCase) Launch() {
 	outNumber := &request.OutputNumber{Data: lCase.caseRequest.Port}
 	lock := lCase.device.ElectricLock(outNumber.Index())
-	commands := lock.NewRequest(lCase.caseRequest)
+	commands := lock.NewRequest(lCase.caseRequest, lCase.device)
 	lCase.execute(commands)
 }

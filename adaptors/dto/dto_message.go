@@ -2,10 +2,10 @@ package dto
 
 //DtoMessage ...
 type DtoMessage struct {
-	Parameter24        []string               `json:"Param24"`
-	Data               map[string]interface{} `json:"Data"`
-	TemperatureSensors *TemperatureSensors    `json:"ts,omitempty"`
-	SID                uint64                 `json:"sid"`
+	Parameter24 []string                      `json:"Param24"`
+	Data        map[string]interface{}        `json:"Data"`
+	Sensors     map[string]*TemperatureSensor `json:"ts"`
+	SID         uint64                        `json:"sid"`
 }
 
 //GetValue from Data field

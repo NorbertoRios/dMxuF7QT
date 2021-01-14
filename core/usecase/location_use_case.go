@@ -23,6 +23,6 @@ type LocationUseCase struct {
 //Launch ...
 func (lCase *LocationUseCase) Launch() {
 	lRequest := lCase.device.LocationRequest()
-	commands := lRequest.NewRequest(lCase.caseRequest)
+	commands := lRequest.NewRequest(lCase.caseRequest, lCase.device)
 	lCase.execute(commands)
 }

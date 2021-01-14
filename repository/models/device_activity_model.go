@@ -7,10 +7,11 @@ import (
 
 //NewDeviceActivity ...
 func NewDeviceActivity(_device interfaces.IDevice) *DeviceActivity {
-	state := _device.CurrentDeviceState()
-	for _, deviceSensor := range state {
-		
-	}
+	// state := _device.CurrentDeviceState()
+	// for _, deviceSensor := range state {
+	// 	return deviceSensor
+	// }
+	return nil
 }
 
 //DeviceActivity device activity model

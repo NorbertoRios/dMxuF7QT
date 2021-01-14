@@ -23,6 +23,6 @@ type ConfigUseCase struct {
 //Launch ...
 func (cCase *ConfigUseCase) Launch() {
 	config := cCase.device.Configuration()
-	commands := config.NewRequest(cCase.caseRequest)
+	commands := config.NewRequest(cCase.caseRequest, cCase.device)
 	cCase.execute(commands)
 }

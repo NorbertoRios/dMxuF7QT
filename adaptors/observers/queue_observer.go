@@ -22,5 +22,5 @@ func (o *QueueObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if v, f := _message.GetValue(o.Symbol); f {
 		return &sensors.QueueSensor{LockID: v.(uint32)}
 	}
-	return &sensors.QueueSensor{LockID: uint32(0)}
+	return nil
 }

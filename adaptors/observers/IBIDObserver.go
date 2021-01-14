@@ -22,5 +22,5 @@ func (o *IBIDObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if v, f := _message.GetValue(o.Symbol); f {
 		return sensors.BuildIButtonSensorFromString(v.(string))
 	}
-	return sensors.BuildIButtonSensorFromString("")
+	return nil
 }

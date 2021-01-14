@@ -25,6 +25,6 @@ type ImmobilizerUseCase struct {
 func (iCase *ImmobilizerUseCase) Launch() {
 	outNumber := &request.OutputNumber{Data: iCase.caseRequest.Port}
 	immo := iCase.device.Immobilizer(outNumber.Index(), iCase.caseRequest.Trigger)
-	commands := immo.NewRequest(iCase.caseRequest)
+	commands := immo.NewRequest(iCase.caseRequest, iCase.device)
 	iCase.execute(commands)
 }

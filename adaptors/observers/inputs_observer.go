@@ -22,5 +22,5 @@ func (o *InputsObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if v, f := _message.GetValue(o.Symbol); f {
 		return sensors.BuildInputsFromString(v.(string))
 	}
-	return sensors.BuildInputsFromString("")
+	return nil
 }

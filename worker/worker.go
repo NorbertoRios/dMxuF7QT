@@ -50,6 +50,10 @@ func (w *Worker) Run() {
 		case entryData := <-w.messageChannel:
 			{
 				device := w.uow.Device(entryData.RawMessage.Identity())
+				if device == nil {
+					w.uow.Register(entryData.RawMessage.Identity(), entryData.Channel)
+					device = w.uow.Device(entryData.RawMessage.Identity())
+				}
 				device.NewChannel(entryData.Channel)
 				usecase.NewMessageArrivedUseCase(device, entryData.RawMessage).Launch()
 				if err := w.uow.Commit(); err == nil {

@@ -3,6 +3,8 @@ package observers
 import (
 	"genx-go/adaptors/dto"
 	"genx-go/core/sensors"
+	"genx-go/types"
+	"strings"
 )
 
 //NewTemperatureSensorsObserver ...
@@ -16,11 +18,16 @@ type TemperatureSensorsObserver struct {
 
 //Notify ...
 func (o *TemperatureSensorsObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
-	temperatureSensors := &sensors.TemperatureSensors{}
-	for index, tempSens := range _message.TemperatureSensors.Sensors {
-		temperatureSensors.Sensors[index] = &sensors.TemperatureSensor{
-			ID:tempSens.ID,
-			Imei: tempSens.
-		}
+	_tSensors := []*sensors.TemperatureSensor{}
+	for index, tempSens := range _message.Sensors {
+		strIndex := &types.String{Data: strings.ReplaceAll(index, "Sensor", "")}
+		id := strIndex.Byte(8)
+		imei := tempSens.ID
+		value := tempSens.Value
+		_tSensors = append(_tSensors, sensors.BuildTemperatureSensor(id, imei, value))
 	}
+	if len(_tSensors) == 0 {
+		return nil
+	}
+	return sensors.NewTemperatureSensors(_tSensors)
 }

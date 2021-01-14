@@ -7,12 +7,14 @@ import (
 	"genx-go/core/lock/task"
 	bRequest "genx-go/core/request"
 	"genx-go/core/usecase"
+	"genx-go/message"
 	"genx-go/test/mock"
 	"testing"
 	"time"
 )
 
 func TestLockLogic(t *testing.T) {
+	factory := message.Factory()
 	exT := time.Now().UTC().Add(60 * time.Minute)
 	req := &lockRequest.UnlockRequest{
 		ExpirationTime: exT.Format("2006-01-02T15:04:05Z"),
@@ -22,8 +24,8 @@ func TestLockLogic(t *testing.T) {
 	req.Identity = "genx_000003870006"
 	device := mock.NewDevice()
 	usecase.NewLockUseCase(device, req).Launch()
-	packet := []byte("000003870006 ACK < SETRELAYDRIVE1X3FFFFFFF SERIALFILTER 000003870006>")
-	usecase.NewMessageArrivedUseCase(device, packet).Launch()
+	rMessage := factory.BuildRawMessage([]byte("000003870006 ACK < SETRELAYDRIVE1X3FFFFFFF SERIALFILTER 000003870006>"))
+	usecase.NewMessageArrivedUseCase(device, rMessage).Launch()
 	out := bRequest.OutputNumber{Data: req.Port}
 	lock := device.ElectricLock(out.Index())
 	if lock.CurrentTask() != nil {
@@ -43,6 +45,7 @@ func TestLockLogic(t *testing.T) {
 }
 
 func TestLockTimeOutLogic(t *testing.T) {
+	factory := message.Factory()
 	exT := time.Now().UTC().Add(1 * time.Second)
 	req := &lockRequest.UnlockRequest{
 		ExpirationTime: exT.Format("2006-01-02T15:04:05Z"),
@@ -84,8 +87,8 @@ func TestLockTimeOutLogic(t *testing.T) {
 	req.Port = "OUT0"
 	req.Identity = "genx_000003870006"
 	usecase.NewLockUseCase(device, req).Launch()
-	packet := []byte("000003870006 ACK < SETRELAYDRIVE1X3FFFFFFF SERIALFILTER 000003870006>")
-	usecase.NewMessageArrivedUseCase(device, packet).Launch()
+	rMessage := factory.BuildRawMessage([]byte("000003870006 ACK < SETRELAYDRIVE1X3FFFFFFF SERIALFILTER 000003870006>"))
+	usecase.NewMessageArrivedUseCase(device, rMessage).Launch()
 	if lock.CurrentTask() != nil {
 		t.Error("CurrentTask should be nil")
 	}

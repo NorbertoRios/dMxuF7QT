@@ -4,11 +4,13 @@ import (
 	"genx-go/core/configuration/request"
 	"genx-go/core/configuration/task"
 	"genx-go/core/usecase"
+	"genx-go/message"
 	"genx-go/test/mock"
 	"testing"
 )
 
 func TestConfigurationLogic(t *testing.T) {
+	factory := message.Factory()
 	req := &request.ConfigurationRequest{
 		Config: []string{
 			"1=One;",
@@ -33,7 +35,7 @@ func TestConfigurationLogic(t *testing.T) {
 	device := mock.NewDevice()
 	usecase.NewConfigUseCase(device, req).Launch()
 	for i := 0; i < 3; i++ {
-		usecase.NewMessageArrivedUseCase(device, []byte(commandAcks[i])).Launch()
+		usecase.NewMessageArrivedUseCase(device, factory.BuildRawMessage([]byte(commandAcks[i]))).Launch()
 	}
 	ct := device.Configuration().CurrentTask().(*task.ConfigTask)
 	sentCount := 0
@@ -80,7 +82,8 @@ func TestConfigurationLogic(t *testing.T) {
 	}
 	usecase.NewConfigUseCase(device, newReq).Launch()
 	for i := 0; i < len(commandAcks); i++ {
-		usecase.NewMessageArrivedUseCase(device, []byte(commandAcks[i])).Launch()
+
+		usecase.NewMessageArrivedUseCase(device, factory.BuildRawMessage([]byte(commandAcks[i]))).Launch()
 	}
 	doneTasks := 0
 	canceledTasks := 0

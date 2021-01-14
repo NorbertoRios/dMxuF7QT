@@ -3,6 +3,8 @@ package unitofwork
 import (
 	"container/list"
 	"fmt"
+	"genx-go/adaptors"
+	commInterfaces "genx-go/connection/interfaces"
 	"genx-go/core/device"
 	"genx-go/core/device/interfaces"
 	"genx-go/logger"
@@ -78,14 +80,14 @@ func (uow *DeviceUnitOfWork) UpdateState(_identity string, _device interfaces.ID
 }
 
 //Register ...
-func (uow *DeviceUnitOfWork) Register(_identity string) {
-	//activity := uow.activityUnitOfWork.Load(_identity)
-	//lastKnownState := uow.stateUnitOfWork.Load(_identity)
-	_device := &device.Device{} //create device based on activity and last known state
+func (uow *DeviceUnitOfWork) Register(_identity string, _channel commInterfaces.IChannel) {
+	activity := uow.activityUnitOfWork.Load(_identity)
+	adaptableActivity := adaptors.NewDeviceActivity(activity)
+	sensors := adaptableActivity.Adapt()
+	_device := device.NewDevice(adaptableActivity.DTO().Parameter24, sensors, _channel)
 	uow.mutex.Lock()
 	defer uow.mutex.Unlock()
 	uow.clean[_identity] = _device
-
 }
 
 //Device ...
@@ -95,7 +97,7 @@ func (uow *DeviceUnitOfWork) Device(_identity string) interfaces.IDevice {
 	d, f := uow.clean[_identity]
 	if !f {
 		logger.Logger().WriteToLog(logger.Info, "[DeviceUnitOfWork | Device] Device with identity: ", _identity, " does not exist")
-		return &device.Device{}
+		return nil
 	}
 	return d
 }
