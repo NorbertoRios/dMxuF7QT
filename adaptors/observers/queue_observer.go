@@ -20,7 +20,7 @@ type QueueObserver struct {
 //Notify ...
 func (o *QueueObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if v, f := _message.GetValue(o.Symbol); f {
-		return &sensors.QueueSensor{LockID: v.(uint32)}
+		return sensors.BuildAdaptedQueueSensor(uint32(v.(float64)))
 	}
 	return nil
 }

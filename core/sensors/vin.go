@@ -1,5 +1,19 @@
 package sensors
 
+import (
+	"time"
+)
+
+//BuildVINSensor ...
+func BuildVINSensor(_vin string) *VINSensor {
+	sensor := &VINSensor{
+		VIN: _vin,
+	}
+	sensor.symbol = "VIN"
+	sensor.createdAt = time.Now().UTC()
+	return sensor
+}
+
 //VINSensor vin number
 type VINSensor struct {
 	Base

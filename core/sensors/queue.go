@@ -12,6 +12,14 @@ type QueueSensor struct {
 	LockID uint32
 }
 
+//BuildAdaptedQueueSensor ...
+func BuildAdaptedQueueSensor(_lockId uint32) ISensor {
+	sensor := &QueueSensor{LockID: _lockId}
+	sensor.symbol = "LocId"
+	sensor.createdAt = time.Now().UTC()
+	return sensor
+}
+
 //BuildQueueSensor returns new gps sensor
 func BuildQueueSensor(data map[string]interface{}) ISensor {
 	if v, f := data[core.LocId]; f {

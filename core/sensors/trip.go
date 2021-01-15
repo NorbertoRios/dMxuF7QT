@@ -3,12 +3,21 @@ package sensors
 import (
 	"genx-go/core"
 	"genx-go/core/columns"
+	"time"
 )
 
 //TripSensor represents trip data
 type TripSensor struct {
 	Base
 	Odometer int32
+}
+
+//BuildAdaptedTripSensor ...
+func BuildAdaptedTripSensor(_odometer int32) ISensor {
+	sensor := &TripSensor{Odometer: _odometer}
+	sensor.symbol = "Odometer"
+	sensor.createdAt = time.Now().UTC()
+	return sensor
 }
 
 //BuildTripSensor returns new gps sensor

@@ -36,7 +36,7 @@ func (o *PowerSensorObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 				}
 			case "Supply":
 				{
-					supply = v.(int32)
+					supply = int32(v.(float64))
 					break
 				}
 			}

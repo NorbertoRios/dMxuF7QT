@@ -11,7 +11,7 @@ import (
 func NewTemperatureSensors(tSensors []*TemperatureSensor) *TemperatureSensors {
 	sensorsMap := make(map[string]*TemperatureSensor)
 	for _, s := range tSensors {
-		sensorsMap[fmt.Sprintf("Sensor%v", s.ID+1)] = s
+		sensorsMap[fmt.Sprintf("Sensor%v", s.ID)] = s
 	}
 	sensor := &TemperatureSensors{}
 	sensor.symbol = "ts"

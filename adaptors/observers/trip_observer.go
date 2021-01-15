@@ -21,9 +21,7 @@ type TripObserver struct {
 //Notify ...
 func (o *TripObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if v, f := _message.GetValue(o.Symbol); f {
-		return &sensors.TripSensor{
-			Odometer: v.(int32),
-		}
+		return sensors.BuildAdaptedTripSensor(int32(v.(float64)))
 	}
 	logger.Logger().WriteToLog(logger.Info, "[TripObserver | Notify] Cant find ", o.Symbol, " in dto message.")
 	return nil

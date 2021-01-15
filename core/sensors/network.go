@@ -13,6 +13,20 @@ type NetworkSensor struct {
 	CSID int32
 }
 
+//BuildAdaptedNetworkSensor ...
+func BuildAdaptedNetworkSensor(data map[string]interface{}) ISensor {
+	sensor := &NetworkSensor{}
+	sensor.symbol = "Network"
+	sensor.createdAt = time.Now().UTC()
+	if v, f := data["RSSI"]; f {
+		sensor.RSSI = int8(v.(float64))
+	}
+	if v, f := data["CSID"]; f {
+		sensor.CSID = int32(v.(float64))
+	}
+	return sensor
+}
+
 //BuildNetworkSensor returns new gps sensor
 func BuildNetworkSensor(data map[string]interface{}) ISensor {
 	rv, rf := data[core.RSSI]

@@ -3,6 +3,7 @@ package observers
 import (
 	"genx-go/adaptors/dto"
 	"genx-go/core/sensors"
+	"genx-go/types"
 )
 
 //NewInputsObserver ...
@@ -20,7 +21,8 @@ type InputsObserver struct {
 //Notify ...
 func (o *InputsObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if v, f := _message.GetValue(o.Symbol); f {
-		return sensors.BuildInputsFromString(v.(string))
+		float := types.NewFloat64(v.(float64))
+		return sensors.BuildInputsFromString(float.String())
 	}
 	return nil
 }

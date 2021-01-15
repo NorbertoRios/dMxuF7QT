@@ -3,6 +3,7 @@ package sensors
 import (
 	"genx-go/core"
 	"genx-go/core/columns"
+	"genx-go/types"
 	"time"
 )
 
@@ -31,16 +32,8 @@ func BuildIgnitionSensor(data map[string]interface{}) ISensor {
 
 //BuildIgnitionSensorFromString returns new ignition sensor
 func BuildIgnitionSensorFromString(data string) ISensor {
-	var state byte
-	switch data {
-	case "ON":
-		state = 1
-		break
-	default:
-		state = 0
-		break
-	}
-	sensor := &IgnitionSensor{IgnitionState: state}
+	strState := types.String{Data: data}
+	sensor := &IgnitionSensor{IgnitionState: strState.Byte(10)}
 	sensor.symbol = "Ignition"
 	sensor.createdAt = time.Now().UTC()
 	return sensor

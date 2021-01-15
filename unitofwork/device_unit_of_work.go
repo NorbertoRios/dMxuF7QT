@@ -14,7 +14,14 @@ import (
 
 //NewDeviceUnitOfWork ...
 func NewDeviceUnitOfWork(_deviceStateRepository, _activityRepository repository.IRepository) *DeviceUnitOfWork {
-	return &DeviceUnitOfWork{}
+	return &DeviceUnitOfWork{
+		activityUnitOfWork: NewDeviceActivityUnitOfWork(_activityRepository),
+		stateUnitOfWork:    NewDeviceStateUnitOfWork(_deviceStateRepository),
+		dirty:              make(map[string]*list.List),
+		clean:              make(map[string]interfaces.IDevice),
+		remove:             []string{},
+		mutex:              &sync.Mutex{},
+	}
 }
 
 //DeviceUnitOfWork ...

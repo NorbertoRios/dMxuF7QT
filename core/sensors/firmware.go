@@ -2,13 +2,15 @@ package sensors
 
 //BuildFirmwareSensor build hw sensor
 func BuildFirmwareSensor(_version string) ISensor {
-	return &Firmware{version: _version}
+	sensor := &Firmware{Version: _version}
+	sensor.symbol = "Firmware"
+	return sensor
 }
 
 //Firmware hardware sensor
 type Firmware struct {
 	Base
-	version string
+	Version string
 }
 
 //ToDTO ....

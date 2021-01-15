@@ -34,7 +34,7 @@ func BuildOutputs(data map[string]interface{}) ISensor {
 //BuildOutputsFromString returns switches from string
 func BuildOutputsFromString(bitMask string) ISensor {
 	sType := &types.String{Data: bitMask}
-	byteValue := sType.BitmaskStringToByte()
+	byteValue := sType.Byte(10)
 	resultRelays := make(map[int]byte)
 	for i := 0; i < 4; i++ {
 		mask := &types.Byte{Data: byteValue}

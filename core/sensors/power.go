@@ -10,6 +10,7 @@ import (
 type PowerSensor struct {
 	Base
 	Supply int32
+	State  string
 }
 
 //ToDTO ..
@@ -39,11 +40,14 @@ func (ps *PowerSensor) PowerState() string {
 		{
 			return "Sleeep Mode"
 		}
+	default:
+		{
+			if ps.Supply > 0 {
+				return "Powered"
+			}
+			return "Unknown"
+		}
 	}
-	if ps.Supply > 0 {
-		return "Powered"
-	}
-	return "Unknown"
 }
 
 //BuildPowerSensor returns new gps sensor
@@ -74,6 +78,7 @@ func BuildPowerSensor(data map[string]interface{}) ISensor {
 func BuildPowerSensorFromString(data int32, state string) ISensor {
 	sensor := &PowerSensor{Supply: data}
 	sensor.symbol = "Power"
+	sensor.State = state
 	sensor.createdAt = time.Now().UTC()
 	return sensor
 }

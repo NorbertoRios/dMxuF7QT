@@ -20,7 +20,7 @@ func ConstructCredentialsJSONProvider(file types.IFile) *CredentialsJSONProvider
 }
 
 //ProvideCredentials provide
-func (provider *XMLProvider) ProvideCredentials() (*ServiceCredentials, error) {
+func (provider *CredentialsJSONProvider) ProvideCredentials() (*ServiceCredentials, error) {
 	filePath := provider.file.Path()
 	logger.Logger().WriteToLog(logger.Info, "Loading credentials configuration from:", filePath)
 	xmlFile, err := ioutil.ReadFile(filePath)

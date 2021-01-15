@@ -33,5 +33,5 @@ func (o *NetworkObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if len(hash) == 0 {
 		return nil
 	}
-	return sensors.BuildNetworkSensor(hash)
+	return sensors.BuildAdaptedNetworkSensor(hash)
 }

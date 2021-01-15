@@ -3,10 +3,11 @@ package observers
 import (
 	"genx-go/adaptors/dto"
 	"genx-go/core/sensors"
+	"genx-go/types"
 )
 
 //NewOutputsObserver ...
-func NewOutputsObserver() *OutputsObserver {	
+func NewOutputsObserver() *OutputsObserver {
 	return &OutputsObserver{
 		Symbol: "Relay",
 	}
@@ -20,7 +21,8 @@ type OutputsObserver struct {
 //Notify ...
 func (o *OutputsObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if v, f := _message.GetValue(o.Symbol); f {
-		return sensors.BuildOutputsFromString(v.(string))
+		float := types.NewFloat64(v.(float64))
+		return sensors.BuildOutputsFromString(float.String())
 	}
 	return nil
 }

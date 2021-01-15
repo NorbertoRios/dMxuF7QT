@@ -27,10 +27,10 @@ func (o *TimeObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 			logger.Logger().WriteToLog(logger.Info, "[TimeObserver | Notify] Cant find ", symbol, " in DTO message")
 			continue
 		}
-		hash[symbol] = v
+		hash[symbol] = v.(string)
 	}
 	if len(hash) == 0 {
 		return nil
 	}
-	return sensors.BuildTimeSensor(hash)
+	return sensors.BuildAdaptedTimeSensor(hash)
 }

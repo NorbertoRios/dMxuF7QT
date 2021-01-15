@@ -3,6 +3,7 @@ package observers
 import (
 	"genx-go/adaptors/dto"
 	"genx-go/core/sensors"
+	"genx-go/types"
 )
 
 //NewIgnitionObserver ...
@@ -20,7 +21,8 @@ type IgnitionObserver struct {
 //Notify ...
 func (o *IgnitionObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if v, f := _message.GetValue(o.Symbol); f {
-		return sensors.BuildIgnitionSensorFromString(string(v.(float64)))
+		float := types.NewFloat64(v.(float64))
+		return sensors.BuildIgnitionSensorFromString(float.String())
 	}
 	return nil
 }

@@ -1,8 +1,10 @@
 package worker
 
 import (
-	"genx-go/core/usecase"
+	coreUseCase "genx-go/core/usecase"
+	"genx-go/logger"
 	"genx-go/unitofwork"
+	"genx-go/worker/usecase"
 	"sync"
 )
 
@@ -54,10 +56,13 @@ func (w *Worker) Run() {
 					w.uow.Register(entryData.RawMessage.Identity(), entryData.Channel)
 					device = w.uow.Device(entryData.RawMessage.Identity())
 				}
+				message := usecase.NewMessageIncomeUseCase(entryData.RawMessage, device)
 				device.NewChannel(entryData.Channel)
-				usecase.NewMessageArrivedUseCase(device, entryData.RawMessage).Launch()
+				coreUseCase.NewMessageArrivedUseCase(device, message).Launch()
 				if err := w.uow.Commit(); err == nil {
-					//Send Ack
+					device.Ack()
+				} else {
+					logger.Logger().WriteToLog(logger.Error, "[Worker | Run] Error while commit. Error : ", err)
 				}
 			}
 		}

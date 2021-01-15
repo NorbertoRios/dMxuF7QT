@@ -3,6 +3,7 @@ package observers
 import (
 	"genx-go/adaptors/dto"
 	"genx-go/core/sensors"
+	"genx-go/types"
 )
 
 //NewIBIDObserver ...
@@ -20,7 +21,8 @@ type IBIDObserver struct {
 //Notify ...
 func (o *IBIDObserver) Notify(_message *dto.DtoMessage) sensors.ISensor {
 	if v, f := _message.GetValue(o.Symbol); f {
-		return sensors.BuildIButtonSensorFromString(v.(string))
+		float := types.NewFloat64(v.(float64))
+		return sensors.BuildIButtonSensorFromString(float.String())
 	}
 	return nil
 }

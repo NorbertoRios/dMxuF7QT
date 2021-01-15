@@ -5,6 +5,7 @@ import (
 	"genx-go/connection/interfaces"
 	"genx-go/core/sensors"
 	"genx-go/message"
+	"genx-go/parser"
 )
 
 //IDevice device interface
@@ -45,4 +46,6 @@ type IDevice interface {
 	Immobilizer(int, string) IImmobilizer
 	Observable() IObservable
 	ProcessCommands(*list.List)
+	Parser() parser.IParser
+	Ack()
 }
