@@ -31,3 +31,10 @@ func (wp *WorkersPool) Flush(rMessage *message.RawMessage, channel interfaces.IC
 	worker.NewDevice(rMessage.Identity())
 	worker.Push(data)
 }
+
+//Run ...
+func (wp *WorkersPool) Run() {
+	for _, worker := range wp.pool.workers {
+		go worker.Run()
+	}
+}

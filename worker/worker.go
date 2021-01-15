@@ -59,10 +59,10 @@ func (w *Worker) Run() {
 				message := usecase.NewMessageIncomeUseCase(entryData.RawMessage, device)
 				device.NewChannel(entryData.Channel)
 				coreUseCase.NewMessageArrivedUseCase(device, message).Launch()
-				if err := w.uow.Commit(); err == nil {
+				if w.uow.Commit() {
 					device.Ack()
 				} else {
-					logger.Logger().WriteToLog(logger.Error, "[Worker | Run] Error while commit. Error : ", err)
+					logger.Logger().WriteToLog(logger.Error, "[Worker | Run] Error while commit.")
 				}
 			}
 		}

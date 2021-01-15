@@ -30,7 +30,7 @@ type DeviceStateRepository struct {
 }
 
 //Save ...
-func (db *DeviceStateRepository) Save(device interfaces.IDevice) error {
+func (db *DeviceStateRepository) Save(device ...interfaces.IDevice) error {
 	return nil
 }
 

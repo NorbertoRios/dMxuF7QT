@@ -38,40 +38,15 @@ type DeviceUnitOfWork struct {
 func (uow *DeviceUnitOfWork) Commit() bool {
 	uow.mutex.Lock()
 	defer uow.mutex.Unlock()
-	return uow.removeDevices() && uow.update()
+	return uow.update()
 }
 
-func (uow *DeviceUnitOfWork) removeDevices() bool {
-	for _, identity := range uow.remove {
-		delete(uow.clean, identity)
-		logger.Logger().WriteToLog(logger.Info, "[DeviceUnitOfWork | removeDevices] Device :", identity, " removed.")
-	}
-	return true
-}
-
-func (uow *DeviceUnitOfWork) update() bool {
-	if !uow.activityUnitOfWork.Commit() || !uow.activityUnitOfWork.Commit() {
-		logger.Logger().WriteToLog(logger.Error, "[DeviceUnitOfWork | update] Cant save changes to database")
-		return false
-	}
-	for identity, dList := range uow.dirty {
-		uow.clean[identity] = dList.Back().Value.(interfaces.IDevice)
-		logger.Logger().WriteToLog(logger.Info, fmt.Sprintf("[DeviceUnitOfWork | update] Device : %v added to clean", identity))
-	}
-	uow.dirty = make(map[string]*list.List)
-	return true
-}
-
-func (uow *DeviceUnitOfWork) addToDirty(_identity string, _device interfaces.IDevice) {
-	l, f := uow.dirty[_identity]
-	if !f {
-		logger.Logger().WriteToLog(logger.Info, "[DeviceUnitOfWork | update] For device: ", _identity, " collection not found. Creating new collection...")
-		l = list.New()
-		uow.mutex.Lock()
-		uow.dirty[_identity] = l
-		uow.mutex.Unlock()
-	}
-	l.PushBack(*_device.(*device.Device))
+//Delete ....
+func (uow *DeviceUnitOfWork) Delete(identity string) {
+	uow.mutex.Lock()
+	defer uow.mutex.Unlock()
+	delete(uow.clean, identity)
+	logger.Logger().WriteToLog(logger.Info, "[DeviceUnitOfWork | Delete] Device ", identity, " successfully removed.")
 }
 
 //UpdateActivity ...
@@ -107,4 +82,29 @@ func (uow *DeviceUnitOfWork) Device(_identity string) interfaces.IDevice {
 		return nil
 	}
 	return d
+}
+
+func (uow *DeviceUnitOfWork) update() bool {
+	if !uow.activityUnitOfWork.Commit() || !uow.activityUnitOfWork.Commit() {
+		logger.Logger().WriteToLog(logger.Error, "[DeviceUnitOfWork | update] Cant save changes to database")
+		return false
+	}
+	for identity, dList := range uow.dirty {
+		uow.clean[identity] = dList.Back().Value.(interfaces.IDevice)
+		logger.Logger().WriteToLog(logger.Info, fmt.Sprintf("[DeviceUnitOfWork | update] Device : %v added to clean", identity))
+	}
+	uow.dirty = make(map[string]*list.List)
+	return true
+}
+
+func (uow *DeviceUnitOfWork) addToDirty(_identity string, _device interfaces.IDevice) {
+	l, f := uow.dirty[_identity]
+	if !f {
+		logger.Logger().WriteToLog(logger.Info, "[DeviceUnitOfWork | update] For device: ", _identity, " collection not found. Creating new collection...")
+		l = list.New()
+		uow.mutex.Lock()
+		uow.dirty[_identity] = l
+		uow.mutex.Unlock()
+	}
+	l.PushBack(*_device.(*device.Device))
 }

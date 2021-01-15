@@ -39,11 +39,6 @@ type UDPServer struct {
 	controller  *controller.RawDataController
 }
 
-//OnNewPacket ..
-func (server *UDPServer) OnNewPacket(callback func(channel *UDPChannel, packet []byte)) {
-	server.onNewPacket = callback
-}
-
 //Listen incoming packet
 func (server *UDPServer) Listen() {
 	for {
@@ -55,7 +50,7 @@ func (server *UDPServer) Listen() {
 		}
 		logger.Logger().WriteToLog(logger.Info, "Received UDP packet:", hex.EncodeToString(buf[0:n]))
 		channel := ConstructUDPChannel(addr, server)
-		server.onNewPacket(channel, buf[0:n])
+		server.controller.Process(buf[0:n], channel)
 	}
 }
 

@@ -7,7 +7,7 @@ import (
 
 //IDeviceUnitOfWork ...
 type IDeviceUnitOfWork interface {
-	Commit() error
+	Commit() bool
 	Device(string) interfaces.IDevice
 	Delete(string)
 	Register(string, connInterfaces.IChannel)
