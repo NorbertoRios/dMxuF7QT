@@ -9,6 +9,8 @@ import (
 	"genx-go/core/device/interfaces"
 	"genx-go/logger"
 	"genx-go/repository"
+	"genx-go/repository/models"
+	"reflect"
 	"sync"
 )
 
@@ -64,9 +66,15 @@ func (uow *DeviceUnitOfWork) UpdateState(_identity string, _device interfaces.ID
 //Register ...
 func (uow *DeviceUnitOfWork) Register(_identity string, _channel commInterfaces.IChannel) {
 	activity := uow.activityUnitOfWork.Load(_identity)
+	if reflect.DeepEqual(activity, &models.DeviceActivity{}) {
+		uow.clean[_identity] = device.NewActivityLessDevice(_channel)
+		return
+	}
 	adaptableActivity := adaptors.NewDeviceActivity(activity)
 	sensors := adaptableActivity.Adapt()
-	_device := device.NewDevice(adaptableActivity.DTO().Parameter24, sensors, _channel)
+
+	//_device := device.NewDevice(adaptableActivity.DTO().Parameter24, sensors, _channel)
+	_device := device.NewDevice([]string{"1", "7", "13", "36", "3", "4", "23", "65", "10", "17", "11", "79", "46", "44", "43", "41", "48", "130"}, sensors, _channel)
 	uow.mutex.Lock()
 	defer uow.mutex.Unlock()
 	uow.clean[_identity] = _device

@@ -4,6 +4,7 @@ package configuration
 type ServiceCredentials struct {
 	MysqDeviceMasterConnectionString string
 	WebAPIPort                       int
+	UDPPort                          int
 	WorkersCount                     int
 	DeviceFacadeHost                 string
 	Rabbit                           *RabbitCredentials

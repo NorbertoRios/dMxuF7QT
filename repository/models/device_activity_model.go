@@ -23,3 +23,8 @@ type DeviceActivity struct {
 	LastMessage        string    `gorm:"column:daiLastMessage"`
 	Serializedsoftware string    `gorm:"column:daiSoftware"`
 }
+
+//TableName for DeviceActivity model
+func (DeviceActivity) TableName() string {
+	return "ats.tblDeviceActivityInfo"
+}

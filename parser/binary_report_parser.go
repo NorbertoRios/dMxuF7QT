@@ -11,7 +11,7 @@ import (
 
 //NewGenxBinaryReportParser ...
 func NewGenxBinaryReportParser(param24 []string) *GenxBinaryReportParser {
-	file := types.NewFile("/config/initializer/ReportConfiguration.xml")
+	file := types.NewFile("/config/initialize/ReportConfiguration.xml")
 	provider := configuration.ConstructXMLProvider(file)
 	config := configuration.ConstructReportConfiguration(provider)
 	return &GenxBinaryReportParser{

@@ -5,14 +5,19 @@ import (
 	"genx-go/connection"
 	"genx-go/connection/controller"
 	"genx-go/connection/interfaces"
+	"genx-go/logger"
 	"genx-go/repository"
 	"genx-go/types"
 	"genx-go/unitofwork"
 	"genx-go/worker"
+
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
+	gLogger "gorm.io/gorm/logger"
 )
 
 func buildServiceConfiguration() *configuration.ServiceCredentials {
-	file := types.NewFile("/config/initializer/credentials.example.json")
+	file := types.NewFile("/config/initialize/credentials.example.json")
 	provider := configuration.ConstructCredentialsJSONProvider(file)
 	serviceConfig, err := provider.ProvideCredentials()
 	if err != nil {
@@ -23,9 +28,16 @@ func buildServiceConfiguration() *configuration.ServiceCredentials {
 
 func buildDeviceUnitOfWork(config *configuration.ServiceCredentials) unitofwork.IDeviceUnitOfWork {
 	serviceConfig := buildServiceConfiguration()
-	activityRepository := repository.NewDeviceActivityRepository(serviceConfig.MysqDeviceMasterConnectionString)
-	historyRepository := repository.NewDeviceStateRepository(serviceConfig.MysqDeviceMasterConnectionString)
-	return unitofwork.NewDeviceUnitOfWork(activityRepository, historyRepository)
+	_connection, err := gorm.Open(mysql.Open(serviceConfig.MysqDeviceMasterConnectionString), &gorm.Config{
+		SkipDefaultTransaction: true,
+		Logger:                 gLogger.Default.LogMode(gLogger.Info),
+	})
+	if err != nil {
+		logger.Logger().WriteToLog("[GenxService | buildDeviceUnitOfWork] Error connecting to raw database:" + err.Error())
+	}
+	activityRepository := repository.NewDeviceActivityRepository(_connection)
+	historyRepository := repository.NewDeviceStateRepository(_connection)
+	return unitofwork.NewDeviceUnitOfWork(historyRepository, activityRepository)
 }
 
 func buildWorkersPool(config *configuration.ServiceCredentials, uow unitofwork.IDeviceUnitOfWork) *worker.WorkersPool {

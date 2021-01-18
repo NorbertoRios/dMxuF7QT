@@ -4,21 +4,11 @@ import (
 	"genx-go/core/device/interfaces"
 	"genx-go/message"
 
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 //NewDeviceStateRepository returns new mysql repository
-func NewDeviceStateRepository(_connectionString string) *DeviceStateRepository {
-	_connection, err := gorm.Open(mysql.Open(_connectionString), &gorm.Config{
-		SkipDefaultTransaction: true,
-		Logger:                 logger.Default.LogMode(logger.Info),
-	})
-
-	if err != nil {
-		panic("Error connecting to raw database:" + err.Error())
-	}
+func NewDeviceStateRepository(_connection *gorm.DB) *DeviceStateRepository {
 	return &DeviceStateRepository{
 		Connection: _connection,
 	}

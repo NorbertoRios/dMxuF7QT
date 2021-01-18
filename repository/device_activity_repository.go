@@ -1,23 +1,16 @@
 package repository
 
 import (
+	"errors"
 	"genx-go/core/device/interfaces"
+	genxLogger "genx-go/logger"
+	"genx-go/repository/models"
 
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 //NewDeviceActivityRepository ...
-func NewDeviceActivityRepository(_connectionString string) *DeviceActivityRepository {
-	_connection, err := gorm.Open(mysql.Open(_connectionString), &gorm.Config{
-		SkipDefaultTransaction: true,
-		Logger:                 logger.Default.LogMode(logger.Info),
-	})
-
-	if err != nil {
-		panic("Error connecting to raw database:" + err.Error())
-	}
+func NewDeviceActivityRepository(_connection *gorm.DB) *DeviceActivityRepository {
 	return &DeviceActivityRepository{
 		Connection: _connection,
 	}
@@ -35,5 +28,13 @@ func (r *DeviceActivityRepository) Save(device ...interfaces.IDevice) error {
 
 //Load ...
 func (r *DeviceActivityRepository) Load(identity string) interface{} {
-	return nil
+	d := &models.DeviceActivity{}
+	err := r.Connection.Where("daiDeviceIdentity=?", identity).Find(d).Error
+	bErr := errors.Is(err, gorm.ErrRecordNotFound)
+	if err != nil && bErr {
+		genxLogger.Logger().WriteToLog(genxLogger.Info, "[DeviceActivityRepository | Load] Activity for device ", identity, " not found")
+	} else if err != nil && !bErr {
+		genxLogger.Logger().WriteToLog(genxLogger.Fatal, "[DeviceActivityRepository | Load] Error while loading activity. Device ", identity, ". Error: ", err)
+	}
+	return d
 }

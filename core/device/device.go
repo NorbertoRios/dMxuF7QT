@@ -15,6 +15,11 @@ import (
 	"time"
 )
 
+//NewActivityLessDevice ...
+func NewActivityLessDevice(_channel connInterfaces.IChannel) interfaces.IDevice {
+	return NewDevice([]string{}, make(map[string]sensors.ISensor), _channel)
+}
+
 //NewDevice ...
 func NewDevice(_param24 []string, _sensors map[string]sensors.ISensor, _channel connInterfaces.IChannel) interfaces.IDevice {
 	return &Device{
@@ -58,7 +63,7 @@ func (device *Device) Send(message interface{}) error {
 
 //Parser ...
 func (device *Device) Parser() parser.IParser {
-	if device.DeviceParser != nil {
+	if device.DeviceParser == nil {
 		device.DeviceParser = parser.NewGenxBinaryReportParser(device.Parameter24)
 	}
 	return device.DeviceParser
