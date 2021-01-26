@@ -44,6 +44,7 @@ type Device struct {
 	LastLocationMessage *message.Message
 	DeviceObservable    *Observable
 	LastStateUpdateTime time.Time
+	LastActivity        time.Time
 	Config              interfaces.IProcess
 	CurrentState        *State
 	DeviceParser        parser.IParser
@@ -66,7 +67,7 @@ func (device *Device) Send(message interface{}) error {
 
 //MessageArrived new message
 func (device *Device) MessageArrived(msg interface{}) *list.List {
-	device.LastStateUpdateTime = time.Now().UTC()
+	device.LastActivity = time.Now().UTC()
 	bMessage, bErr := json.Marshal(msg)
 	if bErr != nil {
 		logger.Logger().WriteToLog(logger.Error, "[Device | MessageArrived] Error while marshaling incoming message. Error: ", bErr)

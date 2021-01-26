@@ -1,7 +1,7 @@
 package repository
 
 import (
-	"genx-go/core/device/interfaces"
+	"genx-go/core/device"
 	"genx-go/message"
 
 	"gorm.io/gorm"
@@ -20,7 +20,7 @@ type DeviceStateRepository struct {
 }
 
 //Save ...
-func (db *DeviceStateRepository) Save(device ...interfaces.IDevice) error {
+func (db *DeviceStateRepository) Save(device ...device.Device) error {
 	return nil
 }
 

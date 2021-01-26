@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"fmt"
 	"genx-go/core/device/interfaces"
+	"genx-go/core/locationmessage/request"
 	"genx-go/core/locationmessage/task"
 	"genx-go/core/process"
 	"genx-go/logger"
@@ -50,22 +51,28 @@ func (p *Process) Param24Arriver(param24 []string) *list.List {
 }
 
 //MessageIncome ...
-func (p *Process) MessageIncome(msg *message.RawMessage, IUow interface{}) {
+func (p *Process) MessageIncome(req *request.MessageRequest, IUow interface{}) {
 	uow := IUow.(unitofwork.IDeviceUnitOfWork)
-	switch p.ProcessCurrentTask.(type) {
-	case *task.LocationMessageTask:
+	requestData := req.Data()
+	switch requestData.(type) {
+	case *message.RawMessage:
 		{
-			locationMessage := p.messageParser.Parse(msg).(*message.LocationMessage)
-			for _, location := range locationMessage.Messages {
-				p.device.MessageArrived(location)
-				uow.UpdateState(msg.Identity(), p.device)
-				uow.UpdateActivity(msg.Identity(), p.device)
+			if _, s := p.ProcessCurrentTask.(*task.LocationMessageTask); s {
+				locationMessage := p.messageParser.Parse(requestData.(*message.RawMessage)).(*message.LocationMessage)
+				for _, location := range locationMessage.Messages {
+					p.device.MessageArrived(location)
+					uow.UpdateState(location.Identity, p.device)
+					uow.UpdateActivity(location.Identity, p.device)
+				}
+			} else {
+				logger.Logger().WriteToLog(logger.Info, "[SyncProcess | MessageIncome] Receipt location message from unsynchronized device: ", req.Identity)
+				p.device.MessageArrived(requestData)
 			}
-			p.device.Send(locationMessage.Ack)
 		}
-	case *task.SyncTask:
+	default:
 		{
-			logger.Logger().WriteToLog(logger.Info, "[Process | MessageIncome] Cant handle message from device. Device aint synchronized.")
+			logger.Logger().WriteToLog(logger.Info, "[SyncProcess | MessageIncome] Receipt message from unsynchronized device: ", req.Identity)
+			p.device.MessageArrived(requestData)
 		}
 	}
 }

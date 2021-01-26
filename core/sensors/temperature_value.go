@@ -15,10 +15,10 @@ func BuildTemperatureValueSensor(rData map[string]interface{}) ISensor {
 	if v, f := rData["TemperatureSensors"]; f {
 		column := &columns.Temperature{RawValue: v}
 		values := make(map[int]int)
-		sNum := 4
+		sNum := 1
 		for i := 0; i < 8; i += 2 {
 			values[sNum] = column.Value(i)
-			sNum--
+			sNum++
 		}
 		//delete(rData, "IBID")
 		return &TemperatureValueSensor{Values: values}

@@ -2,7 +2,7 @@ package repository
 
 import (
 	"errors"
-	"genx-go/core/device/interfaces"
+	"genx-go/core/device"
 	genxLogger "genx-go/logger"
 	"genx-go/repository/models"
 
@@ -22,7 +22,7 @@ type DeviceActivityRepository struct {
 }
 
 //Save ...
-func (r *DeviceActivityRepository) Save(device ...interfaces.IDevice) error {
+func (r *DeviceActivityRepository) Save(device ...device.Device) error {
 	return nil
 }
 

@@ -1,7 +1,6 @@
 package mock
 
 import (
-	serviceConfiguration "genx-go/configuration"
 	"genx-go/core/device"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/location"
@@ -19,9 +18,9 @@ var createdDevice interfaces.IDevice
 func NewDevice() interfaces.IDevice {
 	param24 := "24=1.7.13.36.3.4.23.65.10.17.11.79.46.44.43.82.152.41.48.56.70.77.93.130;"
 	param24 = strings.ReplaceAll(strings.Split(param24, "=")[1], ";", "")
-	param24Columns := strings.Split(param24, ".")
+	//param24Columns := strings.Split(param24, ".")
 	dev := &Device{}
-	dev.Parameter24 = param24Columns
+	//dev.Parameter24 = param24Columns
 	dev.CurrentState = device.NewState(make(map[string]sensors.ISensor))
 	dev.UDPChannel = &UDPChannel{}
 	//dev.SerialNumber = "000003870006"
@@ -44,9 +43,9 @@ type Device struct {
 //Parser ...
 func (device *Device) Parser() parser.IParser {
 	if device.DeviceParser == nil {
-		file := NewFile("..", "/ReportConfiguration.xml")
-		xmlProvider := serviceConfiguration.ConstructXMLProvider(file)
-		device.DeviceParser = parser.NewGenxBinaryReportParser(device.Parameter24, xmlProvider)
+		//file := NewFile("..", "/ReportConfiguration.xml")
+		//xmlProvider := serviceConfiguration.ConstructXMLProvider(file)
+		//device.DeviceParser = parser.NewGenxBinaryReportParser(device.Parameter24, xmlProvider)
 	}
 	return device.DeviceParser
 }

@@ -105,69 +105,23 @@ func checkBReportSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 				assert("Ignition", sens.(*sensors.IgnitionSensor).IgnitionState, byte(1), t)
 				break
 			}
-		case *sensors.Switch:
+		case *sensors.Inputs:
 			{
-				sensor := sens.(*sensors.Switch)
-				switch sensor.ID {
-				case 0:
-					{
-						assert("Switch0", sensor.ID, int(0), t)
-						assert("Switch0", sensor.State, byte(0), t)
-					}
-				case 1:
-					{
-						assert("Switch1", sensor.ID, int(1), t)
-						assert("Switch1", sensor.State, byte(1), t)
-					}
-				case 2:
-					{
-						assert("Switch2", sensor.ID, int(2), t)
-						assert("Switch2", sensor.State, byte(1), t)
-						break
-					}
-				case 3:
-					{
-						assert("Switch3", sensor.ID, int(3), t)
-						assert("Switch3", sensor.State, byte(0), t)
-						break
-					}
-				default:
-					{
-						t.Error("Unexpected sensor id")
-						break
+				inputs := sens.(*sensors.Inputs)
+				shouldState := []byte{0, 1, 1, 0}
+				for i := 0; i < 3; i++ {
+					if inputs.Switches[i+1] != shouldState[i] {
+						t.Error("Inputs states dont equal. Input id:", i)
 					}
 				}
 			}
-		case *sensors.Relay:
+		case *sensors.Outputs:
 			{
-				sensor := sens.(*sensors.Relay)
-				switch sensor.ID {
-				case 0:
-					{
-						assert("Relay0ID", sensor.ID, int(0), t)
-						assert("Relay0State", sensor.State, byte(0), t)
-					}
-				case 1:
-					{
-						assert("Relay1ID", sensor.ID, int(1), t)
-						assert("Relay1State", sensor.State, byte(0), t)
-					}
-				case 2:
-					{
-						assert("Relay2ID", sensor.ID, int(2), t)
-						assert("Relay2State", sensor.State, byte(1), t)
-						break
-					}
-				case 3:
-					{
-						assert("Relay3ID", sensor.ID, int(3), t)
-						assert("Relay3State", sensor.State, byte(0), t)
-						break
-					}
-				default:
-					{
-						t.Error("Unexpected sensor id")
-						break
+				relays := sens.(*sensors.Outputs)
+				shouldState := []byte{0, 1, 0, 0}
+				for i := 0; i < 3; i++ {
+					if relays.Relays[i+1] != shouldState[i] {
+						t.Error("Relays states dont equal. Input id:", i)
 					}
 				}
 			}
@@ -201,10 +155,10 @@ func checkBReportSensors(sensorsArr []sensors.ISensor, t *testing.T) {
 			}
 		case *sensors.TemperatureValueSensor: //0x0C, 0x2A, 0x0D, 0x2A, 0x0F, 0x23, 0x0F, 0xE3 - TValues
 			{
-				assert("TValue1", sens.(*sensors.TemperatureValueSensor).Values[0], int(0x0C2A), t)
-				assert("TValue2", sens.(*sensors.TemperatureValueSensor).Values[1], int(0x0D2A), t)
-				assert("TValue3", sens.(*sensors.TemperatureValueSensor).Values[2], int(0x0F23), t)
-				assert("TValue4", sens.(*sensors.TemperatureValueSensor).Values[3], int(0x0FE3), t)
+				assert("TValue1", sens.(*sensors.TemperatureValueSensor).Values[1], int(0x0C2A), t)
+				assert("TValue2", sens.(*sensors.TemperatureValueSensor).Values[2], int(0x0D2A), t)
+				assert("TValue3", sens.(*sensors.TemperatureValueSensor).Values[3], int(0x0F23), t)
+				assert("TValue4", sens.(*sensors.TemperatureValueSensor).Values[4], int(0x0FE3), t)
 				break
 			}
 		default:

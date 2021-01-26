@@ -51,7 +51,7 @@ func newInputs(data map[string]interface{}) *Inputs {
 //BuildInputsFromString returns switches from string
 func BuildInputsFromString(bitMask string) ISensor {
 	sType := &types.String{Data: bitMask}
-	byteValue := sType.Byte(10)
+	byteValue := sType.BitmaskStringToByte()
 	resultSwitches := make(map[int]byte)
 	for i := 0; i < 4; i++ {
 		switchMask := &types.Byte{Data: byteValue}

@@ -18,7 +18,7 @@ func BuildGenxHardwareMessageParser() *GenxHardwareMessageParser {
 	return &GenxHardwareMessageParser{
 		FirmwareExpression: fwExpr,
 		SensorBuilders: map[*regexp.Regexp]interface{}{
-			ignExpr:    sensors.BuildIgnitionSensorFromString,
+			ignExpr:    sensors.MapOnOffIgnition,
 			voltExpr:   sensors.BuildPowerSensorFromString,
 			switchExpr: sensors.BuildInputsFromString,
 			relayExpr:  sensors.BuildOutputsFromString,

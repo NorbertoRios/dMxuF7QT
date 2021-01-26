@@ -38,7 +38,10 @@ func (str *String) BitmaskStringToByte() byte {
 
 //Byte returns byte from string
 func (str *String) Byte(base int) byte {
-	value, _ := strconv.ParseUint(str.Data, base, 8)
+	value, err := strconv.ParseUint(str.Data, base, 8)
+	if err != nil {
+		return 0
+	}
 	return byte(value)
 }
 

@@ -4,6 +4,7 @@ import (
 	"genx-go/core"
 	"genx-go/core/columns"
 	"genx-go/types"
+	"strings"
 	"time"
 )
 
@@ -38,6 +39,20 @@ func BuildIgnitionSensorFromString(data string) ISensor {
 	sensor.createdAt = time.Now().UTC()
 	return sensor
 
+}
+
+//MapOnOffIgnition ...
+func MapOnOffIgnition(data string) ISensor {
+	var state byte
+	if strings.ToLower(data) == "on" {
+		state = 1
+	} else {
+		state = 0
+	}
+	sensor := &IgnitionSensor{IgnitionState: state}
+	sensor.symbol = "Ignition"
+	sensor.createdAt = time.Now().UTC()
+	return sensor
 }
 
 //ToDTO ..
