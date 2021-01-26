@@ -11,4 +11,6 @@ type IDeviceUnitOfWork interface {
 	Device(string) interfaces.IDevice
 	Delete(string)
 	Register(string, connInterfaces.IChannel)
+	UpdateActivity(string, interfaces.IDevice)
+	UpdateState(string, interfaces.IDevice)
 }

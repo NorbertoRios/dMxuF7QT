@@ -16,7 +16,6 @@ import (
 func NewConfiguration() *Configuration {
 	config := &Configuration{}
 	config.Mutex = &sync.Mutex{}
-	//config.ProcessDevice = _device
 	config.ProcessTasks = list.New()
 	return config
 }

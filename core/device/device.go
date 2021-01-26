@@ -2,6 +2,7 @@ package device
 
 import (
 	"container/list"
+	"encoding/json"
 	connInterfaces "genx-go/connection/interfaces"
 	"genx-go/core/configuration"
 	"genx-go/core/device/interfaces"
@@ -22,23 +23,25 @@ func NewActivityLessDevice(_channel connInterfaces.IChannel) interfaces.IDevice 
 
 //NewDevice ...
 func NewDevice(_param24 []string, _sensors map[string]sensors.ISensor, _channel connInterfaces.IChannel) interfaces.IDevice {
-	return &Device{
-		Parameter24:         _param24,
-		LastLocationMessage: &message.LocationMessage{},
-		DeviceObservable:    NewObservable(),
-		LastStateUpdateTime: time.Now().UTC(),
-		CurrentState:        NewState(_sensors),
-		Mutex:               &sync.Mutex{},
-		UDPChannel:          _channel,
-		ImmoStorage:         peripherystorage.NewImmobilizerStorage(),
-		LockStorage:         peripherystorage.NewElectricLockStorage(),
-	}
+	// device := &Device{
+	// 	Parameter24:         _param24,
+	// 	LastLocationMessage: &message.LocationMessage{},
+	// 	DeviceObservable:    NewObservable(),
+	// 	LastStateUpdateTime: time.Now().UTC(),
+	// 	CurrentState:        NewState(_sensors),
+	// 	Mutex:               &sync.Mutex{},
+	// 	UDPChannel:          _channel,
+	// 	ImmoStorage:         peripherystorage.NewImmobilizerStorage(),
+	// 	LockStorage:         peripherystorage.NewElectricLockStorage(),
+	// }
+	// //device.DeviceObservable.Attach()
+	// return device
+	return nil
 }
 
 //Device struct
 type Device struct {
-	Parameter24         []string
-	LastLocationMessage *message.LocationMessage
+	LastLocationMessage *message.Message
 	DeviceObservable    *Observable
 	LastStateUpdateTime time.Time
 	Config              interfaces.IProcess
@@ -61,12 +64,49 @@ func (device *Device) Send(message interface{}) error {
 	return nil
 }
 
-//Parser ...
-func (device *Device) Parser() parser.IParser {
-	if device.DeviceParser == nil {
-		device.DeviceParser = parser.NewGenxBinaryReportParser(device.Parameter24)
+//MessageArrived new message
+func (device *Device) MessageArrived(msg interface{}) *list.List {
+	device.LastStateUpdateTime = time.Now().UTC()
+	bMessage, bErr := json.Marshal(msg)
+	if bErr != nil {
+		logger.Logger().WriteToLog(logger.Error, "[Device | MessageArrived] Error while marshaling incoming message. Error: ", bErr)
+	} else {
+		logger.Logger().WriteToLog(logger.Info, "[Device | MessageArrived] New message arrived. Message: ", string(bMessage))
 	}
-	return device.DeviceParser
+	return device.DeviceObservable.Notify(msg)
+}
+
+//ProcessCommands process commands
+func (device *Device) ProcessCommands(commands *list.List) {
+	device.Mutex.Lock()
+	defer device.Mutex.Unlock()
+	for commands.Len() > 0 {
+		cmd := commands.Front()
+		command, valid := cmd.Value.(interfaces.ICommand)
+		if valid {
+			nList := command.Execute(device)
+			if nList != nil && nList.Len() > 0 {
+				commands.PushFrontList(nList)
+			}
+			commands.Remove(cmd)
+		}
+	}
+}
+
+//Immobilizer ...
+func (device *Device) Immobilizer(index int, trigger string) interfaces.IImmobilizer {
+	return device.ImmoStorage.Immobilizer(index, trigger, device)
+}
+
+//Observable returns device Observable
+func (device *Device) Observable() interfaces.IObservable {
+	return device.DeviceObservable
+}
+
+//NewState ...
+func (device *Device) NewState(messageSensors []sensors.ISensor) {
+	device.LastStateUpdateTime = time.Now().UTC()
+	device.CurrentState = NewSensorState(device.CurrentState, messageSensors)
 }
 
 //NewChannel ...
@@ -90,9 +130,9 @@ func (device *Device) LocationRequest() interfaces.IProcess {
 	return device.LocationProcess
 }
 
-//LastDeviceLocationMessage ..
-func (device *Device) LastDeviceLocationMessage() *message.LocationMessage {
-	return device.LastLocationMessage
+//LocationMessageProcess ...
+func (device *Device) LocationMessageProcess() interfaces.ILocationMessageProcess {
+	return nil
 }
 
 //ElectricLock ..
@@ -100,63 +140,9 @@ func (device *Device) ElectricLock(index int) interfaces.IProcess {
 	return device.LockStorage.ElectricLock(index, device)
 }
 
-//Ack ...
-func (device *Device) Ack() {
-	device.Send(device.LastLocationMessage.Ack)
-}
-
 //State returns device current state
 func (device *Device) State() map[string]sensors.ISensor {
 	device.Mutex.Lock()
 	defer device.Mutex.Unlock()
 	return device.CurrentState.State()
-}
-
-func (device *Device) handleLocationMessage(msg *message.LocationMessage) *list.List {
-	commands := list.New()
-	device.LastLocationMessage = msg
-	for _, m := range msg.Messages {
-		device.CurrentState = NewSensorState(device.CurrentState, m.Sensors)
-		commands.PushBackList(device.DeviceObservable.Notify(m))
-	}
-	return commands
-}
-
-//MessageArrived new message
-func (device *Device) MessageArrived(msg interface{}) *list.List {
-	device.LastStateUpdateTime = time.Now().UTC()
-	switch msg.(type) {
-	case *message.LocationMessage:
-		{
-			return device.handleLocationMessage(msg.(*message.LocationMessage))
-		}
-	}
-	return device.DeviceObservable.Notify(msg)
-}
-
-//Immobilizer ...
-func (device *Device) Immobilizer(index int, trigger string) interfaces.IImmobilizer {
-	return device.ImmoStorage.Immobilizer(index, trigger, device)
-}
-
-//Observable returns device Observable
-func (device *Device) Observable() interfaces.IObservable {
-	return device.DeviceObservable
-}
-
-//ProcessCommands process commands
-func (device *Device) ProcessCommands(commands *list.List) {
-	device.Mutex.Lock()
-	defer device.Mutex.Unlock()
-	for commands.Len() > 0 {
-		cmd := commands.Front()
-		command, valid := cmd.Value.(interfaces.ICommand)
-		if valid {
-			nList := command.Execute(device)
-			if nList != nil && nList.Len() > 0 {
-				commands.PushFrontList(nList)
-			}
-			commands.Remove(cmd)
-		}
-	}
 }

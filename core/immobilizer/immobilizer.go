@@ -54,7 +54,7 @@ func (immo *Immobilizer) competitivenessOfTasks(newTask interfaces.ITask, curren
 	}
 	cmdList := list.New()
 	cmdList.PushBackList(immo.ProcessCurrentTask.Invoker().CanselTask(immo.ProcessCurrentTask, "Deprecated"))
-	cmdList.PushBackList(immo.ProcessCurrentTask.Commands())
+	cmdList.PushBackList(newTask.Commands())
 	immo.ProcessCurrentTask = newTask
 	return cmdList
 }

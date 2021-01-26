@@ -1,9 +1,9 @@
 package repository
 
-import "genx-go/core/device/interfaces"
+import "genx-go/core/device"
 
 //IRepository interface for all repositories
 type IRepository interface {
-	Save(...interfaces.IDevice) error
+	Save(...device.Device) error
 	Load(string) interface{}
 }

@@ -1,9 +1,7 @@
 package worker
 
 import (
-	coreUseCase "genx-go/core/usecase"
 	"genx-go/logger"
-	"genx-go/message"
 	"genx-go/unitofwork"
 	"genx-go/worker/usecase"
 	"sync"
@@ -56,17 +54,15 @@ func (w *Worker) Run() {
 				if device == nil {
 					w.uow.Register(entryData.RawMessage.Identity(), entryData.Channel)
 					device = w.uow.Device(entryData.RawMessage.Identity())
-				}
-				msg := usecase.NewMessageIncomeUseCase(entryData.RawMessage, device).Launch()
-				device.NewChannel(entryData.Channel)
-				coreUseCase.NewMessageArrivedUseCase(device, msg).Launch()
-				if w.uow.Commit() {
-					if _, s := msg.(*message.LocationMessage); s {
-						device.Ack()
-					}
 				} else {
-					logger.Logger().WriteToLog(logger.Error, "[Worker | Run] Error while commit.")
+					device.NewChannel(entryData.Channel)
 				}
+				usecase.NewMessageIncomeUseCase(entryData.RawMessage, device, w.uow).Launch()
+				go func() {
+					if !w.uow.Commit() {
+						logger.Logger().WriteToLog(logger.Fatal, "[Worker | Run] Something went wrong while commit changes to database")
+					}
+				}()
 			}
 		}
 	}

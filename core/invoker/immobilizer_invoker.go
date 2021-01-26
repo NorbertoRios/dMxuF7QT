@@ -34,9 +34,3 @@ func (invoker *ImmobilizerInvoker) DiagWatchdogsCommands(task interfaces.ITask) 
 	cmd.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
 	return cmd
 }
-
-//CanselTask ...
-func (invoker *ImmobilizerInvoker) CanselTask(_task interfaces.ITask, description string) *list.List {
-	invoker.process.TaskCancel(_task, description)
-	return invoker.dropAllObservers(_task)
-}

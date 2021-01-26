@@ -3,7 +3,6 @@ package unitofwork
 import (
 	"container/list"
 	"genx-go/core/device"
-	"genx-go/core/device/interfaces"
 	"genx-go/logger"
 	"genx-go/repository"
 	"sync"
@@ -30,10 +29,10 @@ func (uow *BaseUnitOfWork) Update(identity string, _device device.Device) {
 }
 
 func (uow *BaseUnitOfWork) update() bool {
-	devices := []interfaces.IDevice{}
+	devices := []device.Device{}
 	for _, list := range uow.dirty {
 		for element := list.Front(); element != nil; element = element.Next() {
-			d, _ := element.Value.(interfaces.IDevice)
+			d, _ := element.Value.(device.Device)
 			devices = append(devices, d)
 		}
 	}
