@@ -52,7 +52,7 @@ func NewGenxService() *GenxService {
 	workersPool.Run()
 	serverController := controller.NewRawDataController(workersPool)
 	return &GenxService{
-		server: connection.ConstructUDPServer("127.0.0.1", 10080, serverController),
+		server: connection.ConstructUDPServer("", 10064, serverController),
 	}
 }
 

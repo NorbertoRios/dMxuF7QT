@@ -1,4 +1,4 @@
-package request
+package usecase
 
 import (
 	"genx-go/logger"
@@ -7,22 +7,22 @@ import (
 	"genx-go/parser"
 )
 
-//NewMessageRequest ...
-func NewMessageRequest(_rawMessage *message.RawMessage) *MessageRequest {
-	return &MessageRequest{
+//NewPrepareMessage ...
+func NewPrepareMessage(_rawMessage *message.RawMessage) *PrepareMessage {
+	return &PrepareMessage{
 		Identity:   _rawMessage.Identity(),
 		rawMessage: _rawMessage,
 	}
 }
 
-//MessageRequest ...
-type MessageRequest struct {
+//PrepareMessage ...
+type PrepareMessage struct {
 	Identity   string
 	rawMessage *message.RawMessage
 }
 
-//Data ...
-func (mr *MessageRequest) Data() interface{} {
+//PreparedMessage ...
+func (mr *PrepareMessage) PreparedMessage() interface{} {
 	switch mr.rawMessage.MessageType {
 	case messagetype.BinaryLocation:
 		{

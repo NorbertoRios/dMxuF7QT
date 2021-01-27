@@ -13,7 +13,6 @@ import (
 //New ...
 func New() *Request {
 	req := &Request{}
-	//req.ProcessDevice = _device
 	req.ProcessTasks = list.New()
 	req.Mutex = &sync.Mutex{}
 	return req

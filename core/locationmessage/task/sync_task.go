@@ -32,6 +32,6 @@ func (task *SyncTask) Observers() []interfaces.IObserver {
 //Commands ...
 func (task *SyncTask) Commands() *list.List { //Таска должна отправить комманду для опроса 24 параметра + повесить обзервер на эту команду
 	cList := list.New()
-	cList.PushBack(observers.NewSyncObserver(task))
+	cList.PushBack(observers.NewSendDiagCommand(task))
 	return cList
 }

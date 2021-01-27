@@ -29,10 +29,10 @@ func (invoker *LocationProcessInvoker) SendDiagCommandAfterAnyMessage(task inter
 }
 
 //DeviceSynchronized ...
-func (invoker *LocationProcessInvoker) DeviceSynchronized(param24 string) *list.List {
+func (invoker *LocationProcessInvoker) DeviceSynchronized(param24 string, _device interfaces.IDevice) *list.List {
 	cmd := list.New()
 	value := strings.ReplaceAll(strings.Split(param24, "=")[1], ";", "")
 	param24Arr := strings.Split(value, ".")
-	cmd.PushBackList(invoker.process.Param24Arriver(param24Arr))
+	cmd.PushBackList(invoker.process.Param24Arriver(param24Arr, _device))
 	return cmd
 }

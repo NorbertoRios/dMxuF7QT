@@ -41,7 +41,7 @@ func (observer *SyncObserver) Update(msg interface{}) *list.List {
 		{
 			paramMessage := msg.(*message.ParametersMessage)
 			if value, f := paramMessage.Parameters["24"]; f {
-				cList.PushBackList(observer.task.Invoker().(interfaces.ILocationProcessInvoker).DeviceSynchronized(value))
+				cList.PushBackList(observer.task.Invoker().(interfaces.ILocationProcessInvoker).DeviceSynchronized(value, observer.task.Device()))
 				observer.Watchdog.Stop()
 			}
 		}
@@ -49,7 +49,7 @@ func (observer *SyncObserver) Update(msg interface{}) *list.List {
 		{
 			ackMessage := msg.(*message.ParametersMessage)
 			if value, f := ackMessage.Parameters["24"]; f {
-				cList.PushBackList(observer.task.Invoker().(interfaces.ILocationProcessInvoker).DeviceSynchronized(value))
+				cList.PushBackList(observer.task.Invoker().(interfaces.ILocationProcessInvoker).DeviceSynchronized(value, observer.task.Device()))
 				observer.Watchdog.Stop()
 			}
 		}

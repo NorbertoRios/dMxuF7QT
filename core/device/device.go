@@ -7,47 +7,46 @@ import (
 	"genx-go/core/configuration"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/location"
+	"genx-go/core/locationmessage"
 	"genx-go/core/peripherystorage"
 	"genx-go/core/sensors"
 	"genx-go/logger"
-	"genx-go/message"
 	"genx-go/parser"
 	"sync"
 	"time"
 )
 
-//NewActivityLessDevice ...
-func NewActivityLessDevice(_channel connInterfaces.IChannel) interfaces.IDevice {
-	return NewDevice([]string{}, make(map[string]sensors.ISensor), _channel)
-}
-
 //NewDevice ...
-func NewDevice(_param24 []string, _sensors map[string]sensors.ISensor, _channel connInterfaces.IChannel) interfaces.IDevice {
-	// device := &Device{
-	// 	Parameter24:         _param24,
-	// 	LastLocationMessage: &message.LocationMessage{},
-	// 	DeviceObservable:    NewObservable(),
-	// 	LastStateUpdateTime: time.Now().UTC(),
-	// 	CurrentState:        NewState(_sensors),
-	// 	Mutex:               &sync.Mutex{},
-	// 	UDPChannel:          _channel,
-	// 	ImmoStorage:         peripherystorage.NewImmobilizerStorage(),
-	// 	LockStorage:         peripherystorage.NewElectricLockStorage(),
-	// }
-	// //device.DeviceObservable.Attach()
-	// return device
-	return nil
+func NewDevice(_parameter24 []string, _sensors map[string]sensors.ISensor, _channel connInterfaces.IChannel) interfaces.IDevice {
+	var deviceParser parser.IParser
+	if len(_parameter24) == 0 {
+		deviceParser = nil
+	} else {
+		deviceParser = parser.NewGenxBinaryReportParser(_parameter24)
+	}
+	return &Device{
+		LastActivity:        time.Now().UTC(),
+		LastStateUpdateTime: time.Now().UTC(),
+		MessageProcess:      locationmessage.NewLocationProcess(_parameter24),
+		parser:              deviceParser,
+		DeviceObservable:    NewObservable(),
+		CurrentState:        NewState(_sensors),
+		UDPChannel:          _channel,
+		Mutex:               &sync.Mutex{},
+		ImmoStorage:         peripherystorage.NewImmobilizerStorage(),
+		LockStorage:         peripherystorage.NewElectricLockStorage(),
+	}
 }
 
 //Device struct
 type Device struct {
-	LastLocationMessage *message.Message
+	parser              parser.IParser
+	MessageProcess      interfaces.ILocationMessageProcess
 	DeviceObservable    *Observable
 	LastStateUpdateTime time.Time
 	LastActivity        time.Time
 	Config              interfaces.IProcess
 	CurrentState        *State
-	DeviceParser        parser.IParser
 	ImmoStorage         *peripherystorage.ImmobilizerStorage
 	LockStorage         *peripherystorage.ElectricLockStorage
 	UDPChannel          connInterfaces.IChannel
@@ -115,6 +114,16 @@ func (device *Device) NewChannel(_channel connInterfaces.IChannel) {
 	device.UDPChannel = _channel
 }
 
+//LastActivityTime ...
+func (device *Device) LastActivityTime() time.Time {
+	return device.LastActivity
+}
+
+//Parser ...
+func (device *Device) Parser() parser.IParser {
+	return device.parser
+}
+
 //Configuration ..
 func (device *Device) Configuration() interfaces.IProcess {
 	if device.Config == nil {
@@ -133,7 +142,7 @@ func (device *Device) LocationRequest() interfaces.IProcess {
 
 //LocationMessageProcess ...
 func (device *Device) LocationMessageProcess() interfaces.ILocationMessageProcess {
-	return nil
+	return device.MessageProcess
 }
 
 //ElectricLock ..
