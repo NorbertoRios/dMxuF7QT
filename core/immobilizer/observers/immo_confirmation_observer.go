@@ -16,7 +16,7 @@ import (
 func NewImmoConfitmationObserver(_task interfaces.ITask) *ImmoConfitmationObserver {
 	return &ImmoConfitmationObserver{
 		task:     _task,
-		Watchdog: watchdog.NewWatchdog(_task.Device(), _task.Invoker().(interfaces.IImmoInvoker).DiagWatchdogsCommands(_task), 30),
+		Watchdog: watchdog.NewWatchdog(_task.Device(), _task.Invoker().(interfaces.IImmoInvoker).WatchdogsCommands(_task, "DIAG HARDWARE"), 30),
 	}
 }
 

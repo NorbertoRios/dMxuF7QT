@@ -2,7 +2,6 @@ package interfaces
 
 import (
 	"container/list"
-	"genx-go/core/request"
 )
 
 //IProcess ...
@@ -11,5 +10,7 @@ type IProcess interface {
 	TaskDone(ITask)
 	CurrentTask() ITask
 	Tasks() *list.List
-	NewRequest(request.IRequest, IDevice) *list.List
+	NewRequest(interface{}, IDevice) *list.List
+	Pause()
+	Resume()
 }

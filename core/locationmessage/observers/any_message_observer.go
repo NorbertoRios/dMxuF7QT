@@ -2,6 +2,7 @@ package observers
 
 import (
 	"container/list"
+	"genx-go/core/commands"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/observers"
 	"genx-go/logger"
@@ -21,10 +22,10 @@ type AnyMessageObserver struct {
 
 //Update ...
 func (observer *AnyMessageObserver) Update(msg interface{}) *list.List {
-	commands := list.New()
-	commands.PushBack(NewSendDiagCommand(observer.task))
-	commands.PushBack(observers.NewDetachObserverCommand(observer))
-	return commands
+	cmd := list.New()
+	cmd.PushBack(commands.NewSendDeviceMessageCommand("DIAG PARAMS=24"))
+	cmd.PushBack(observers.NewDetachObserverCommand(observer))
+	return cmd
 }
 
 //Task ...

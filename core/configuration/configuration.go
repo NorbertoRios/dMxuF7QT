@@ -6,7 +6,6 @@ import (
 	"genx-go/core/configuration/task"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/process"
-	baseRequest "genx-go/core/request"
 	"genx-go/logger"
 	"reflect"
 	"sync"
@@ -26,12 +25,12 @@ type Configuration struct {
 }
 
 //NewRequest ..
-func (config *Configuration) NewRequest(req baseRequest.IRequest, device interfaces.IDevice) *list.List {
+func (config *Configuration) NewRequest(req interface{}, device interfaces.IDevice) *list.List {
 	cList := list.New()
 	newTask := task.New(req.(*request.ConfigurationRequest), device, config)
 	if config.ProcessCurrentTask != nil {
 		if _, v := config.ProcessCurrentTask.(*task.ConfigTask); v {
-			cList.PushBackList(config.ProcessCurrentTask.Invoker().CanselTask(config.ProcessCurrentTask, "Deprecated"))
+			cList.PushBackList(config.ProcessCurrentTask.Invoker().CancelTask(config.ProcessCurrentTask, "Deprecated"))
 		}
 	}
 	config.ProcessCurrentTask = newTask

@@ -12,7 +12,7 @@ func NewSensorState(_lastState *State, deviceSensors []sensors.ISensor) *State {
 	hash := _lastState.State()
 	for _, sensor := range deviceSensors {
 		if sensor.Symbol() == "" {
-			logger.Logger().WriteToLog(logger.Error, "[NewSensorState] Cant find symbol for sensor. Sensor: ", sensor.ToDTO())
+			logger.Logger().WriteToLog(logger.Error, "[NewSensorState] Cant find symbol for sensor. Sensor: ", sensor)
 			continue
 		}
 		hash[sensor.Symbol()] = sensor

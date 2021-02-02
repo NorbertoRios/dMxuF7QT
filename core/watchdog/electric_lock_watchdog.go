@@ -15,7 +15,7 @@ func NewElectricLockWatchdog(_task interfaces.ITask) *ElectricLockWatchdog {
 		expirationTime: _task.Request().(*request.UnlockRequest).Time(),
 	}
 	wd.device = _task.Device()
-	wd.stopChannel = make(chan struct{})
+	wd.stopChannel = make(chan interface{})
 	return wd
 }
 
@@ -39,7 +39,7 @@ func (wd *ElectricLockWatchdog) Start() {
 				{
 					if wd.expirationTime.Before(time.Now().UTC()) {
 						logger.Logger().WriteToLog(logger.Info, "[ElectricLockWatchdog] Electric lock change task canceled by time.")
-						cmds := wd.task.Invoker().CanselTask(wd.task, "Time is over")
+						cmds := wd.task.Invoker().CancelTask(wd.task, "Time is over")
 						usecase.NewBaseUseCase(wd.device, cmds).Launch()
 						return
 					}

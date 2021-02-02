@@ -19,18 +19,26 @@ type ImmobilizerInvoker struct {
 	BaseInvoker
 }
 
-//AckWatchdogsCommands ...
-func (invoker *ImmobilizerInvoker) AckWatchdogsCommands(task interfaces.ITask) *list.List {
+//WatchdogsCommands ...
+func (invoker *ImmobilizerInvoker) WatchdogsCommands(task interfaces.ITask, _message string) *list.List {
 	cmd := list.New()
-	anyMessageObserver := immoObservers.NewAnyImmoMessageObserver(task)
+	anyMessageObserver := immoObservers.NewAnyImmoMessageObserver(task, _message)
 	cmd.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
 	return cmd
 }
 
+//AckWatchdogsCommands ...
+// func (invoker *ImmobilizerInvoker) AckWatchdogsCommands(task interfaces.ITask) *list.List {
+// 	cmd := list.New()
+// 	anyMessageObserver := immoObservers.NewAnyImmoMessageObserver(task)
+// 	cmd.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
+// 	return cmd
+// }
+
 //DiagWatchdogsCommands ...
-func (invoker *ImmobilizerInvoker) DiagWatchdogsCommands(task interfaces.ITask) *list.List {
-	cmd := list.New()
-	anyMessageObserver := immoObservers.NewAnyImmoDiagObserver(task)
-	cmd.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
-	return cmd
-}
+// func (invoker *ImmobilizerInvoker) DiagWatchdogsCommands(task interfaces.ITask) *list.List {
+// 	cmd := list.New()
+// 	anyMessageObserver := immoObservers.NewAnyImmoDiagObserver(task)
+// 	cmd.PushBack(observers.NewAttachObserverCommand(anyMessageObserver))
+// 	return cmd
+// }

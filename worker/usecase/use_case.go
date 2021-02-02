@@ -38,18 +38,19 @@ func (miu *MessageIncomeUseCase) Launch() {
 			parser := miu.device.Parser()
 			if parser == nil {
 				logger.Logger().WriteToLog(logger.Info, "[MessageIncomeUseCase | Launch] Parser is nul, location message wont be processed. Device: ", rm.Identity())
-				process.MessageIncome(rm, miu.device)
+				process.NewRequest(rm, miu.device)
 				return
 			}
 			msg := parser.Parse(rm).(*message.LocationMessage)
 			for _, m := range msg.Messages {
-				process.MessageIncome(m, miu.device)
+				process.NewRequest(m, miu.device)
 				miu.uow.UpdateState(rm.Identity(), miu.device)
 			}
+			miu.device.Send(msg.Ack)
 		}
 	default:
 		{
-			process.MessageIncome(preparedMessage, miu.device)
+			process.NewRequest(preparedMessage, miu.device)
 		}
 	}
 	miu.uow.UpdateActivity(miu.rawMessage.Identity(), miu.device)

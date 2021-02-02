@@ -1,7 +1,6 @@
 package worker
 
 import (
-	"genx-go/logger"
 	"genx-go/unitofwork"
 	"genx-go/worker/usecase"
 	"sync"
@@ -58,11 +57,9 @@ func (w *Worker) Run() {
 					device.NewChannel(entryData.Channel)
 				}
 				usecase.NewMessageIncomeUseCase(entryData.RawMessage, device, w.uow).Launch()
-				go func() {
-					if !w.uow.Commit() {
-						logger.Logger().WriteToLog(logger.Fatal, "[Worker | Run] Something went wrong while commit changes to database")
-					}
-				}()
+				// if !w.uow.Commit() {
+				// 	logger.Logger().WriteToLog(logger.Fatal, "[Worker | Run] Something went wrong while commit changes to database")
+				// }
 			}
 		}
 	}

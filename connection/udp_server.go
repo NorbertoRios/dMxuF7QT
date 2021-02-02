@@ -48,7 +48,7 @@ func (server *UDPServer) Listen() {
 			logger.Logger().WriteToLog(logger.Fatal, "Error Reading from udp connection: ", err.Error())
 			return
 		}
-		logger.Logger().WriteToLog(logger.Info, "Received UDP packet:", hex.EncodeToString(buf[0:n]))
+		logger.Logger().WriteToLog(logger.Info, "Received UDP packet:", hex.EncodeToString(buf[0:n]), ". IP: ", addr.String())
 		channel := ConstructUDPChannel(addr, server)
 		server.controller.Process(buf[0:n], channel)
 	}

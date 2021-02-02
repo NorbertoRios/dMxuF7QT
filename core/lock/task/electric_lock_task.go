@@ -36,7 +36,7 @@ func (task *ElectricLockTask) Commands() *list.List {
 	unlockRequest := task.FacadeRequest.(*request.UnlockRequest)
 	if unlockRequest.Time().Before(time.Now().UTC()) {
 		logger.Logger().WriteToLog(logger.Info, "[ElectricLockTask | Start] Task time is over. Task expiration time: ", unlockRequest.Time().String(), ". Current time: ", time.Now().UTC().String())
-		return task.Invoker().CanselTask(task, "Task timed out")
+		return task.Invoker().CancelTask(task, "Task timed out")
 	}
 	cList := list.New()
 	cList.PushFront(observers.NewElectricLockSendCommand(task))

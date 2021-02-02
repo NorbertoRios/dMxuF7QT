@@ -11,7 +11,7 @@ import (
 )
 
 //New ...
-func New() *Request {
+func New() interfaces.IProcess {
 	req := &Request{}
 	req.ProcessTasks = list.New()
 	req.Mutex = &sync.Mutex{}
@@ -24,10 +24,10 @@ type Request struct {
 }
 
 //NewRequest ...
-func (lRequest *Request) NewRequest(req request.IRequest, _device interfaces.IDevice) *list.List {
+func (lRequest *Request) NewRequest(req interface{}, _device interfaces.IDevice) *list.List {
 	cList := list.New()
 	if lRequest.ProcessCurrentTask != nil {
-		cList.PushBackList(lRequest.ProcessCurrentTask.Invoker().CanselTask(lRequest.ProcessCurrentTask, "Deprecated"))
+		cList.PushBackList(lRequest.ProcessCurrentTask.Invoker().CancelTask(lRequest.ProcessCurrentTask, "Deprecated"))
 	}
 	lRequest.ProcessCurrentTask = task.NewLocationTask(req.(*request.BaseRequest), _device, lRequest)
 	cList.PushBackList(lRequest.ProcessCurrentTask.Commands())

@@ -6,6 +6,6 @@ import (
 
 //IInvoker ..
 type IInvoker interface {
-	CanselTask(ITask, string) *list.List
+	CancelTask(ITask, string) *list.List
 	DoneTask(ITask) *list.List
 }

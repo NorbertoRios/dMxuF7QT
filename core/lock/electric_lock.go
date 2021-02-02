@@ -30,8 +30,8 @@ type ElectricLock struct {
 }
 
 //NewRequest ..
-func (lock *ElectricLock) NewRequest(req baseRequest.IRequest, _device interfaces.IDevice) *list.List {
-	newTask := task.NewElectricLockTask(req, _device, lock)
+func (lock *ElectricLock) NewRequest(req interface{}, _device interfaces.IDevice) *list.List {
+	newTask := task.NewElectricLockTask(req.(baseRequest.IRequest), _device, lock)
 	if lock.ProcessCurrentTask == nil {
 		lock.ProcessCurrentTask = newTask
 		return lock.ProcessCurrentTask.Commands()
@@ -41,10 +41,10 @@ func (lock *ElectricLock) NewRequest(req baseRequest.IRequest, _device interface
 
 func (lock *ElectricLock) competitivenessOfTasks(newTask interfaces.ITask, currentReq *request.UnlockRequest) *list.List {
 	if currentReq.Equal(newTask.Request().(*request.UnlockRequest)) {
-		return newTask.Invoker().CanselTask(newTask, "Duplicate")
+		return newTask.Invoker().CancelTask(newTask, "Duplicate")
 	}
 	cmdList := list.New()
-	cmdList.PushBackList(lock.ProcessCurrentTask.Invoker().CanselTask(lock.ProcessCurrentTask, "Deprecated"))
+	cmdList.PushBackList(lock.ProcessCurrentTask.Invoker().CancelTask(lock.ProcessCurrentTask, "Deprecated"))
 	lock.ProcessCurrentTask = newTask
 	cmdList.PushBackList(lock.ProcessCurrentTask.Commands())
 	logger.Logger().WriteToLog(logger.Info, "[ElectricLock] Task created and run")

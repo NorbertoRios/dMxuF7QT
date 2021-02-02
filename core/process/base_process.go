@@ -33,3 +33,11 @@ func (process *BaseProcess) PushToTasks(_task interfaces.ITask, isDone bool) {
 		process.ProcessTasks.PushBack(_task)
 	}
 }
+
+//Pause ...
+func (process *BaseProcess) Pause() {
+}
+
+//Resume ...
+func (process *BaseProcess) Resume() {
+}

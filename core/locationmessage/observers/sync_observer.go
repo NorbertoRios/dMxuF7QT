@@ -12,14 +12,14 @@ import (
 func NewSyncObserver(_task interfaces.ITask) *SyncObserver {
 	return &SyncObserver{
 		task:     _task,
-		Watchdog: watchdog.NewWatchdog(_task.Device(), _task.Invoker().(interfaces.ILocationProcessInvoker).SendDiagCommandAfterAnyMessage(_task), 10),
+		watchdog: watchdog.NewWatchdog(_task.Device(), _task.Invoker().(interfaces.ILocationProcessInvoker).SendDiagCommandAfterAnyMessage(_task), 10),
 	}
 }
 
 //SyncObserver ...
 type SyncObserver struct {
 	task     interfaces.ITask
-	Watchdog *watchdog.Watchdog
+	watchdog *watchdog.Watchdog
 }
 
 //Task ...
@@ -30,29 +30,33 @@ func (observer *SyncObserver) Task() interfaces.ITask {
 //Attached ...
 func (observer *SyncObserver) Attached() {
 	logger.Logger().WriteToLog(logger.Info, "[SyncObserver] Successfuly attached")
-	observer.Watchdog.Start()
+	observer.watchdog.Start()
+}
+
+func (observer *SyncObserver) synchronized(value string) *list.List {
+	cList := list.New()
+	cList.PushBackList(observer.task.Invoker().(interfaces.ILocationProcessInvoker).DeviceSynchronized(value, observer.task.Device()))
+	observer.watchdog.Stop()
+	return cList
 }
 
 //Update ...
 func (observer *SyncObserver) Update(msg interface{}) *list.List {
-	cList := list.New()
 	switch msg.(type) {
 	case *message.ParametersMessage:
 		{
 			paramMessage := msg.(*message.ParametersMessage)
 			if value, f := paramMessage.Parameters["24"]; f {
-				cList.PushBackList(observer.task.Invoker().(interfaces.ILocationProcessInvoker).DeviceSynchronized(value, observer.task.Device()))
-				observer.Watchdog.Stop()
+				return observer.synchronized(value)
 			}
 		}
 	case *message.AckMessage:
 		{
 			ackMessage := msg.(*message.ParametersMessage)
 			if value, f := ackMessage.Parameters["24"]; f {
-				cList.PushBackList(observer.task.Invoker().(interfaces.ILocationProcessInvoker).DeviceSynchronized(value, observer.task.Device()))
-				observer.Watchdog.Stop()
+				return observer.synchronized(value)
 			}
 		}
 	}
-	return cList
+	return list.New()
 }

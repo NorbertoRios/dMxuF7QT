@@ -2,6 +2,7 @@ package observers
 
 import (
 	"container/list"
+	"genx-go/core/commands"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/immobilizer/request"
 	"genx-go/core/observers"
@@ -12,9 +13,10 @@ import (
 
 //NewWaitingImmoAckObserver ...
 func NewWaitingImmoAckObserver(_task interfaces.ITask) *WaitingImmoAckObserver {
+	setRelayDrive := NewSetRelayDrive(_task.Request().(*request.ChangeImmoStateRequest))
 	return &WaitingImmoAckObserver{
 		task:     _task,
-		Watchdog: watchdog.NewWatchdog(_task.Device(), _task.Invoker().(interfaces.IImmoInvoker).AckWatchdogsCommands(_task), 30),
+		Watchdog: watchdog.NewWatchdog(_task.Device(), _task.Invoker().(interfaces.IImmoInvoker).WatchdogsCommands(_task, setRelayDrive.Command()), 30),
 	}
 }
 
@@ -37,7 +39,7 @@ func (observer *WaitingImmoAckObserver) Task() interfaces.ITask {
 
 //Update observer
 func (observer *WaitingImmoAckObserver) Update(msg interface{}) *list.List {
-	commands := list.New()
+	cmds := list.New()
 	switch msg.(type) {
 	case *message.AckMessage:
 		{
@@ -46,11 +48,11 @@ func (observer *WaitingImmoAckObserver) Update(msg interface{}) *list.List {
 			if ackMessage.Value == setRelayDrive.Command() {
 				observer.Watchdog.Stop()
 				immoConfObserver := NewImmoConfitmationObserver(observer.task)
-				commands.PushBack(observers.NewDetachObserverCommand(observer))
-				commands.PushBack(observers.NewAttachObserverCommand(immoConfObserver))
-				commands.PushBack(observers.NewSendStringCommand("DIAG HARDWARE"))
+				cmds.PushBack(observers.NewDetachObserverCommand(observer))
+				cmds.PushBack(observers.NewAttachObserverCommand(immoConfObserver))
+				cmds.PushBack(commands.NewSendDeviceMessageCommand("DIAG HARDWARE"))
 			}
 		}
 	}
-	return commands
+	return cmds
 }

@@ -14,7 +14,7 @@ func NewSyncTask(_process interfaces.ILocationMessageProcess, _device interfaces
 	t := &SyncTask{}
 	t.bornTime = time.Now().UTC()
 	t.device = _device
-	t.invoker = invoker.NewLocationProcessInvoker(_process)
+	t.invoker = invoker.NewLocationProcessInvoker(_process.(interfaces.IProcess))
 	return t
 }
 

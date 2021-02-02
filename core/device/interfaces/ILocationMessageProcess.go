@@ -6,6 +6,6 @@ import (
 
 //ILocationMessageProcess ...
 type ILocationMessageProcess interface {
+	IProcess
 	Param24Arriver([]string, IDevice) *list.List
-	MessageIncome(interface{}, IDevice)
 }

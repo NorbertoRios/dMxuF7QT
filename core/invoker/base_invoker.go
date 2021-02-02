@@ -11,8 +11,8 @@ type BaseInvoker struct {
 	process interfaces.IProcess
 }
 
-//CanselTask ...
-func (invoker *BaseInvoker) CanselTask(_task interfaces.ITask, description string) *list.List {
+//CancelTask ...
+func (invoker *BaseInvoker) CancelTask(_task interfaces.ITask, description string) *list.List {
 	invoker.process.TaskCancel(_task, description)
 	return invoker.dropAllObservers(_task)
 }

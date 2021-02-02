@@ -93,6 +93,11 @@ func (device *Device) ProcessCommands(commands *list.List) {
 	}
 }
 
+//New24Param ...
+func (device *Device) New24Param(_parameter24 []string) {
+	device.parser = parser.NewGenxBinaryReportParser(_parameter24)
+}
+
 //Immobilizer ...
 func (device *Device) Immobilizer(index int, trigger string) interfaces.IImmobilizer {
 	return device.ImmoStorage.Immobilizer(index, trigger, device)

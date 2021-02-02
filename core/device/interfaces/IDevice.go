@@ -22,4 +22,5 @@ type IDevice interface {
 	LocationMessageProcess() ILocationMessageProcess
 	NewState([]sensors.ISensor)
 	Parser() parser.IParser
+	New24Param([]string)
 }

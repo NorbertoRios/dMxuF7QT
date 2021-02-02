@@ -9,16 +9,15 @@ import (
 )
 
 //NewLocationProcessInvoker ...
-func NewLocationProcessInvoker(_process interfaces.ILocationMessageProcess) *LocationProcessInvoker {
-	return &LocationProcessInvoker{
-		process: _process,
-	}
+func NewLocationProcessInvoker(_process interfaces.IProcess) *LocationProcessInvoker {
+	invoker := &LocationProcessInvoker{}
+	invoker.process = _process
+	return invoker
 }
 
 //LocationProcessInvoker ...
 type LocationProcessInvoker struct {
 	BaseInvoker
-	process interfaces.ILocationMessageProcess
 }
 
 //SendDiagCommandAfterAnyMessage ...
@@ -33,6 +32,6 @@ func (invoker *LocationProcessInvoker) DeviceSynchronized(param24 string, _devic
 	cmd := list.New()
 	value := strings.ReplaceAll(strings.Split(param24, "=")[1], ";", "")
 	param24Arr := strings.Split(value, ".")
-	cmd.PushBackList(invoker.process.Param24Arriver(param24Arr, _device))
+	cmd.PushBackList(invoker.process.(interfaces.ILocationMessageProcess).Param24Arriver(param24Arr, _device))
 	return cmd
 }

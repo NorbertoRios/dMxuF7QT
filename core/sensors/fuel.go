@@ -14,7 +14,9 @@ type Fuel struct {
 
 //BuildFuelSensor returns new gps sensor
 func BuildFuelSensor(data map[string]interface{}) ISensor {
-	return nil
+	sensor := &Fuel{}
+	sensor.symbol = "FuelLevel"
+	return sensor
 }
 
 //BuildFuelSensorFromString returns new fuel sensor

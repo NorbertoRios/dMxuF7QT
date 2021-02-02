@@ -7,7 +7,6 @@ import (
 	"genx-go/core/immobilizer/request"
 	"genx-go/core/immobilizer/task"
 	"genx-go/core/process"
-	baseRequest "genx-go/core/request"
 	"genx-go/core/sensors"
 	"genx-go/logger"
 	"reflect"
@@ -38,7 +37,7 @@ func (immo *Immobilizer) Trigger() string {
 }
 
 //NewRequest ...
-func (immo *Immobilizer) NewRequest(req baseRequest.IRequest, _device interfaces.IDevice) *list.List {
+func (immo *Immobilizer) NewRequest(req interface{}, _device interfaces.IDevice) *list.List {
 	newTask := task.NewImmobilizerTask(req.(*request.ChangeImmoStateRequest), immo, _device)
 	if immo.ProcessCurrentTask == nil {
 		immo.ProcessCurrentTask = newTask
@@ -50,10 +49,10 @@ func (immo *Immobilizer) NewRequest(req baseRequest.IRequest, _device interfaces
 func (immo *Immobilizer) competitivenessOfTasks(newTask interfaces.ITask, currentRequest *request.ChangeImmoStateRequest) *list.List {
 	if currentRequest.Equal(newTask.Request().(*request.ChangeImmoStateRequest)) {
 		logger.Logger().WriteToLog(logger.Info, fmt.Sprintf("[Immobilizer | competitivenessOfTasks] Duplicate request %v", currentRequest.Marshal()))
-		return newTask.Invoker().CanselTask(newTask, "Duplicate")
+		return newTask.Invoker().CancelTask(newTask, "Duplicate")
 	}
 	cmdList := list.New()
-	cmdList.PushBackList(immo.ProcessCurrentTask.Invoker().CanselTask(immo.ProcessCurrentTask, "Deprecated"))
+	cmdList.PushBackList(immo.ProcessCurrentTask.Invoker().CancelTask(immo.ProcessCurrentTask, "Deprecated"))
 	cmdList.PushBackList(newTask.Commands())
 	immo.ProcessCurrentTask = newTask
 	return cmdList

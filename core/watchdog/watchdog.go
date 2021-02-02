@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"genx-go/core/device/interfaces"
 	"genx-go/core/usecase"
+	"genx-go/logger"
 	"time"
 )
 
@@ -13,7 +14,7 @@ func NewWatchdog(_device interfaces.IDevice, _commands *list.List, _duration int
 		device:      _device,
 		commands:    _commands,
 		duration:    _duration,
-		stopChannel: make(chan struct{}),
+		stopChannel: make(chan interface{}),
 	}
 }
 
@@ -22,7 +23,7 @@ type Watchdog struct {
 	device      interfaces.IDevice
 	commands    *list.List
 	duration    int
-	stopChannel chan struct{}
+	stopChannel chan interface{}
 }
 
 //Start ...
@@ -35,11 +36,12 @@ func (w *Watchdog) Start() {
 				{
 					ticker.Stop()
 					usecase.NewBaseUseCase(w.device, w.commands).Launch()
-					return
+					logger.Logger().WriteToLog(logger.Info, "[Watchdog | Stop] Watchdog time is elapsed.")
 				}
 			case <-w.stopChannel:
 				{
 					ticker.Stop()
+					logger.Logger().WriteToLog(logger.Info, "[Watchdog | Stop] Watchdog is forced to stop")
 					return
 				}
 			}
